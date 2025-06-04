@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, ActivityIndicator, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useFonts } from 'expo-font';
 import Header from '../../components/Header';
-import BannerList from '../../components/BannerList'; // <-- Cambia aquí
+import Banner from '../../components/Banner'; // Asegúrate de que este es tu banner vertical
+import CarouselsPorCategoria from '../../components/CarouselsPorCategoria';
 import Footer from '../../components/Footer';
 
 export default function App() {
@@ -32,11 +33,10 @@ export default function App() {
         style={{ flex: 1 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ minHeight: 900 }} // Asegura espacio para scroll
+        contentContainerStyle={{ minHeight: 900 }}
       >
-        <BannerList />  {/* <-- Cambia esto por BannerList */}
-        {/* Contenido principal aquí */}
-        <View style={{ height: 600 }} /> {/* Simula contenido */}
+        <Banner /> {/* Aquí va el Banner vertical arriba del todo */}
+        <CarouselsPorCategoria />
         {showFooter && <Footer />}
       </ScrollView>
     </View>

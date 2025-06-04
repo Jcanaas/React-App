@@ -52,11 +52,13 @@ const styles = StyleSheet.create({
   },
   logo: {
     height: 90,
-    aspectRatio: 672 / 1240,
-    marginLeft: 0,
-    marginBottom: 20,
+    width: 220, // Ajusta este valor según el tamaño real del logo
     backgroundColor: 'transparent',
+    marginLeft: 15,
+    marginBottom: 20,
     alignSelf: 'flex-start',
+    borderWidth: 0,
+    borderColor: 'red',
   },
   button: {
     flexDirection: 'row',
@@ -66,6 +68,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 2,
     marginTop: 2,
+    marginLeft: 15,
     alignSelf: 'flex-start',
   },
   icon: {
