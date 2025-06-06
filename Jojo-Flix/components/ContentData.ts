@@ -1,4 +1,4 @@
-export interface BannerItem {
+export interface ContentItem {
   nombre: string;
   descripcion: string;
   fondo: any;
@@ -8,18 +8,45 @@ export interface BannerItem {
   nombresEpisodios: string[];
   fechaEstreno: string;
   puntuacion: number;
-  categoria?: string;
+  categoria?: string[];
   verticalbanner: any;
 }
 
-export const BannerData: BannerItem[] = [
+export const ContentData: ContentItem[] = [
   {
     nombre: 'Beck: Mongolian Chop Squad',
     descripcion: 'Beck: Mongolian Chop Squad es un anime que sigue la historia de Yukio "Koyuki" Tanaka, un adolescente que descubre su pasión por la música y se une a una banda llamada Beck. A medida que Koyuki y sus amigos luchan por alcanzar el éxito en la industria musical, enfrentan desafíos personales y profesionales, explorando temas de amistad, perseverancia y el poder transformador de la música.',
     fondo: require('../assets/images/beck_bg.jpg'),
     logo: require('../assets/images/beck_logo.png'),
     capitulos: 26,
-    fuente: [],
+    fuente: [
+  "https://mega.nz/embed/UeMQlRoR#EwlxBorqdNokJXjM0G2JsHlU9dSa9YwZhjnAG2ArWe0",
+  "https://mega.nz/embed/YCUjCYCQ#30OGp2gc0pO5oAzhVE5PnEcuDTSvhmo2OB7t25mI0b4",
+  "https://mega.nz/embed/ZHsUgAwC#U3LyAl9O84bl_Ve4B_vbwyDQirr21uA22e6SuHhVa4Q",
+  "https://mega.nz/embed/9f8RFTCB#MVTyzGVCLr05Vr_KVVy1QnpOFBKVG7NMqkXprDVKJo8",
+  "https://mega.nz/embed/kH8hWLIb#rjzRF9Rcje_OXtSfn7UkwWufxoG5swFkjQqHgtLB6Xg",
+  "https://mega.nz/embed/wPd3iTbS#RB1wpl8AjjpfZdL2xv38tLfkCb32EL2QvCMhptVGel4",
+  "https://mega.nz/embed/gCs3AKYS#q7SX7XX_3JCQWmAg0aIBl837o-BaXUYUTv6WAKGn9vs",
+  "https://mega.nz/embed/BKlQ2LiI#xx4bWEDsMu5WkmV979OouGGAomBfD_bmiTKywJUX6kY",
+  "https://mega.nz/embed/1DlUgQDa#Us0IIeVyIM9gsoCdxKvbLDKu-JzrOLOO6v-BCxmlSFQ",
+  "https://mega.nz/embed/BHNAmJgC#HwiWl9ylp3d-Iy8-LmxJ0KXLSDHV9KB9KU8ohsXbx-8",
+  "https://mega.nz/embed/JaklwB5Z#eiozQWqedA5u3IW1mnxTGwWJxWAFHVnhWlKzA9iNWyQ",
+  "https://mega.nz/embed/Zbs1xYiI#QVOFwKO2RJBMcfphtCSgGJ5rWnbzbsQHFjWfWA0vayw",
+  "https://mega.nz/embed/5Ts3jIRR#pSS3ni2xyOfIlBDKFp7PcLIZEuwH0R2YRbEK2gW8jSQ",
+  "https://mega.nz/embed/1HcGXBJa#0JCGpU9biGfqRw_rRJiX94r1ysR-8APX0ydFJPMeUzg",
+  "https://mega.nz/embed/4W0U2TSZ#KcmlcodN8m1q15fTKXV-vrAA9SpXSY69D-TWU8xWris",
+  "https://mega.nz/embed/gPcyxYzJ#W6UKRL4RKIe0oNyOPrX5EU55YrhnKHmgjTcy7mUzJW0",
+  "https://mega.nz/embed/ZaFlnbiR#q9QmS8asUZwQFPoSzB_DDcZ4O2ttouANcr203sW7eWA",
+  "https://mega.nz/embed/gadzESbY#F5KIBN725G90efvg2hFrtFmQmYR4RTh-NYI_lGGDEGw",
+  "https://mega.nz/embed/sT8ikSwQ#oZIMeYC0qmq9d7LVqDV-Gu1rQ1AErCQwMBLXyNTGV0I",
+  "https://mega.nz/embed/pb0HkJKT#Fv318aTpT7MmqXVrgc7L3Q7nbyYSngezjIS549-GEok",
+  "https://mega.nz/embed/0Kcx1YCQ#IiRXePMLImGJ76ZM0XeHxARvrRH8kFUsHMKBNT22hLY",
+  "https://mega.nz/embed/cfsllaJY#J0kH_1Nej2s1mTyDdqtyO05ZW7tnSbDGx3-c_wZw-FU",
+  "https://mega.nz/embed/BT9HwZCD#Np3q67k593LLofozxzpql1YX7iDW12ShcqCSLUIrAdI",
+  "https://mega.nz/embed/EHU2lR5R#oB5cGeOAEvvDPEN83kpGLUKBbXS3o68x3Ma1QmEv_Ec",
+  "https://mega.nz/embed/9StmxCiB#Oawy_vpICcmKz1rh8CpLDGOV4JjFbsnd-y19v4_FC1U",
+  "https://mega.nz/embed/ETcgEaDB#_Zkmt5eCDUjcfcLQsqRFL10qZTZqdhovnghh0EZHVEk"
+],
     nombresEpisodios: [
         "1. El escenario de un chaval de 14 años",
         "2. Sala de conciertos",
@@ -50,7 +77,7 @@ export const BannerData: BannerItem[] = [
     ],
     fechaEstreno: '2004-10-07',
     puntuacion: 8.9,
-    categoria: 'Anime',
+    categoria: ['Anime', 'Serie'],
     verticalbanner:'../assets/images/tlouverticalbanner.jpg',
   },
   {
@@ -73,7 +100,7 @@ export const BannerData: BannerItem[] = [
     ],
     fechaEstreno: '',
     puntuacion: 9.5,
-    categoria: 'Serie',
+    categoria: ['Serie'],
     verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
   },
   {
@@ -235,7 +262,7 @@ export const BannerData: BannerItem[] = [
         "Degradación"],
     fechaEstreno: '2004',
     puntuacion: 9.2,
-    categoria: 'Serie',
+    categoria: ['Anime', 'Serie'],
     verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
   }, 
   {
@@ -243,8 +270,21 @@ export const BannerData: BannerItem[] = [
     descripcion: 'Dante está a cargo de una tienda que hace de todo llamada Devil May Cry. Con un mal carácter y una mala paga hace los trabajos para saldar todas sus deudas. Después de su primera misión ha tenido que quedarse con una niña que según él es insoportable, pero esa niña tiene algo especial, es la heredera de una familia millonaria y de un poder que ni ella conoce.',
     fondo: require('../assets/images/DMC_Banner.png'),
     logo: require('../assets/images/DevilMayCry.png'),
-    capitulos: 13,
-    fuente: [],
+    capitulos: 12,
+    fuente: [
+  "https://mega.nz/embed/HnAxnAwa#DZWIZwhpcbL8pE4TzcKPUsf2cHRsCDH6_429Ev8-7gY",
+  "https://mega.nz/embed/miYzjYZa#hpE3mn78CO2KRjQVHbajEIE9QRE6T4ZNJUkIvBdrUhY",
+  "https://mega.nz/embed/vjYh1Kza#LRMiqLgNWHEt52EGC_CKLPak3ochfeNEkTl2g08J9lw",
+  "https://mega.nz/embed/f6IhWKpR#e1FyZ5hdWGqoLPIy25PDQlHMMai0x-0BjeMap1sPRgc",
+  "https://mega.nz/embed/WyRH1YAK#UIRYlmREkMj0Z5K3VXDd3fGU6TeCBVAZ7DU0nKe0SP4",
+  "https://mega.nz/embed/6yBhWICZ#HgXpfhLrPIZ_mMmMlIclzNtkMEwATwJjBUJspmeqeiE",
+  "https://mega.nz/embed/2iRzUShZ#kM51LkVribTmU8PxzZf6L2XJqH7PU5x4mhnHN9xcPdA",
+  "https://mega.nz/embed/67IRAK6b#9kjybJD4vzb5CcDFSoQWQHFuMLUX9PXCEioZj-SLaYM",
+  "https://mega.nz/embed/u7YFyCoB#jfZcSR3RRIySisgjA5tT5DTztcx4clGVGst9C_d26v0",
+  "https://mega.nz/embed/HiYVmYJI#H8iaruZNkAXWfKlR56JqWKP1aWsOhz0wjHNnoNDEg_s",
+  "https://mega.nz/embed/umZhwIaI#tb0ovvQJCt0tkbLVK1pQGcH-lxS28JJy47Nd2c1FuqM",
+  "https://mega.nz/embed/v2QTnYqK#7_Sy-itUoYAiEYyJXjaG-VutnE67aIn49oDMG9GYIFU"
+],
     nombresEpisodios: [
         "1",
         "2",
@@ -262,7 +302,7 @@ export const BannerData: BannerItem[] = [
     ],
     fechaEstreno: '',
     puntuacion: 5.8,
-    categoria: 'Serie',
+    categoria: ['Anime', 'Serie'],
     verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
   }
 ];

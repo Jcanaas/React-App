@@ -1,102 +1,138 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, FlatList, Dimensions, StyleSheet } from 'react-native';
-import Animated, { Easing, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { View, Image, FlatList, Dimensions, StyleSheet, TouchableOpacity, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { ContentData, ContentItem } from './ContentData';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
 interface BannerCarouselProps {
-  banners: React.ReactNode[]; // Espera una lista de <Banner ... />
+  nombres: string[];
   intervalMs?: number;
-  animationDurationMs?: number; // Nuevo: duración de la animación
+  onVerPress?: (item: ContentItem) => void;
 }
 
-const BannerCarousel: React.FC<BannerCarouselProps> = ({
-  banners,
-  intervalMs = 12000,
-  animationDurationMs = 1000, // Por defecto 1.2s
-}) => {
-  const flatListRef = useRef<FlatList<any>>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5000, onVerPress }) => {
+  const banners = ContentData.filter(item => nombres.includes(item.nombre));
+  // Duplica los banners para simular el loop
+  const loopBanners = [...banners, ...banners, ...banners];
+  const realLength = banners.length;
+  const initialIndex = realLength; // Empieza en la "mitad" para permitir loop en ambos sentidos
 
-  // Animación custom con reanimated
-  const scrollX = useSharedValue(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const flatListRef = useRef<FlatList<ContentItem>>(null);
 
-  // Actualiza scrollX cuando cambia el índice
+  // Auto-scroll con loop
   useEffect(() => {
-    scrollX.value = withTiming(currentIndex * width, {
-      duration: animationDurationMs,
-      easing: Easing.inOut(Easing.cubic),
-    });
-  }, [currentIndex, animationDurationMs, scrollX]);
-
-  // Scroll automático cada intervalMs
-  useEffect(() => {
+    if (realLength <= 1) return;
     const timer = setInterval(() => {
-      let nextIndex = (currentIndex + 1) % banners.length;
+      let nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     }, intervalMs);
-
     return () => clearInterval(timer);
-  }, [currentIndex, banners.length, intervalMs]);
+  }, [currentIndex, realLength, intervalMs]);
 
-  // Ajusta el índice correctamente al terminar el desplazamiento manual
-  const onMomentumScrollEnd = (ev: any) => {
-    const offset = ev.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offset / width);
-    setCurrentIndex(newIndex);
+  // Corrige el índice cuando llegas a los extremos
+  const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / width);
+    let correctedIndex = newIndex;
+    if (newIndex >= realLength * 2) {
+      correctedIndex = realLength;
+      flatListRef.current?.scrollToIndex({ index: correctedIndex, animated: false });
+    } else if (newIndex < realLength) {
+      correctedIndex = realLength + (newIndex % realLength);
+      flatListRef.current?.scrollToIndex({ index: correctedIndex, animated: false });
+    }
+    setCurrentIndex(correctedIndex);
   };
 
-  // Estilo animado para el wrapper
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: -scrollX.value,
-      },
-    ],
-  }));
+  const renderItem = ({ item }: { item: ContentItem }) => (
+    <View style={styles.bannerContainer}>
+      <Image source={item.fondo} style={styles.backgroundImage} />
+      <View style={styles.overlay} />
+      <View style={styles.logoAndButtonContainer}>
+        <Image source={item.logo} style={styles.logo} resizeMode="contain" />
+        <TouchableOpacity
+          style={styles.verButton}
+          onPress={() => onVerPress && onVerPress(item)}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="play-arrow" size={24} color="#fff" />
+          <Text style={styles.verButtonText}>Ver</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
-    <View style={styles.carouselContainer}>
-      <Animated.View style={[{ flexDirection: 'row', width: width * banners.length }, animatedStyle]}>
-        {banners.map((item, idx) => (
-          <View key={idx} style={{ width }}>{item}</View>
-        ))}
-      </Animated.View>
-      {/* El FlatList ahora solo gestiona el scroll manual */}
-      <FlatList
-        ref={flatListRef}
-        data={banners}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => null} // No renderiza nada, sólo para el scroll
-        keyExtractor={(_, idx) => idx.toString()}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        getItemLayout={(_, index) => (
-          { length: width, offset: width * index, index }
-        )}
-        initialScrollIndex={currentIndex}
-        style={styles.flatList}
-      />
-    </View>
+    <FlatList
+      ref={flatListRef}
+      data={loopBanners}
+      renderItem={renderItem}
+      keyExtractor={(_, idx) => idx.toString()}
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      getItemLayout={(_, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      initialScrollIndex={initialIndex}
+      onMomentumScrollEnd={onMomentumScrollEnd}
+      style={{ flexGrow: 0 }}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  carouselContainer: {
-    width: width,
-    height: 250,
-    backgroundColor: 'black',
+  bannerContainer: {
+    width,
+    height: 240,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    position: 'relative',
     overflow: 'hidden',
   },
-  flatList: {
-    flexGrow: 0,
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
     position: 'absolute',
-    width: width,
-    height: 250,
-    top: 0,
-    left: 0,
-    zIndex: 5,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  logoAndButtonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: 32,
+    zIndex: 2,
+    height: '100%',
+  },
+  logo: {
+    width: 220,
+    height: 90,
+    marginBottom: 18,
+  },
+  verButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 4,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  verButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    marginLeft: 6,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
 });
 
