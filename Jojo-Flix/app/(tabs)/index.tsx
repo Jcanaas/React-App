@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';
 import BannerCarousel from '../../components/BannerCarousel';
 import ContentDetailScreen from '../../components/ContentDetailScreen';
 import { ContentItem } from '../../components/ContentData';
+import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -41,20 +42,20 @@ export default function App() {
           style={{ flex: 1 }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          contentContainerStyle={{ minHeight: 900 }}
+          contentContainerStyle={{ minHeight: 900, paddingBottom: 300 }} // <-- Cambiado a 200
         >
           <BannerCarousel
             nombres={[
               'Beck: Mongolian Chop Squad',
-              'The Last of Us',
               'Monster',
-              'Devil May Cry'
+              'Old Boy'
             ]}
             onVerPress={item => setSelectedContent(item)}
           />
+          <VerticalTripleCarouselsByCategory onPress={setSelectedContent} />
         </ScrollView>
       )}
-      <Footer />
+      {showFooter && <Footer />}
     </View>
   );
 }

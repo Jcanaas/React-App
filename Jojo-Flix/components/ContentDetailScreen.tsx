@@ -35,11 +35,17 @@ const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
 
       {/* Info */}
       <View style={styles.infoRow}>
-        <Text style={styles.infoText}>Estreno: {content.fechaEstreno || 'Desconocido'}</Text>
-        <Text style={styles.infoText}>
+        <View style={styles.puntuacionEstrenoRow}>
+          <Text style={styles.infoText}>
+            Estreno: {content.fechaEstreno || 'Desconocido'}
+          </Text>
+          <Text style={styles.infoText}>
+            Puntuación: <Text style={{ color: getScoreColor(content.puntuacion) }}>{content.puntuacion}</Text>
+          </Text>
+        </View>
+        <Text style={styles.categoriaText}>
           Categoría: {Array.isArray(content.categoria) ? content.categoria.join(', ') : content.categoria || 'N/A'}
         </Text>
-        <Text style={styles.infoText}>Puntuación: {content.puntuacion}</Text>
       </View>
 
       {/* Descripción */}
@@ -106,6 +112,13 @@ const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
   );
 };
 
+function getScoreColor(score: number) {
+  if (score >= 8) return '#4caf50'; // verde
+  if (score >= 6) return '#ffc107'; // amarillo
+  if (score >= 4) return '#ff9800'; // naranja
+  return '#f44336'; // rojo
+}
+
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 32,
@@ -142,10 +155,22 @@ const styles = StyleSheet.create({
     height: 80,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: 10,
     marginTop: 4,
+    marginHorizontal: 18,
+  },
+  puntuacionEstrenoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  categoriaText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Bebas Neue',
+    letterSpacing: 1,
+    marginTop: 2,
   },
   infoText: {
     color: '#fff',

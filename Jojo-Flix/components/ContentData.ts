@@ -4,7 +4,7 @@ export interface ContentItem {
   fondo: any;
   logo: any;
   capitulos: number;
-  fuente: any[]; // Puedes tipar mejor si lo necesitas
+  fuente: any[]; 
   nombresEpisodios: string[];
   fechaEstreno: string;
   puntuacion: number;
@@ -78,7 +78,7 @@ export const ContentData: ContentItem[] = [
     fechaEstreno: '2004-10-07',
     puntuacion: 8.9,
     categoria: ['Anime', 'Serie'],
-    verticalbanner:'../assets/images/tlouverticalbanner.jpg',
+    verticalbanner: require('../assets/images/beckverticalbanner.png'),
   },
   {
     nombre: 'The Last of Us',
@@ -86,7 +86,17 @@ export const ContentData: ContentItem[] = [
     fondo: require('../assets/images/tloutemp1.webp'),
     logo: require('../assets/images/The_Last_of_Us_logo.png'),
     capitulos: 9,
-    fuente: [],
+    fuente: [
+      "https://mega.nz/embed/XcNmARSb#KOZC9pDtRpInPN7XqA9YRjfJSq7aWfrQUTVViyLH5M0",
+      "https://mega.nz/embed/6cUiQYaZ#njRVc85KH6t7K1bm4WgF3gFiOID2hVa99YD_3W1f4dc",
+      "https://mega.nz/embed/jcFDjLxI#KFUUe_HcGxhaCQBesmkAC3t3MkuPeVGpS1GlugDvLgA",
+      "https://mega.nz/embed/ScVghDDb#Es-SUENs5c2svanMPF8zTzaxj2XhPJvrXFYr6LiSnmY",
+      "https://mega.nz/embed/TJEA0BqQ#s9u9njTRmjmcHbp3i3EYihCRWsvYODF0roUHrQd-EKk",
+      "https://mega.nz/embed/CVcG2SAJ#G2Cu-U8iYf1LSKFp4-cxosoTPpuy5khXCLtI55Mv6Us",
+      "https://mega.nz/embed/2EEQQaLQ#dtMvf6-WUYqwA-WwlWb6eoVpQuzil9aV3AXc1lRcMlQ",
+      "https://mega.nz/embed/GN9hxQAT#GK4NOYoUW2vJDVaf0G1G4tVKnD2tDja1Mgw63bPJSYo",
+      "https://mega.nz/embed/mJ8BkQrL#EIbGHu0rGr5zq4NpNtNxBbLOqUd7QymG7pV9rBts570"
+    ],
     nombresEpisodios: [
         "1. Cuando te pierdes en la oscuridad",
         "2. Infectados",
@@ -98,7 +108,7 @@ export const ContentData: ContentItem[] = [
         "8. En nuestras horas más bajas",
         "9. Busca la luz"
     ],
-    fechaEstreno: '',
+    fechaEstreno: '2022',
     puntuacion: 9.5,
     categoria: ['Serie'],
     verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
@@ -263,7 +273,7 @@ export const ContentData: ContentItem[] = [
     fechaEstreno: '2004',
     puntuacion: 9.2,
     categoria: ['Anime', 'Serie'],
-    verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
+    verticalbanner: require('../assets/images/Monster-verticalbanner.webp')
   }, 
   {
     nombre: 'Devil May Cry',
@@ -303,6 +313,289 @@ export const ContentData: ContentItem[] = [
     fechaEstreno: '',
     puntuacion: 5.8,
     categoria: ['Anime', 'Serie'],
-    verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
+    verticalbanner: require('../assets/images/devil_may_cry_v.webp')
+  },
+  {
+    nombre: 'Solo Leveling',
+    descripcion: 'En un mundo de cazadores superdotados y monstruos, un débil cazador adquiere poderes a través de un misterioso programa, lo que le lleva a convertirse en uno de los cazadores más fuertes y a conquistar las mazmorras más poderosas.',
+    fondo: require('../assets/images/solo-leveling-bg.webp'),
+    logo: require('../assets/images/Solo_Leveling_logo.png'),
+    capitulos: 12,
+    fuente: [
+      "https://mega.nz/embed/Pd8TXCiB#UhkyxZuaVuztYgtQ9FpFlmOznX5kV6FsoSiuiS_QkUg",
+      "https://mega.nz/embed/PIFUlTYB#h9UfEbgryAPiGkMbOMdStjmrWwfgzfUZOxyGmuMRpgU",
+      "https://mega.nz/embed/PUtziALS#l52dBskeEDKy15it5kiBGk7Y_tWe6dT7UqCb_5oceRQ",
+      "https://mega.nz/embed/iNtxQTZZ#awKOXAHeL4qU_syZgBzE7nSfVcX0v4XFt9Pm_AAkfuM",
+      "https://mega.nz/embed/iY0UXZoQ#Fqc3ZoIqZj3tw5YFKD7nqgYvAxU9do0rVLfR6AOXoBQ",
+      "https://mega.nz/embed/XR8jUArI#WVPBY9vTDT5j_xVgE17d8GaXUi9svVqvbANcHIA1tlY",
+      "https://mega.nz/embed/XZ8REB7A#pipIvHlVBcE3fenaujo4lzunhGYvHotDeNLoXoxCD_Y",
+      "https://mega.nz/embed/3Z8GmbxD#E9j7n7BrXblflOh80fKVn1AE53et26hnD-gMWuaYkYA",
+      "https://mega.nz/embed/WddlxTaS#JIzzLJUzUgX3nm96My1he2FJMHIpIpBLuzHeau3ikp0",
+      "https://mega.nz/embed/CRcglJQR#DVpagTlya8cnhl4lethnT0-zAqzMy9Ka_XO-CnqcoX8",
+      "https://mega.nz/embed/PZUS0KpD#12kGrf85KbeoO1PVUUwaiRyAPWfjqMHc552U2ll9Zhw",
+      "https://mega.nz/embed/3UsFHLCZ#t7FvsTQkJfT0yC1CMWiYNtPPS_u11Q8jd5IHcyZuiD8"
+    ],
+    nombresEpisodios: [
+      "1. Ya estoy acostumbrado",
+      "2. Si tuviera otra oportunidad",
+      "3. Es como un juego",
+      "4. Tengo que hacerme más fuerte",
+      "5. Un muy buen trato",
+      "6. Comienza la verdadera cacería",
+      "7. Veamos hasta dónde puedo llegar",
+      "8. Qué frustrante",
+      "9. Has estado ocultando tus habilidades",
+      "10. ¿Qué es esto, un picnic?",
+      "11. Un caballero defendiendo un trono vacío",
+      "12. Surjan"
+    ],
+    fechaEstreno: '2024',
+    puntuacion: 8.7,
+    categoria: ['Anime', 'Serie','ciencia ficción'],
+    verticalbanner: require('../assets/images/solo-levling-vbanner.png') 
+  },
+  {
+    nombre: 'Fear Street Part One: 1994',
+    descripcion: 'En 1994, un grupo de adolescentes descubre que los sucesos que aterrorizan su ciudad desde hace generaciones podrían estar conectados. Además, puede que ahora les toque a ellos protagonizar la pesadilla. Primera parte de la trilogía basada en las famosas novelas de miedo de R. L. Stine.',
+    fondo: require('../assets/images/fearstreet1banner.webp'),
+    logo: require('../assets/images/fear_street_part_one_1994-logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/bo4SDYwa#shINqPXVxhQmrEm3OxzQC2WSZPvI3O88btk5igk18tA'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2021',
+    puntuacion: 5.4,
+    categoria: ['Película', 'Terror'],
+    verticalbanner: require('../assets/images/fear_street_part_one_1994-vertical-banner.jpg')
+  },
+  {
+    nombre: 'Fear Street Part Two: 1978',
+    descripcion: 'En 1978, Camp Nightwing está dividido en campistas que vinieron del pueblo oprimido de Shadyside y consejeros que vinieron del próspero pueblo de Sunnyvale. Cuando los horrores del pasado de ambos pueblos cogen fuerza, estos dos grupos deberán unirse para resolver un misterio terrorífico.',
+    fondo: require('../assets/images/fear_street_part_two_1994-banner.jpg'),
+    logo: require('../assets/images/fear_street_part_two_1994-logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/T1QgxJQa#h6J5ag6A6mBgqsYzE4KDPj3AmlUP8PaPW0IrsfmtAzc'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2021',
+    puntuacion: 6,
+    categoria: ['Película', 'Terror'],
+    verticalbanner: require('../assets/images/fear_street_part_two_1978-vertical-banner.jpg')
+  },
+  {
+    nombre: 'Fear Street: Prom Queen',
+    descripcion: 'Una noche de primavera... la suave luz de la luna... cinco hermosas candidatas a reina del baile... parejas bailando en el baile de graduación del instituto Shadyside... estos deberían ser los ingredientes del romance. Pero si se añade un brutal asesinato, y luego otro, y otro, la receta se convierte rápidamente en horror. Lizzie McVay se da cuenta de que alguien está asesinando una a una a las cinco candidatas a Reina del Baile... ¡y que ella puede ser la siguiente en la lista! ¿Podrá detener al asesino antes de que el baile termine para siempre?',
+    fondo: require('../assets/images/fearstreetpromoqueenbanner.jpg'),
+    logo: require('../assets/images/Fear_Street_-_Prom_Queen_(logo).png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/TBFnwYKJ#AtvPe-4RSVOVToG8uTvYns5luN06pcEeZO2L5XuJXZs'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2025',
+    puntuacion: 3.5,
+    categoria: ['Película', 'Terror'],
+    verticalbanner: require('../assets/images/fearstreetpromqueenvertical.jpeg')
+  },
+  {
+    nombre: 'Dune',
+    descripcion: 'En el Año 10191 el desértico planeta Arrakis, feudo de la familia Harkonnen desde hace generaciones, queda en manos de la Casa de los Atreides por orden del emperador. Con ello les cede la explotación de las reservas de especia, la materia prima más valiosa de la galaxia, necesaria para los viajes interestelares y también una droga capaz de amplificar la conciencia y extender la vida. El duque Leto (Oscar Isaac), la dama Jessica (Rebecca Ferguson) y el hijo de ambos, Paul Atreides (Timothée Chalamet), llegan a Arrakis con la esperanza de mantener el buen nombre de su casa y ser fieles al emperador, pero pronto se verán envueltos en una trama de traiciones y engaños que les llevará a cuestionar su confianza entre sus más allegados y a valorar a los lugareños, los Fremen, una estirpe de habitantes del desierto con una estrecha relación con la especia.',
+    fondo: require('../assets/images/dune_wallpaper_pc_hd_2021_by_andrewvm_dep0l32-pre.jpg'),
+    logo: require('../assets/images/Dune_2021_transparent_logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/iQVzjLCC#wDTyAJm4vF5wluz95u6pWbewWLRqa1egfgoE-w8xbeY'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2021',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Ciencia ficción', 'Acción'],
+    verticalbanner: require('../assets/images/duneverticalbanner.jpg')
+  },
+  {
+    nombre: '28 Semanas Después',
+    descripcion: '28 Semanas Después es la secuela de 28 Días Después, una película que se centra en un virus que convierte a las personas en caníbales. En esta secuela, el virus ha sido erradicado y los supervivientes están regresando a Londres. Sin embargo, el virus vuelve a aparecer y los supervivientes deben luchar por su supervivencia una vez más.',
+    fondo: require('../assets/images/28semanasdespuesbanner.webp'),
+    logo: require('../assets/images/nobackground.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/aQliDbxR#jhZ-j41NJ4kKb7yU-xL43UazOtQ5hSxVZyVFKyJrGQ4'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2007',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Terror'],
+    verticalbanner: require('../assets/images/28_weeks_later-892655817-mmed.jpg')
+  },
+  {
+    nombre: 'Star Wars. Episodio III: La venganza de los Sith',
+    descripcion: 'Último capítulo de la trilogía de precuelas de Star Wars, en el que Anakin Skywalker definitivamente se pasa al lado oscuro. En el Episodio III aparece el General Grievous, un ser implacable mitad-alien mitad-robot, el líder del ejército separatista Droid. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
+    fondo: require('../assets/images/starwars3banner.webp'),
+    logo: require('../assets/images/starwars3logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/jBcRhBSK#yFiZj-DF0e5RYCASBjGCSbplESYIweEFth9Trwl5Rmk'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2005',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Ciencia ficción', 'Acción'],
+    verticalbanner: require('../assets/images/starwars3verticalbanner.jpg')
+  },
+  {
+    nombre: 'Megamente 2',
+    descripcion: 'Megamente 2 es una película de animación que sigue las aventuras del villano reformado Megamente y su amigo Minion. Después de derrotar a su archienemigo Metro',
+    fondo: require('../assets/images/c61b6126c4d1fcd5c6c627e8487d6514b50c68a5d4726c5c1a1a50d631f98dd5.jpg'),
+    logo: require('../assets/images/nobackground.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/b44SQTYI#tSYvlIMppDPYr3oLSsSn92f5yxYuFpYfj8n3icShSF4'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 2.5,
+    categoria: ['Película'],
+    verticalbanner: require('../assets/images/Megamente2verticalbanner.webp')
+  },
+  {
+    nombre: 'Berserk',
+    descripcion: 'Basada en una exitosa saga que se ha visto reflejada ya en un manga, una serie y un videojuego, esta es la primera parte de Berserk en formato largometraje. Nuestro héroe es un guerrero de espada en mano. Imbatible, deberá lidiar con otro luchador, de pelo y armadura plateada.',
+    fondo: require('../assets/images/Berserkbannerlaedaddorada.jpg'),
+    logo: require('../assets/images/A_Berserk.webp'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/nsQCATTS#nKIMu1Wlq_AfPEri9yJoma-HYsIEzwgt5UW2qMtwMWY'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 6.9,
+    categoria: ['Película', 'Anime'],
+    verticalbanner: require('../assets/images/berserk1vericalbanner.jpg')
+  },
+  {
+    nombre: 'Carol',
+    descripcion: 'Nueva York, años 50. Therese Belivet (Rooney Mara), una joven dependienta de una tienda de Manhattan que sueña con una vida mejor, conoce un día a Carol Aird (Cate Blanchett), una mujer elegante y sofisticada que se encuentra atrapada en un matrimonio infeliz. Entre ellas surge una atracción inmediata, cada vez más intensa y profunda, que cambiará sus vidas para siempre.',
+    fondo: require('../assets/images/carolbanner.webp'),
+    logo: require('../assets/images/carollogo.webp'),
+    capitulos: 1,
+    fuente: [''],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 7,
+    categoria: ['Película', 'LGTBIQ+'],
+    verticalbanner: require('../assets/images/carolverticalbanner.jpg')
+  },
+  {
+    nombre: 'Call me by your name',
+    descripcion: 'Elio Perlman (Timothée Chalamet), un joven de 17 años, pasa el cálido y soleado verano de 1983 en la casa de campo de sus padres en el norte de Italia. Se pasa el tiempo holgazaneando, escuchando música, leyendo libros y nadando hasta que un día el nuevo ayudante americano de su padre llega a la gran villa. Oliver (Armie Hammer) es encantador y, como Elio, tiene raíces judías; también es joven, seguro de sí mismo y atractivo. Al principio Elio se muestra algo frío y distante hacia el joven, pero pronto ambos empiezan a salir juntos de excursión y, conforme el verano avanza, la atracción mutua de la pareja se hace más intensa.',
+    fondo: require('../assets/images/call_me_by_your_name.jpg'),
+    logo: require('../assets/images/call_me_by_your_name-logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/Dk5WBIaY#MvcEwx9imXYLnsuOAZLIEYyHFRaLVx0FTIhbzf1R7Vg'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 7,
+    categoria: ['Película', 'LGTBIQ+'],
+    verticalbanner: require('../assets/images/call_me_by_your_name-vertical.jpg')
+  },
+  {
+    nombre: 'Old Boy',
+    descripcion: 'Oh Dae-su es un hombre de negocios coreano que un día es secuestrado y confinado durante años en una celda en la que sólo hay una televisión. Y, sin embargo, ignora por qué razón está allí... Segunda parte de la "trilogía de la venganza" de Park Chan-wook.',
+    fondo: require('../assets/images/oldboybanner.jpg'),
+    logo: require('../assets/images/oldboylogo.webp'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/z5wACY6R#U2zxqeyEqV0DRLMJbvjWnN0PPzZ0rT1iK1KOj2bWyMs'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 8.8,
+    categoria: ['Película', 'Acción'],
+    verticalbanner: require('../assets/images/oldboybannervertical.jpg')
+  },
+  {
+    nombre: 'Secreto en la montaña',
+    descripcion: 'En 1963, dos vaqueros, Ennis del Mar (Heath Ledger) y Jack Twist (Jake Gyllenhaal), se conocen mientras trabajan como pastores de ovejas en el remoto rancho de Brokeback Mountain. A pesar de sus diferencias, los dos hombres desarrollan una profunda conexión emocional y sexual que desafía las normas sociales de la época. A lo largo de los años, su relación se convierte en un secreto compartido, ya que ambos luchan por equilibrar sus sentimientos con las expectativas de la sociedad y sus propias vidas personales.',
+    fondo: require('../assets/images/oldboybanner.jpg'),
+    logo: require('../assets/images/oldboylogo.webp'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/z5wACY6R#U2zxqeyEqV0DRLMJbvjWnN0PPzZ0rT1iK1KOj2bWyMs'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 8.8,
+    categoria: ['Película', 'LGTBIQ+'],
+    verticalbanner: require('../assets/images/secreto-en-la-montana-cover.jpg')
+  },
+  {
+    nombre: 'Bocchi the Rock!',
+    descripcion: 'Hitori Gotou es una chica solitaria que sueña con ser parte de una banda de música. Sin embargo, su timidez y falta de habilidades sociales la han mantenido alejada de la escena musical. Un día, conoce a Nijika Ijichi, quien le ofrece unirse a su banda llamada "Kessoku Band". A pesar de sus inseguridades, Hitori acepta y comienza su viaje para superar sus miedos y convertirse en una talentosa guitarrista.',
+    fondo: require('../assets/images/bocchi_the_Rock_Banner.jpg'),
+    logo: require('../assets/images/Bocchi_the_Rock_Logo.webp'),
+    capitulos: 12,
+    fuente: [
+      "https://mega.nz/embed/HpIShJLC#ctI8HW0liy6LKisBBc5t79fOCExQUAOZJJMUf9DI4FA",
+      "https://mega.nz/embed/24JXSTYS#dFcI6ix46hZy7Aev5mhXO6UdZUKfXE9tZOUyhAV6kpg",
+      "https://mega.nz/embed/LpwylAwK#PVq6zMxjfZdxt-oDan3r30pHOTD13vHcdGqcUWc1AsU",
+      "https://mega.nz/embed/ypgzlahI#jZ4c2CZuhr_M9NbeOp0CxgSpeE2prqkjU1xYlclcRok",
+      "https://mega.nz/embed/3xwkmJza#TFNYkIu8hEQf1JD1NUE8G7sJXAs-M1wvO4SBmTuQqko",
+      "https://mega.nz/embed/7xRwzbzb#uSyc9hMgmLFFI2RtkEyE2fQlPtZ36h1wFqBjvHyqoOk",
+      "https://mega.nz/embed/zghTQL6L#4CIOEd8gf7Uv-fT_QIl3ZzKjZh7p1HCftWzwvrmZhoI",
+      "https://mega.nz/embed/b5gCwY5D#m0d0hy0hVtahOR7437MROWvuvL1h-lym0obhPx3aZFA",
+      "https://mega.nz/embed/WtpGwarB#RaFbLnDoyPE6lW4M4IbkkgsMUTCdiqI-jeEt_DYsy_g",
+      "https://mega.nz/embed/TwQh2YSJ#vWhUfKaVaG3kK9Q3ciGHIw3gzb4OLpUi7Dl1Uq9vwl4",
+      "https://mega.nz/embed/PlpT2RQD#YSapNwN6-6DKDsOD2fziue2lthoxq5-QApO3pWgAZjU",
+      "https://mega.nz/embed/m1QQSBjL#D83s6K099uE7zFdP8LSi7r_aQbs3qVed6x5IyJtI1os"
+    ],
+    nombresEpisodios: [
+      "01 - La caída de Bocchi",
+      "02 - Hasta mañana",
+      "03 - Llegada rápida",
+      "04 - Jumping Girl(s)",
+      "05 - Un pez que no vuela",
+      "06 - Ocho vistas insuperables",
+      "07 - Hasta tu casa",
+      "08 - Bocchi The Rock",
+      "09 - Las escaleras de Enoshima",
+      "10 - After Dark",
+      "11 - Un atardecer duodecimal",
+      "12 - Cae la mañana"
+    ],
+    fechaEstreno: '2024',
+    puntuacion: 8.8,
+    categoria: ['Serie', 'Anime'],
+    verticalbanner: require('../assets/images/bocchi_the_rock_re-639827727-large.jpg')
+  },
+  {
+    nombre: 'Aqui no hay quien viva',
+    descripcion: 'Aquí no hay quien viva es una serie de televisión española que se emitió desde 2003 hasta 2006. La trama gira en torno a los vecinos de un edificio en Madrid, sus relaciones, conflictos y situaciones cómicas. La serie es conocida por su humor y personajes entrañables.',
+    fondo: require('../assets/images/Anhqv.jpg'),
+    logo: require('../assets/images/AnhqvTitle.png'),
+    capitulos: 17,
+    fuente: [
+      "https://mega.nz/embed/0AZ2SQhY#cV3LdY4ieRMMoxPzE3VGNm9fwF_EpiZ2wCVkCml0MaM",
+      "https://mega.nz/embed/kUBEyYQa#NB6DG9sqt8h1rpsmayC-7eStLhsLFMLiNvbcUlegQM8",
+      "https://mega.nz/embed/IAZxXTKY#gbXbkiR8D9mwWDRc8nAxC5WzS4qborZA3EilyG_-vOo",
+      "https://mega.nz/embed/sQxwRBID#7LACVFBbCl-ZeGtxnpbfcETOmudgOlVq60PnANfRLQ8",
+      "https://mega.nz/embed/QEwgjYqb#EpkQztS_0llyRTpaPl2ffH-oCyfgXzb8IFsrWz4zCr8",
+      "https://mega.nz/embed/RRgGjRrC#t1_e7nF9AUNOFxTFTXWrdXpy7U6MELTPxGmTM8VVjUU",
+      "https://mega.nz/embed/MYQByC6Y#mFvNXGK_zsJcoy3jl3PjvxfqkiQzkqbg7cdsUC7m5b8",
+      "https://mega.nz/embed/RYoWzYhB#h4tTzyHCvtfIG_fsd0WT6H1jWFMkT6IfHDktKNUOahk",
+      "https://mega.nz/embed/INJClarT#_UnGT_idAH7Fzg5RonAKDOUHxLoPvzomOq8Un7dCwKA",
+      "https://mega.nz/embed/8NIGjB5Y#BXMBqIO7nUQRI0C-0PozmxOqDSG7TPzOY3zfvwkZnbQ",
+      "https://mega.nz/embed/JIYlCK5Y#8tL3njWULrc68xsz0sINOJXZ6cQD8DBm50rowkolnD0",
+      "https://mega.nz/embed/IYgEhRQa#7TI3L2CpHtOhz-1xfnEfhadcAZOnEglyxtCww-Q_PKY",
+      "https://mega.nz/embed/NZwGzBxI#Z33OmXMiUZTVU6M1jq6MhceG1DLQ4X2cLyXsgkhOT_s",
+      "https://mega.nz/embed/xAgGhJiB#nRgaLL7stygWa_sdl-kGZIO6qQAck8VWxxeunkTh5OM",
+      "https://mega.nz/embed/gZ5H0JJZ#fGUv9zXmAcb7XygutUjnhm5PdyUvsae28aW05pD59HU",
+      "https://mega.nz/embed/ZZwhWIpB#jXkpLe6phjLkIZg-xJcfi8s4Cs9iWuwZd1Q-G_Dm8SM",
+      "https://mega.nz/embed/EBhwEboD#tcCEL9HZiwO-K6u0gEqdgBcZE-RlwplXdFHhX1iREB0"
+  ],
+    nombresEpisodios: [
+    "01 - Érase una mudanza",
+    "02 - Érase una reforma",
+    "03 - Érase el reciclaje",
+    "04 - Érase un rumor",
+    "05 - Érase un niño",
+    "06 - Érase un resbalón",
+    "07 - Érase una rata",
+    "08 - Érase un indigente",
+    "09 - Érase una de miedo",
+    "10 - Érase un dilema",
+    "11 - Érase un traspaso",
+    "12 - Érase un sustituto",
+    "13 - Érase una fiesta",
+    "14 - Érase una avería",
+    "15 - Érase un anillo",
+    "16 - Érase una Nochebuena",
+    "17 - Érase un fin de año"
+  ],
+    fechaEstreno: '2003',
+    puntuacion: 10,
+    categoria: ['Serie', 'LGTBIQ+'],
+    verticalbanner: require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg')
   }
 ];

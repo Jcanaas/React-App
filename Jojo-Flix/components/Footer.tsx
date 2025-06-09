@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderTopWidth: 1,
     borderTopColor: '#222',
+    marginBottom: 24, // <-- Añade margen inferior aquí
   },
   gradient: {
     width: 180,
