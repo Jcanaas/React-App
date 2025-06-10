@@ -5,7 +5,8 @@ import { ContentItem, ContentData } from './ContentData';
 import VerticalTripleCarousel from './VerticalTripleCarousel';
 
 interface Props {
-  onPress?: (item: ContentItem) => void;
+  onPress: (item: ContentItem) => void;
+  filterCategories?: string[];
 }
 
 const getCategories = (data: ContentItem[]) => {
@@ -61,20 +62,26 @@ const RainbowText: React.FC<{ children: string }> = ({ children }) => {
   );
 };
 
-const VerticalTripleCarouselsByCategory: React.FC<Props> = ({ onPress }) => {
+const VerticalTripleCarouselsByCategory: React.FC<Props> = ({ onPress, filterCategories }) => {
   const categories = getCategories(ContentData);
+
+  const filteredData = filterCategories && filterCategories.length > 0
+    ? ContentData.filter(item =>
+        (item.categoria ?? []).some(cat => filterCategories.includes(cat))
+      )
+    : ContentData;
 
   return (
     <View>
       {categories.map((category, idx) => {
-        const items = ContentData.filter(item => (item.categoria ?? []).includes(category));
+        const items = filteredData.filter(item => (item.categoria ?? []).includes(category));
         if (items.length === 0) return null;
         return (
           <View
             key={category}
             style={{
               marginBottom: 8,
-              marginTop: idx === 0 ? 24 : 0, // <-- Añade espacio solo arriba del primero
+              marginTop: idx === 0 ? 24 : 0,
             }}
           >
             {category === 'LGTBIQ+' ? (

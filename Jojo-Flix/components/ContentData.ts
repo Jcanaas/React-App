@@ -351,7 +351,7 @@ export const ContentData: ContentItem[] = [
     ],
     fechaEstreno: '2024',
     puntuacion: 8.7,
-    categoria: ['Anime', 'Serie','ciencia ficción'],
+    categoria: ['Anime', 'Serie','Ciencia ficción'],
     verticalbanner: require('../assets/images/solo-levling-vbanner.png') 
   },
   {
@@ -595,7 +595,7 @@ export const ContentData: ContentItem[] = [
   ],
     fechaEstreno: '2003',
     puntuacion: 10,
-    categoria: ['Serie', 'LGTBIQ+'],
+    categoria: ['Serie', 'LGTBIQ+', 'Comedia'],
     verticalbanner: require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg')
   }
 ];

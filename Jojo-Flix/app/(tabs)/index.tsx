@@ -9,6 +9,7 @@ import { ContentItem } from '../../components/ContentData';
 import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
 import { SearchProvider } from '../../components/SearchContent';
 import SearchModal from '../../components/SearchModal'; // <-- Importa el modal
+import CategoryModal from '../../components/CategoryModal';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -19,6 +20,8 @@ export default function App() {
 
   // Estado para mostrar el modal de búsqueda
   const [searchVisible, setSearchVisible] = useState(false);
+  const [categoryVisible, setCategoryVisible] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
@@ -36,10 +39,11 @@ export default function App() {
 
   return (
     <SearchProvider>
-      <View style={{ flex: 1, backgroundColor: '#181818' }}>
+      <View style={{ flex: 1, backgroundColor: '#181818', position: 'relative' }}>
         <Header
           onLogoPress={() => setSelectedContent(null)}
           onSearchPress={() => setSearchVisible(true)}
+          onMenuPress={() => setCategoryVisible(true)}
         />
         {selectedContent ? (
           <ContentDetailScreen
@@ -61,10 +65,19 @@ export default function App() {
               ]}
               onVerPress={item => setSelectedContent(item)}
             />
-            <VerticalTripleCarouselsByCategory onPress={setSelectedContent} />
+            <VerticalTripleCarouselsByCategory
+              onPress={setSelectedContent}
+              filterCategories={selectedCategories}
+            />
           </ScrollView>
         )}
         {showFooter && <Footer />}
+        <CategoryModal
+          visible={categoryVisible}
+          setVisible={setCategoryVisible}
+          selected={selectedCategories}
+          setSelected={setSelectedCategories}
+        />
       </View>
       <SearchModal
         visible={searchVisible}
