@@ -55,7 +55,7 @@ export default function App() {
             style={{ flex: 1 }}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            contentContainerStyle={{ minHeight: 900, paddingBottom: 300 }}
+            contentContainerStyle={{ minHeight: 900, paddingBottom: 100 }}
           >
             <BannerCarousel
               nombres={[

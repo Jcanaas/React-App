@@ -3,9 +3,15 @@ import { View, Image, TouchableOpacity, StyleSheet, Dimensions, FlatList } from 
 import { ContentItem } from './ContentData';
 
 const { width } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 16 * 2; // 16 a cada lado
-const GAP = 16; // Solo 2 gaps entre 3 items
-const ITEM_WIDTH = (width - HORIZONTAL_PADDING - GAP * 2) / 3;
+const isMobile = width < 700; // Umbral para móvil/escritorio
+
+// Calcula cuántos items caben en pantalla según el dispositivo
+const VISIBLE_ITEMS = isMobile ? 3 : Math.floor(width / 160); // 160px aprox de ancho por item en PC
+const GAP = 16;
+const HORIZONTAL_PADDING = 16 * 2;
+const ITEM_WIDTH = isMobile
+  ? (width - HORIZONTAL_PADDING - GAP * (VISIBLE_ITEMS - 1)) / VISIBLE_ITEMS
+  : 180; // 1/3 más pequeño en PC
 const ITEM_HEIGHT = ITEM_WIDTH * 1.5;
 
 interface Props {
@@ -13,7 +19,6 @@ interface Props {
   onPress?: (item: ContentItem) => void;
 }
 
-const VISIBLE_ITEMS = 3;
 const REPEAT = 10;
 
 const VerticalTripleCarousel: React.FC<Props> = ({ items, onPress }) => {
@@ -55,11 +60,11 @@ const VerticalTripleCarousel: React.FC<Props> = ({ items, onPress }) => {
       )}
       contentContainerStyle={styles.container}
       getItemLayout={(_, index) => ({
-        length: ITEM_WIDTH + 16,
-        offset: (ITEM_WIDTH + 16) * index,
+        length: ITEM_WIDTH + GAP,
+        offset: (ITEM_WIDTH + GAP) * index,
         index,
       })}
-      snapToInterval={ITEM_WIDTH + 16}
+      snapToInterval={ITEM_WIDTH + GAP}
       decelerationRate="fast"
       initialNumToRender={VISIBLE_ITEMS * 2}
     />
@@ -73,7 +78,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
     marginVertical: 24,
     paddingHorizontal: 16,
-    gap: 16,
+    gap: GAP,
   },
   item: {
     width: ITEM_WIDTH,
@@ -82,7 +87,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#222',
     elevation: 4,
-    // No marginRight aquí
   },
   image: {
     width: '100%',

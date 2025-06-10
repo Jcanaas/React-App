@@ -3,7 +3,10 @@ import { View, Image, FlatList, Dimensions, StyleSheet, TouchableOpacity, Text, 
 import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
+const windowWidth = Dimensions.get('window').width;
+const isMobile = windowWidth < 700; // Ajusta el umbral si lo necesitas
+const BANNER_ASPECT_RATIO = isMobile ? 16 / 9 : 21 / 8;
+const bannerHeight = Math.round(windowWidth / BANNER_ASPECT_RATIO);
 
 interface BannerCarouselProps {
   nombres: string[];
@@ -16,7 +19,8 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
   // Duplica los banners para simular el loop
   const loopBanners = [...banners, ...banners, ...banners];
   const realLength = banners.length;
-  const initialIndex = realLength; // Empieza en la "mitad" para permitir loop en ambos sentidos
+  // Corrige el initialIndex para que nunca esté fuera de rango
+  const initialIndex = Math.max(0, Math.min(realLength, loopBanners.length - 1));
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const flatListRef = useRef<FlatList<ContentItem>>(null);
@@ -26,22 +30,26 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
     if (realLength <= 1) return;
     const timer = setInterval(() => {
       let nextIndex = currentIndex + 1;
-      setCurrentIndex(nextIndex);
-      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+      // Limita el índice antes de usarlo
+      const safeIndex = Math.max(0, Math.min(nextIndex, loopBanners.length - 1));
+      setCurrentIndex(safeIndex);
+      flatListRef.current?.scrollToIndex({ index: safeIndex, animated: true });
     }, intervalMs);
     return () => clearInterval(timer);
-  }, [currentIndex, realLength, intervalMs]);
+  }, [currentIndex, realLength, intervalMs, loopBanners.length]);
 
-  // Corrige el índice cuando llegas a los extremos
   const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / width);
+    const newIndex = Math.round(offsetX / windowWidth);
     let correctedIndex = newIndex;
     if (newIndex >= realLength * 2) {
       correctedIndex = realLength;
-      flatListRef.current?.scrollToIndex({ index: correctedIndex, animated: false });
     } else if (newIndex < realLength) {
       correctedIndex = realLength + (newIndex % realLength);
+    }
+    // Limita el índice antes de usarlo
+    correctedIndex = Math.max(0, Math.min(correctedIndex, loopBanners.length - 1));
+    if (correctedIndex !== newIndex) {
       flatListRef.current?.scrollToIndex({ index: correctedIndex, animated: false });
     }
     setCurrentIndex(correctedIndex);
@@ -75,8 +83,8 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
       pagingEnabled
       showsHorizontalScrollIndicator={false}
       getItemLayout={(_, index) => ({
-        length: width,
-        offset: width * index,
+        length: windowWidth,
+        offset: windowWidth * index,
         index,
       })}
       initialScrollIndex={initialIndex}
@@ -88,17 +96,19 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
 
 const styles = StyleSheet.create({
   bannerContainer: {
-    width,
-    height: 240,
+    width: windowWidth,
+    height: bannerHeight,
     justifyContent: 'center',
     alignItems: 'flex-start',
     position: 'relative',
     overflow: 'hidden',
+    alignSelf: 'center',
   },
   backgroundImage: {
     width: '100%',
     height: '100%',
     position: 'absolute',
+    resizeMode: 'cover',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -113,8 +123,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   logo: {
-    width: 220,
-    height: 90,
+    width: isMobile ? 220 : 440,   // Doble de ancho en PC
+    height: isMobile ? 90 : 180,   // Doble de alto en PC
     marginBottom: 18,
   },
   verButton: {
