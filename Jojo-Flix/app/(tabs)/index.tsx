@@ -7,6 +7,8 @@ import BannerCarousel from '../../components/BannerCarousel';
 import ContentDetailScreen from '../../components/ContentDetailScreen';
 import { ContentItem } from '../../components/ContentData';
 import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
+import { SearchProvider } from '../../components/SearchContent';
+import SearchModal from '../../components/SearchModal'; // <-- Importa el modal
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -14,6 +16,9 @@ export default function App() {
   });
   const [showFooter, setShowFooter] = useState(false);
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+
+  // Estado para mostrar el modal de búsqueda
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
@@ -30,32 +35,45 @@ export default function App() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#181818' }}>
-      <Header onLogoPress={() => setSelectedContent(null)} />
-      {selectedContent ? (
-        <ContentDetailScreen
-          content={selectedContent}
-          onBack={() => setSelectedContent(null)}
+    <SearchProvider>
+      <View style={{ flex: 1, backgroundColor: '#181818' }}>
+        <Header
+          onLogoPress={() => setSelectedContent(null)}
+          onSearchPress={() => setSearchVisible(true)}
         />
-      ) : (
-        <ScrollView
-          style={{ flex: 1 }}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ minHeight: 900, paddingBottom: 300 }} // <-- Cambiado a 200
-        >
-          <BannerCarousel
-            nombres={[
-              'Beck: Mongolian Chop Squad',
-              'Monster',
-              'Old Boy'
-            ]}
-            onVerPress={item => setSelectedContent(item)}
+        {selectedContent ? (
+          <ContentDetailScreen
+            content={selectedContent}
+            onBack={() => setSelectedContent(null)}
           />
-          <VerticalTripleCarouselsByCategory onPress={setSelectedContent} />
-        </ScrollView>
-      )}
-      {showFooter && <Footer />}
-    </View>
+        ) : (
+          <ScrollView
+            style={{ flex: 1 }}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            contentContainerStyle={{ minHeight: 900, paddingBottom: 300 }}
+          >
+            <BannerCarousel
+              nombres={[
+                'Beck: Mongolian Chop Squad',
+                'Monster',
+                'Old Boy'
+              ]}
+              onVerPress={item => setSelectedContent(item)}
+            />
+            <VerticalTripleCarouselsByCategory onPress={setSelectedContent} />
+          </ScrollView>
+        )}
+        {showFooter && <Footer />}
+      </View>
+      <SearchModal
+        visible={searchVisible}
+        setVisible={setSearchVisible}
+        onSelect={item => {
+          setSelectedContent(item);
+          setSearchVisible(false);
+        }}
+      />
+    </SearchProvider>
   );
 }

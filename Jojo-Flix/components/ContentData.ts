@@ -500,10 +500,10 @@ export const ContentData: ContentItem[] = [
   {
     nombre: 'Secreto en la montaña',
     descripcion: 'En 1963, dos vaqueros, Ennis del Mar (Heath Ledger) y Jack Twist (Jake Gyllenhaal), se conocen mientras trabajan como pastores de ovejas en el remoto rancho de Brokeback Mountain. A pesar de sus diferencias, los dos hombres desarrollan una profunda conexión emocional y sexual que desafía las normas sociales de la época. A lo largo de los años, su relación se convierte en un secreto compartido, ya que ambos luchan por equilibrar sus sentimientos con las expectativas de la sociedad y sus propias vidas personales.',
-    fondo: require('../assets/images/oldboybanner.jpg'),
-    logo: require('../assets/images/oldboylogo.webp'),
+    fondo: require('../assets/images/13140BROKEBACK-MOUNTAIN_banner_1.jpg'),
+    logo: require('../assets/images/brokeback-mountain-logo.png'),
     capitulos: 1,
-    fuente: ['https://mega.nz/embed/z5wACY6R#U2zxqeyEqV0DRLMJbvjWnN0PPzZ0rT1iK1KOj2bWyMs'],
+    fuente: ['https://mega.nz/embed/0VZ1VBxI#UAOEV27DvQL5_JGzECsr7NyrFx1fLAeFGHtwf-LbFIY'],
     nombresEpisodios: ['Película completa'],
     fechaEstreno: '2024',
     puntuacion: 8.8,

@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Platform, StatusBar, Text } from 'r
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSearch } from './SearchContent';
 
 interface HeaderProps {
   onLogoPress?: () => void;
@@ -39,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({
           </MaskedView>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onSearchPress} style={styles.searchButton}>
+        <TouchableOpacity onPress={onSearchPress}>
           <Ionicons name="search" size={26} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -88,14 +89,6 @@ const styles = StyleSheet.create({
   gradient: {
     width: 140,
     height: 48,
-  },
-  searchButton: {
-    padding: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-    width: 36,
-    height: 36,
   },
 });
 
