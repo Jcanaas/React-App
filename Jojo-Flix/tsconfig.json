@@ -3,10 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
+      "@/*": ["./*"]
+    },
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "jsxImportSource": "react"
   },
   "include": [
     "**/*.ts",

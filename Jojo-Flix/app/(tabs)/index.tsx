@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ActivityIndicator, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useFonts } from 'expo-font';
 import { useUser } from '../../components/UserContext';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import BannerCarousel from '../../components/BannerCarousel';
@@ -25,15 +25,23 @@ export default function Home() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { user } = useUser();
-  const router = useRouter();
-  const segments = useSegments();
+  const [userChecked, setUserChecked] = useState(false);
 
   React.useEffect(() => {
-    // Solo navega si el layout ya está montado
-    if (segments.length > 0 && !user) {
+    // Marca cuando el contexto de usuario ya se resolvió (sea null o un objeto)
+    if (user !== undefined) setUserChecked(true);
+  }, [user]);
+
+  const router = useRouter();
+  const segments = useSegments();
+  const navigationState = useRootNavigationState();
+
+  React.useEffect(() => {
+    // Solo navega si el layout ya está montado y el usuario fue chequeado
+    if (userChecked && navigationState?.key && segments.length > 0 && !user) {
       router.replace('/auth');
     }
-  }, [user, segments]);
+  }, [user, userChecked, segments, navigationState?.key]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
@@ -47,6 +55,10 @@ export default function Home() {
         <ActivityIndicator size="large" />
       </View>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

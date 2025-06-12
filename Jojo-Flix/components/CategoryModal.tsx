@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 18,
+    marginTop: 30,
   },
   category: {
     paddingVertical: 10,
@@ -135,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
+    marginBottom: 35,
   },
   applyBtnText: {
     color: '#fff',

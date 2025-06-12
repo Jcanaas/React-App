@@ -6,7 +6,7 @@ const UserContext = createContext<{ user: User | null }>({ user: null });
 
 export const useUser = () => useContext(UserContext);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -19,4 +19,4 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </UserContext.Provider>
   );
-};
+}
