@@ -40,9 +40,14 @@ const Header: React.FC<HeaderProps> = ({
           </MaskedView>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onSearchPress}>
-          <Ionicons name="search" size={26} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.rightIcons}>
+          <TouchableOpacity onPress={onSearchPress} style={styles.iconButton}>
+            <Ionicons name="search" size={26} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { /* acción usuario */ }} style={styles.iconButton}>
+            <Ionicons name="person-circle-outline" size={28} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -89,6 +94,14 @@ const styles = StyleSheet.create({
   gradient: {
     width: 140,
     height: 48,
+  },
+  rightIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    marginLeft: 8,
+    padding: 4,
   },
 });
 
