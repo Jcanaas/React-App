@@ -1,0 +1,241 @@
+## Prompt de Proyecto: Jojo-Flix
+
+### Descripción General
+
+**Jojo-Flix** es una aplicación desarrollada en React Native (con Expo) que simula una plataforma de streaming de contenido audiovisual, permitiendo a los usuarios ver información de películas y series, reproducir vídeos, gestionar favoritos y controlar su sesión de usuario. Utiliza Firebase para la autenticación y la gestión de datos de usuario, incluyendo la persistencia de favoritos.
+
+---
+
+### Instrucciones de Personalización para J.Cañas
+
+- **Siempre que sugieras un cambio, especifica claramente en qué ARCHIVO debe aplicarse el cambio.**
+- Si el cambio es en una función, componente o fragmento, indica también la ubicación aproximada dentro del archivo si es relevante.
+- Todas las respuestas, sugerencias y fragmentos de código deben estar adaptados y personalizados para J.Cañas.
+- Usa comentarios claros y precisos para que J.Cañas pueda identificar fácilmente dónde y cómo aplicar cada modificación.
+- Si hay pasos adicionales o dependencias, indícalo explícitamente.
+
+---
+
+### Estructura de Carpetas y Archivos Principales
+
+- **app/**
+  - `user-info.tsx`: Pantalla de información del usuario, muestra datos personales, avatar, sección de favoritos y botón de cerrar sesión.
+  - `_layout.tsx`: Archivo de layout principal. Aquí se envuelve toda la app con el `UserProvider` para que el usuario y la autenticación estén disponibles globalmente.
+- **components/**
+  - `Header.tsx`: Componente de cabecera con logo, menú, buscador y avatar de usuario (foto desde Firestore).
+  - `Footer.tsx`: Componente de pie de página.
+  - `ContentDetailScreen.tsx`: Pantalla de detalle de contenido (película o serie), muestra información, vídeo, episodios y permite añadir a favoritos.
+  - `ContentData.ts`: Define el tipo `ContentItem` y los datos de contenido.
+  - `firebaseConfig.ts`: Configuración e inicialización de Firebase (Auth y Firestore).
+  - `SearchContent.tsx`: Lógica y UI para la búsqueda de contenido.
+  - `UserContext.tsx`: Contexto de usuario (`UserProvider` y hook `useUser`).
+
+---
+
+### Contexto de Usuario (UserProvider)
+
+- Toda la app está envuelta en un **UserProvider** (contexto de usuario) en `app/_layout.tsx`.  
+  Esto permite acceder al usuario autenticado y sus datos desde cualquier componente, sin necesidad de pasar props manualmente.
+
+#### Ejemplo de uso en el layout principal:
+
+```tsx
+// app/_layout.tsx
+import { UserProvider } from '../components/UserContext';
+
+export default function RootLayout() {
+  return (
+    <UserProvider>
+      {/* Aquí va el Stack, ThemeProvider, etc. */}
+    </UserProvider>
+  );
+}
+```
+
+#### Ejemplo de uso del hook en cualquier componente:
+
+```tsx
+import { useUser } from '../components/UserContext';
+
+const { user } = useUser();
+```
+
+> **Nota:**  
+> El contexto de usuario (`UserProvider`) envuelve toda la navegación en `app/_layout.tsx`, asegurando que cualquier pantalla (incluyendo las de `(tabs)/index.tsx`) tenga acceso global al usuario autenticado y sus datos.
+
+---
+
+### Versión de Firebase utilizada
+
+Este proyecto utiliza **Firebase versión 9 (modular)**, también conocida como la "modular SDK".  
+Esto significa que los imports y el uso de Firestore y Auth siguen la sintaxis modular, que es más eficiente y recomendada por Google para proyectos nuevos.
+
+#### Ejemplo de imports con Firebase v9 (modular):
+
+```tsx
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
+```
+
+- **No** se usa la sintaxis antigua tipo `firebase.firestore().doc(...)`.
+- Todas las funciones (`doc`, `getDoc`, `setDoc`, `updateDoc`, `deleteField`, etc.) se importan directamente desde `firebase/firestore`.
+
+#### Ventajas de la versión modular (v9):
+
+- Mejor tree-shaking (solo se importa lo que se usa).
+- Código más limpio y fácil de mantener.
+- Mejor soporte y actualizaciones futuras.
+
+> **Nota:**  
+> Si copias ejemplos de la documentación oficial de Firebase, asegúrate de que sean para la versión 9+ (modular) y no para la versión antigua (namespaced).
+
+---
+
+### Funcionalidades Clave
+
+#### 1. **Autenticación y Sesión**
+- Se utiliza Firebase Auth.
+- La sesión se mantiene automáticamente (persistencia por defecto de Firebase).
+- El usuario puede cerrar sesión desde la pantalla de usuario (`user-info.tsx`) mediante un botón que llama a `signOut(auth)`.
+
+#### 2. **Gestión de Usuario**
+- Los datos del usuario (nombre, email, foto de perfil) se almacenan en Firestore bajo la colección `users` con el UID como documento.
+- El avatar del usuario se muestra tanto en el header como en la pantalla de usuario, usando la URL almacenada en el campo `profileImage` de Firestore.
+- Si no hay foto, se usa un placeholder generado por [ui-avatars.com](https://ui-avatars.com/).
+
+#### 3. **Favoritos**
+- Cada usuario tiene un campo `favoritos` en su documento de Firestore, que es un diccionario/objeto donde la clave es el ID del contenido y el valor puede ser un objeto con información adicional (ej: título, fecha, tipo).
+- Desde la pantalla de detalle (`ContentDetailScreen.tsx`), el usuario puede añadir o quitar un contenido de favoritos. El icono de corazón se actualiza en tiempo real usando Firestore.
+- En la pantalla de usuario (`user-info.tsx`), hay una sección para mostrar los favoritos (actualmente placeholder, pero preparada para listar los favoritos del usuario).
+
+#### 4. **Visualización de Contenido**
+- El componente `ContentDetailScreen` muestra:
+  - Banner con fondo y logo del contenido.
+  - Información: fecha de estreno, puntuación (con color dinámico), categorías.
+  - Descripción.
+  - Para series, lista de episodios desplegable.
+  - Reproductor de vídeo (WebView).
+  - Botón para añadir/quitar de favoritos.
+- El tipo de contenido se determina por el campo `categoria` (puede ser string o array).
+
+#### 5. **Header Personalizado**
+- El header muestra:
+  - Menú lateral (icono).
+  - Logo central con gradiente.
+  - Buscador (icono).
+  - Avatar de usuario (foto de Firestore o icono por defecto).
+- El componente se exporta como `Header`.
+
+---
+
+### Exports y Nombres de Componentes
+
+- **Header.tsx**:  
+  `export default Header;`
+- **Footer.tsx**:  
+  `export default Footer;`
+- **ContentDetailScreen.tsx**:  
+  `export default ContentDetailScreen;`
+- **user-info.tsx**:  
+  `export default UserInfoScreen;`
+- **ContentData.ts**:  
+  `export type ContentItem = { ... };`  
+  `export const contentList = [ ... ];`
+- **firebaseConfig.ts**:  
+  `export const auth = ...;`  
+  `export const db = ...;`
+- **UserContext.tsx**:  
+  `export const UserProvider = ...;`  
+  `export const useUser = ...;`
+
+---
+
+### Integración con Firebase
+
+- **Firestore**:  
+  - Colección `users`, documento por UID.
+  - Campos: `name`, `email`, `profileImage`, `favoritos` (objeto/diccionario).
+- **Auth**:  
+  - Se usa para login/logout y obtener el UID del usuario.
+
+---
+
+### Ejemplo de Añadir o Quitar Favoritos
+
+```tsx
+// ARCHIVO: components/ContentDetailScreen.tsx (o donde manejes favoritos)
+import { auth, db } from '../components/firebaseConfig';
+import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
+
+const toggleFavorite = async (contentId, contentData, isFavorite) => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const userRef = doc(db, 'users', user.uid);
+  if (isFavorite) {
+    // Borra solo la clave anidada en Firestore
+    await updateDoc(userRef, { [`favoritos.${contentId}`]: deleteField() });
+  } else {
+    // Añade o actualiza el favorito
+    const snap = await getDoc(userRef);
+    let favoritos = {};
+    if (snap.exists()) {
+      favoritos = snap.data().favoritos || {};
+    }
+    favoritos[contentId] = contentData;
+    await setDoc(userRef, { favoritos }, { merge: true });
+  }
+};
+```
+
+---
+
+### Ejemplo de Guardar Datos de Usuario
+
+```tsx
+// ARCHIVO: cualquier componente donde quieras guardar datos de usuario
+import { auth, db } from '../components/firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+
+const saveUserData = async (data) => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const userRef = doc(db, 'users', user.uid);
+  // El segundo argumento es el objeto con los datos a guardar o actualizar
+  // El tercer argumento { merge: true } asegura que solo se actualicen los campos indicados
+  await setDoc(userRef, data, { merge: true });
+};
+
+// Ejemplo de uso:
+saveUserData({
+  preferencias: {
+    tema: 'oscuro',
+    idioma: 'es',
+  },
+  ultimaConexion: new Date().toISOString(),
+});});
+```
+
+
+
+
+
+
+
+
+
+
+
+
+---- El contexto de usuario (`UserProvider`) envuelve toda la navegación en `app/_layout.tsx`, asegurando acceso global al usuario autenticado y sus datos en cualquier pantalla.- El código está modularizado y los componentes principales se exportan por defecto.- El proyecto está preparado para extender la sección de favoritos y la gestión de usuario.- Los iconos principales son de `@expo/vector-icons` (ej: `MaterialIcons`, `Ionicons`).- Todos los estilos se gestionan con `StyleSheet.create`.### Notas Técnicas---
+---
+
+### Notas Técnicas
+
+- Todos los estilos se gestionan con `StyleSheet.create`.
+- Los iconos principales son de `@expo/vector-icons` (ej: `MaterialIcons`, `Ionicons`).
+- El proyecto está preparado para extender la sección de favoritos y la gestión de usuario.
+- El código está modularizado y los componentes principales se exportan por defecto.
+- El contexto de usuario (`UserProvider`) envuelve toda la navegación en `app/_layout.tsx`, asegurando acceso global al usuario autenticado y sus datos en cualquier pantalla.
+
+---

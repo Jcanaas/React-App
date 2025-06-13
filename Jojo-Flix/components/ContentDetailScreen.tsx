@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ContentItem } from './ContentData';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Vibration } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
+import { auth, db } from '../components/firebaseConfig';
+import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
 
-interface Props {
-  content: ContentItem;
-  onBack?: () => void;
-}
+const ContentDetailScreen: React.FC = () => {
+  const route = useRoute();
+  // Recibe contentId desde la navegación
+  const { contentId, onBack } = route.params as { contentId: string; onBack?: () => void };
 
-const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
+  // Busca el contenido por id
+  const content = ContentData.find(item => item.id === contentId);
+
+  if (!content) {
+    return <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Contenido no encontrado</Text>;
+  }
+
   const [showEpisodes, setShowEpisodes] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
+
+  // Estado para favoritos
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
 
   const isSerie = Array.isArray(content.categoria)
     ? content.categoria.includes('Serie')
@@ -21,6 +34,51 @@ const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
     isSerie && content.fuente.length > 0
       ? content.fuente[selectedEpisode]
       : content.fuente[0];
+
+  // Comprobar si ya es favorito al cargar
+  useEffect(() => {
+    const checkFavorite = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        setIsFavorite(!!(data.favoritos && data.favoritos[content.id]));
+      }
+    };
+    checkFavorite();
+  }, [content.id]);
+
+  // Función para añadir/quitar de favoritos
+  const toggleFavorite = async () => {
+    Vibration.vibrate(5);
+    setFavLoading(true);
+    const user = auth.currentUser;
+    if (!user) {
+      setFavLoading(false);
+      return;
+    }
+    const userRef = doc(db, 'users', user.uid);
+    const snap = await getDoc(userRef);
+    let favoritos: { [key: string]: any } = {};
+    if (snap.exists()) {
+      favoritos = { ...(snap.data().favoritos || {}) };
+    }
+    if (isFavorite) {
+      // Borra solo la clave anidada en Firestore
+      await updateDoc(userRef, { [`favoritos.${content.id}`]: deleteField() });
+    } else {
+      favoritos[content.id] = {
+        titulo: content.nombre,
+        fecha: new Date().toISOString(),
+        tipo: Array.isArray(content.categoria) ? content.categoria.join(', ') : content.categoria,
+      };
+      await setDoc(userRef, { favoritos }, { merge: true });
+    }
+    setIsFavorite(!isFavorite);
+    setFavLoading(false);
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,6 +101,18 @@ const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
             Puntuación: <Text style={{ color: getScoreColor(content.puntuacion) }}>{content.puntuacion}</Text>
           </Text>
         </View>
+        {/* Botón de favoritos debajo de Puntuación */}
+        <TouchableOpacity
+          onPress={toggleFavorite}
+          style={{ alignSelf: 'flex-end', marginRight: 0, marginTop: 8, marginBottom: 8, opacity: favLoading ? 0.5 : 1 }}
+          disabled={favLoading}
+        >
+          <MaterialIcons
+            name={isFavorite ? 'favorite' : 'favorite-border'}
+            size={32}
+            color={isFavorite ? '#DF2892' : '#fff'}
+          />
+        </TouchableOpacity>
         <Text style={styles.categoriaText}>
           Categoría: {Array.isArray(content.categoria) ? content.categoria.join(', ') : content.categoria || 'N/A'}
         </Text>
@@ -79,7 +149,7 @@ const ContentDetailScreen: React.FC<Props> = ({ content, onBack }) => {
                   ]}
                   onPress={() => {
                     setSelectedEpisode(index);
-                    setShowEpisodes(false); // Plegar la lista al seleccionar
+                    setShowEpisodes(false);
                   }}
                 >
                   <Text style={styles.episodioText}>{item}</Text>

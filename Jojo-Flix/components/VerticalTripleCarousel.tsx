@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, Dimensions, FlatList } from 'react-native';
 import { ContentItem } from './ContentData';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 const isMobile = width < 700; // Umbral para móvil/escritorio
@@ -21,7 +22,8 @@ interface Props {
 
 const REPEAT = 10;
 
-const VerticalTripleCarousel: React.FC<Props> = ({ items, onPress }) => {
+const VerticalTripleCarousel: React.FC<Props> = ({ items }) => {
+  const router = useRouter();
   // Repite los items para simular loop
   const loopItems = Array(REPEAT).fill(items).flat();
   const listRef = useRef<FlatList>(null);
@@ -49,7 +51,7 @@ const VerticalTripleCarousel: React.FC<Props> = ({ items, onPress }) => {
         <TouchableOpacity
           style={styles.item}
           activeOpacity={0.8}
-          onPress={() => onPress && onPress(item)}
+          onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
         >
           <Image
             source={item.verticalbanner}

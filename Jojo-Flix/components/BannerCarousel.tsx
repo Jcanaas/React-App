@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Image, FlatList, Dimensions, StyleSheet, TouchableOpacity, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = windowWidth < 700; // Ajusta el umbral si lo necesitas
@@ -14,7 +15,8 @@ interface BannerCarouselProps {
   onVerPress?: (item: ContentItem) => void;
 }
 
-const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5000, onVerPress }) => {
+const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5000 }) => {
+  const router = useRouter();
   const banners = ContentData.filter(item => nombres.includes(item.nombre));
   // Duplica los banners para simular el loop
   const loopBanners = [...banners, ...banners, ...banners];
@@ -63,7 +65,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
         <Image source={item.logo} style={styles.logo} resizeMode="contain" />
         <TouchableOpacity
           style={styles.verButton}
-          onPress={() => onVerPress && onVerPress(item)}
+          onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
           activeOpacity={0.8}
         >
           <MaterialIcons name="play-arrow" size={24} color="#fff" />

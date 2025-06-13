@@ -6,8 +6,6 @@ import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import BannerCarousel from '../../components/BannerCarousel';
-import ContentDetailScreen from '../../components/ContentDetailScreen';
-import { ContentItem } from '../../components/ContentData';
 import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
 import SearchModal from '../../components/SearchModal';
 import CategoryModal from '../../components/CategoryModal';
@@ -17,9 +15,6 @@ export default function Home() {
     'Bebas Neue': require('../../assets/fonts/BN.ttf'),
   });
   const [showFooter, setShowFooter] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
-
-  // Estado para mostrar el modal de búsqueda
   const [searchVisible, setSearchVisible] = useState(false);
   const [categoryVisible, setCategoryVisible] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -28,7 +23,6 @@ export default function Home() {
   const [userChecked, setUserChecked] = useState(false);
 
   React.useEffect(() => {
-    // Marca cuando el contexto de usuario ya se resolvió (sea null o un objeto)
     if (user !== undefined) setUserChecked(true);
   }, [user]);
 
@@ -37,7 +31,6 @@ export default function Home() {
   const navigationState = useRootNavigationState();
 
   React.useEffect(() => {
-    // Solo navega si el layout ya está montado y el usuario fue chequeado
     if (userChecked && navigationState?.key && segments.length > 0 && !user) {
       router.replace('/auth');
     }
@@ -64,36 +57,27 @@ export default function Home() {
   return (
     <View style={{ flex: 1, backgroundColor: '#181818', position: 'relative' }}>
       <Header
-        onLogoPress={() => setSelectedContent(null)}
         onSearchPress={() => setSearchVisible(true)}
         onMenuPress={() => setCategoryVisible(true)}
       />
-      {selectedContent ? (
-        <ContentDetailScreen
-          content={selectedContent}
-          onBack={() => setSelectedContent(null)}
+      <ScrollView
+        style={{ flex: 1 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ minHeight: 900, paddingBottom: 100 }}
+      >
+        <BannerCarousel
+          nombres={[
+            'Beck: Mongolian Chop Squad',
+            'Monster',
+            'Old Boy'
+          ]}
         />
-      ) : (
-        <ScrollView
-          style={{ flex: 1 }}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ minHeight: 900, paddingBottom: 100 }}
-        >
-          <BannerCarousel
-            nombres={[
-              'Beck: Mongolian Chop Squad',
-              'Monster',
-              'Old Boy'
-            ]}
-            onVerPress={item => setSelectedContent(item)}
-          />
-          <VerticalTripleCarouselsByCategory
-            onPress={setSelectedContent}
-            filterCategories={selectedCategories}
-          />
-        </ScrollView>
-      )}
+        <VerticalTripleCarouselsByCategory
+          filterCategories={selectedCategories}
+          onPress={item => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
+        />
+      </ScrollView>
       {showFooter && <Footer />}
       <CategoryModal
         visible={categoryVisible}
@@ -105,8 +89,8 @@ export default function Home() {
         visible={searchVisible}
         setVisible={setSearchVisible}
         onSelect={item => {
-          setSelectedContent(item);
           setSearchVisible(false);
+          router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
         }}
       />
     </View>

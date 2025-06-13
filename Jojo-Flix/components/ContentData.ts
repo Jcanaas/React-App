@@ -1,4 +1,5 @@
 export interface ContentItem {
+  id: string;
   nombre: string;
   descripcion: string;
   fondo: any;
@@ -14,6 +15,7 @@ export interface ContentItem {
 
 export const ContentData: ContentItem[] = [
   {
+    id: 'Beck: Mongolian Chop Squad',
     nombre: 'Beck: Mongolian Chop Squad',
     descripcion: 'Beck: Mongolian Chop Squad es un anime que sigue la historia de Yukio "Koyuki" Tanaka, un adolescente que descubre su pasión por la música y se une a una banda llamada Beck. A medida que Koyuki y sus amigos luchan por alcanzar el éxito en la industria musical, enfrentan desafíos personales y profesionales, explorando temas de amistad, perseverancia y el poder transformador de la música.',
     fondo: require('../assets/images/beck_bg.jpg'),
@@ -81,6 +83,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/beckverticalbanner.png'),
   },
   {
+    id: 'The Last of Us',
     nombre: 'The Last of Us',
     descripcion: 'The Last of Us sigue a Joel, un hombre endurecido por la pérdida, que debe escoltar a Ellie, una joven inmune a una infección que ha devastado al mundo. Juntos cruzan un Estados Unidos postapocalíptico lleno de peligros humanos e infectados, enfrentando desafíos que pondrán a prueba su vínculo, su moral y su voluntad de sobrevivir.',
     fondo: require('../assets/images/tloutemp1.webp'),
@@ -114,6 +117,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/tlouverticalbanner.jpg')
   },
   {
+    id: 'Monster',
     nombre: 'Monster',
     descripcion: 'El doctor Kenzo Tenma es un prometedor neurocirujano japonés que ejerce en el Eisler Memorial Hospital de Dusseldorf. Lo tiene todo en la vida; un trabajo que le apasiona y en el que demuestra una habilidad increíble, y una novia rica y guapa. Sin embargo, un día decide ignorar una orden de su superior y salva a un niño desconocido en lugar de la vida del alcalde de la ciudad.',
     fondo: require('../assets/images/Monster.png'),
@@ -276,6 +280,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/Monster-verticalbanner.webp')
   }, 
   {
+    id: 'Devil May Cry',
     nombre: 'Devil May Cry',
     descripcion: 'Dante está a cargo de una tienda que hace de todo llamada Devil May Cry. Con un mal carácter y una mala paga hace los trabajos para saldar todas sus deudas. Después de su primera misión ha tenido que quedarse con una niña que según él es insoportable, pero esa niña tiene algo especial, es la heredera de una familia millonaria y de un poder que ni ella conoce.',
     fondo: require('../assets/images/DMC_Banner.png'),
@@ -316,6 +321,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/devil_may_cry_v.webp')
   },
   {
+    id: 'Solo Leveling',
     nombre: 'Solo Leveling',
     descripcion: 'En un mundo de cazadores superdotados y monstruos, un débil cazador adquiere poderes a través de un misterioso programa, lo que le lleva a convertirse en uno de los cazadores más fuertes y a conquistar las mazmorras más poderosas.',
     fondo: require('../assets/images/solo-leveling-bg.webp'),
@@ -355,6 +361,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/solo-levling-vbanner.png') 
   },
   {
+    id: 'Fear Street Part One: 1994',
     nombre: 'Fear Street Part One: 1994',
     descripcion: 'En 1994, un grupo de adolescentes descubre que los sucesos que aterrorizan su ciudad desde hace generaciones podrían estar conectados. Además, puede que ahora les toque a ellos protagonizar la pesadilla. Primera parte de la trilogía basada en las famosas novelas de miedo de R. L. Stine.',
     fondo: require('../assets/images/fearstreet1banner.webp'),
@@ -368,6 +375,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/fear_street_part_one_1994-vertical-banner.jpg')
   },
   {
+    id: 'Fear Street Part Two: 1978',
     nombre: 'Fear Street Part Two: 1978',
     descripcion: 'En 1978, Camp Nightwing está dividido en campistas que vinieron del pueblo oprimido de Shadyside y consejeros que vinieron del próspero pueblo de Sunnyvale. Cuando los horrores del pasado de ambos pueblos cogen fuerza, estos dos grupos deberán unirse para resolver un misterio terrorífico.',
     fondo: require('../assets/images/fear_street_part_two_1994-banner.jpg'),
@@ -381,6 +389,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/fear_street_part_two_1978-vertical-banner.jpg')
   },
   {
+    id: 'Fear Street: Prom Queen',
     nombre: 'Fear Street: Prom Queen',
     descripcion: 'Una noche de primavera... la suave luz de la luna... cinco hermosas candidatas a reina del baile... parejas bailando en el baile de graduación del instituto Shadyside... estos deberían ser los ingredientes del romance. Pero si se añade un brutal asesinato, y luego otro, y otro, la receta se convierte rápidamente en horror. Lizzie McVay se da cuenta de que alguien está asesinando una a una a las cinco candidatas a Reina del Baile... ¡y que ella puede ser la siguiente en la lista! ¿Podrá detener al asesino antes de que el baile termine para siempre?',
     fondo: require('../assets/images/fearstreetpromoqueenbanner.jpg'),
@@ -394,6 +403,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/fearstreetpromqueenvertical.jpeg')
   },
   {
+    id: 'Dune',
     nombre: 'Dune',
     descripcion: 'En el Año 10191 el desértico planeta Arrakis, feudo de la familia Harkonnen desde hace generaciones, queda en manos de la Casa de los Atreides por orden del emperador. Con ello les cede la explotación de las reservas de especia, la materia prima más valiosa de la galaxia, necesaria para los viajes interestelares y también una droga capaz de amplificar la conciencia y extender la vida. El duque Leto (Oscar Isaac), la dama Jessica (Rebecca Ferguson) y el hijo de ambos, Paul Atreides (Timothée Chalamet), llegan a Arrakis con la esperanza de mantener el buen nombre de su casa y ser fieles al emperador, pero pronto se verán envueltos en una trama de traiciones y engaños que les llevará a cuestionar su confianza entre sus más allegados y a valorar a los lugareños, los Fremen, una estirpe de habitantes del desierto con una estrecha relación con la especia.',
     fondo: require('../assets/images/dune_wallpaper_pc_hd_2021_by_andrewvm_dep0l32-pre.jpg'),
@@ -407,6 +417,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/duneverticalbanner.jpg')
   },
   {
+    id: '28 Semanas Después',
     nombre: '28 Semanas Después',
     descripcion: '28 Semanas Después es la secuela de 28 Días Después, una película que se centra en un virus que convierte a las personas en caníbales. En esta secuela, el virus ha sido erradicado y los supervivientes están regresando a Londres. Sin embargo, el virus vuelve a aparecer y los supervivientes deben luchar por su supervivencia una vez más.',
     fondo: require('../assets/images/28semanasdespuesbanner.webp'),
@@ -420,6 +431,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/28_weeks_later-892655817-mmed.jpg')
   },
   {
+    id: 'Star Wars. Episodio III: La venganza de los Sith',
     nombre: 'Star Wars. Episodio III: La venganza de los Sith',
     descripcion: 'Último capítulo de la trilogía de precuelas de Star Wars, en el que Anakin Skywalker definitivamente se pasa al lado oscuro. En el Episodio III aparece el General Grievous, un ser implacable mitad-alien mitad-robot, el líder del ejército separatista Droid. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
     fondo: require('../assets/images/starwars3banner.webp'),
@@ -433,6 +445,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/starwars3verticalbanner.jpg')
   },
   {
+    id: 'Megamente 2',
     nombre: 'Megamente 2',
     descripcion: 'Megamente 2 es una película de animación que sigue las aventuras del villano reformado Megamente y su amigo Minion. Después de derrotar a su archienemigo Metro',
     fondo: require('../assets/images/c61b6126c4d1fcd5c6c627e8487d6514b50c68a5d4726c5c1a1a50d631f98dd5.jpg'),
@@ -446,6 +459,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/Megamente2verticalbanner.webp')
   },
   {
+    id: 'Berserk',
     nombre: 'Berserk',
     descripcion: 'Basada en una exitosa saga que se ha visto reflejada ya en un manga, una serie y un videojuego, esta es la primera parte de Berserk en formato largometraje. Nuestro héroe es un guerrero de espada en mano. Imbatible, deberá lidiar con otro luchador, de pelo y armadura plateada.',
     fondo: require('../assets/images/Berserkbannerlaedaddorada.jpg'),
@@ -459,6 +473,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/berserk1vericalbanner.jpg')
   },
   {
+    id: 'Carol',
     nombre: 'Carol',
     descripcion: 'Nueva York, años 50. Therese Belivet (Rooney Mara), una joven dependienta de una tienda de Manhattan que sueña con una vida mejor, conoce un día a Carol Aird (Cate Blanchett), una mujer elegante y sofisticada que se encuentra atrapada en un matrimonio infeliz. Entre ellas surge una atracción inmediata, cada vez más intensa y profunda, que cambiará sus vidas para siempre.',
     fondo: require('../assets/images/carolbanner.webp'),
@@ -472,6 +487,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/carolverticalbanner.jpg')
   },
   {
+    id: 'Call me by your name',
     nombre: 'Call me by your name',
     descripcion: 'Elio Perlman (Timothée Chalamet), un joven de 17 años, pasa el cálido y soleado verano de 1983 en la casa de campo de sus padres en el norte de Italia. Se pasa el tiempo holgazaneando, escuchando música, leyendo libros y nadando hasta que un día el nuevo ayudante americano de su padre llega a la gran villa. Oliver (Armie Hammer) es encantador y, como Elio, tiene raíces judías; también es joven, seguro de sí mismo y atractivo. Al principio Elio se muestra algo frío y distante hacia el joven, pero pronto ambos empiezan a salir juntos de excursión y, conforme el verano avanza, la atracción mutua de la pareja se hace más intensa.',
     fondo: require('../assets/images/call_me_by_your_name.jpg'),
@@ -485,6 +501,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/call_me_by_your_name-vertical.jpg')
   },
   {
+    id: 'Old Boy',
     nombre: 'Old Boy',
     descripcion: 'Oh Dae-su es un hombre de negocios coreano que un día es secuestrado y confinado durante años en una celda en la que sólo hay una televisión. Y, sin embargo, ignora por qué razón está allí... Segunda parte de la "trilogía de la venganza" de Park Chan-wook.',
     fondo: require('../assets/images/oldboybanner.jpg'),
@@ -498,6 +515,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/oldboybannervertical.jpg')
   },
   {
+    id: 'Secreto en la montaña',
     nombre: 'Secreto en la montaña',
     descripcion: 'En 1963, dos vaqueros, Ennis del Mar (Heath Ledger) y Jack Twist (Jake Gyllenhaal), se conocen mientras trabajan como pastores de ovejas en el remoto rancho de Brokeback Mountain. A pesar de sus diferencias, los dos hombres desarrollan una profunda conexión emocional y sexual que desafía las normas sociales de la época. A lo largo de los años, su relación se convierte en un secreto compartido, ya que ambos luchan por equilibrar sus sentimientos con las expectativas de la sociedad y sus propias vidas personales.',
     fondo: require('../assets/images/13140BROKEBACK-MOUNTAIN_banner_1.jpg'),
@@ -511,6 +529,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/secreto-en-la-montana-cover.jpg')
   },
   {
+    id: 'Bocchi the Rock!',
     nombre: 'Bocchi the Rock!',
     descripcion: 'Hitori Gotou es una chica solitaria que sueña con ser parte de una banda de música. Sin embargo, su timidez y falta de habilidades sociales la han mantenido alejada de la escena musical. Un día, conoce a Nijika Ijichi, quien le ofrece unirse a su banda llamada "Kessoku Band". A pesar de sus inseguridades, Hitori acepta y comienza su viaje para superar sus miedos y convertirse en una talentosa guitarrista.',
     fondo: require('../assets/images/bocchi_the_Rock_Banner.jpg'),
@@ -550,6 +569,7 @@ export const ContentData: ContentItem[] = [
     verticalbanner: require('../assets/images/bocchi_the_rock_re-639827727-large.jpg')
   },
   {
+    id: 'Aqui no hay quien viva',
     nombre: 'Aqui no hay quien viva',
     descripcion: 'Aquí no hay quien viva es una serie de televisión española que se emitió desde 2003 hasta 2006. La trama gira en torno a los vecinos de un edificio en Madrid, sus relaciones, conflictos y situaciones cómicas. La serie es conocida por su humor y personajes entrañables.',
     fondo: require('../assets/images/Anhqv.jpg'),

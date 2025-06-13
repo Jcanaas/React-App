@@ -71,11 +71,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleUser = () => {
-    if (pathname !== '/') {
-      router.push('/');
-    } else {
-      router.push('/user-info');
-    }
+    router.push('/user-info');
   };
 
   return (

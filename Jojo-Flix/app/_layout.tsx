@@ -21,7 +21,12 @@ export default function RootLayout() {
   return (
     <UserProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            animation: 'none', // Esto elimina la animación de transición entre pantallas
+            headerShown: false,
+          }}
+        >
           <Stack.Screen name="(tabs)/index" />
           <Stack.Screen name="auth" />
           <Stack.Screen name="+not-found" />
