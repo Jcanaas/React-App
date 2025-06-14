@@ -9,7 +9,7 @@ import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore'
 
 const windowWidth = Dimensions.get('window').width;
 // Solo para el reproductor:
-const PLAYER_WIDTH = Math.round(windowWidth * 0.6); // Más pequeño (60% del ancho)
+const PLAYER_WIDTH = Math.round(windowWidth * 0.9); // Ahora 90% del ancho
 const PLAYER_HEIGHT = Math.round(PLAYER_WIDTH / (16 / 9));
 const isMobile = windowWidth < 700; // Igual que en BannerCarousel
 const BANNER_ASPECT_RATIO = isMobile ? 16 / 9 : 21 / 8;

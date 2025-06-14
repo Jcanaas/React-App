@@ -239,3 +239,16 @@ saveUserData({
 - El contexto de usuario (`UserProvider`) envuelve toda la navegación en `app/_layout.tsx`, asegurando acceso global al usuario autenticado y sus datos en cualquier pantalla.
 
 ---
+
+
+
+
+Cuentas Mega:
+jordicanadas2@gmail.com
+Holakase207
+
+jordicanadas0@gmail.com
+Holakase207
+
+jordicanadas693@gmail.com (Anhqv)
+Holakase207

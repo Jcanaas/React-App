@@ -617,5 +617,33 @@ export const ContentData: ContentItem[] = [
     puntuacion: 10,
     categoria: ['Serie', 'LGTBIQ+', 'Comedia'],
     verticalbanner: require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg')
-  }
+  },
+   {
+    id: 'Star Wars. Episodio IV: Una nueva esperanza',
+    nombre: 'star Wars. Episodio IV: Una nueva esperanza',
+    descripcion: 'Hace mucho tiempo en una galaxia muy, muy lejana ... Son tiempos de guerra civil. Naves rebeldes han atacado desde una base secreta y han obtenido su primera victoria contra el malvado Imperio Galáctico. Durante la batalla, espías rebeldes lograron robar los planos secretos del arma más extrema del Imperio, la Estrella de la Muerte, una estación espacial blindada con suficiente potencia para destruir un planeta entero. Perseguida por los siniestros agentes del Imperio, la Princesa Leia se dirige velozmente a casa en su nave espacial, mientras resguarda los planos que pueden salvar a su pueblo y restaurar la libertad en la galaxia',
+    fondo: require('../assets/images/Star-wars-4b.webp'),
+    logo: require('../assets/images/Star-Wars-transparent-logo.png'),
+    capitulos: 1977,
+    fuente: ['https://mega.nz/embed/oYxhWKRS#pLgye3Ld05RfkcJbIOnc_-HUD89flVzKp-ci7uzZ3IM'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '',
+    puntuacion: 9.8,
+    categoria: ['Película', 'Acción'],
+    verticalbanner: require('../assets/images/starwars4v.jpg')
+  },
+  {
+    id: 'Star Wars. Episodio V: El Imperio Contraataca',
+    nombre: 'Star Wars. Episodio V: El Imperio Contraataca',
+    descripcion: 'Hace mucho tiempo en una galaxia muy, muy lejana ... Son tiempos de guerra civil. Naves rebeldes han atacado desde una base secreta y han obtenido su primera victoria contra el malvado Imperio Galáctico. Durante la batalla, espías rebeldes lograron robar los planos secretos del arma más extrema del Imperio, la Estrella de la Muerte, una estación espacial blindada con suficiente potencia para destruir un planeta entero. Perseguida por los siniestros agentes del Imperio, la Princesa Leia se dirige velozmente a casa en su nave espacial, mientras resguarda los planos que pueden salvar a su pueblo y restaurar la libertad en la galaxia',
+    fondo: require('../assets/images/Star-wars-4b.webp'),
+    logo: require('../assets/images/Star-Wars-transparent-logo.png'),
+    capitulos: 1979,
+    fuente: ['https://mega.nz/embed/JUJG1BRL#ziSUyUIBD-8A0_rW1lhVZUkYM97mWguMEOINQEp6QxM'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '',
+    puntuacion: 9.8,
+    categoria: ['Película', 'Acción'],
+    verticalbanner: require('../assets/images/EpVv.webp')
+  },
 ];
