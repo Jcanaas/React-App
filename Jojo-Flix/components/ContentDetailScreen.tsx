@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Vibration } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Vibration, Dimensions, Platform } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { auth, db } from '../components/firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
+
+const windowWidth = Dimensions.get('window').width;
+// Solo para el reproductor:
+const PLAYER_WIDTH = Math.round(windowWidth * 0.6); // Más pequeño (60% del ancho)
+const PLAYER_HEIGHT = Math.round(PLAYER_WIDTH / (16 / 9));
+const isMobile = windowWidth < 700; // Igual que en BannerCarousel
+const BANNER_ASPECT_RATIO = isMobile ? 16 / 9 : 21 / 8;
+const bannerHeight = Math.round(windowWidth / BANNER_ASPECT_RATIO);
 
 const ContentDetailScreen: React.FC = () => {
   const route = useRoute();
@@ -83,11 +91,21 @@ const ContentDetailScreen: React.FC = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Banner */}
-      <View style={styles.bannerContainer}>
+      <View style={[styles.bannerContainer, { width: windowWidth, height: bannerHeight }]}>
         <Image source={content.fondo} style={styles.backgroundImage} />
         <View style={styles.overlay} />
         <View style={styles.logoContainer}>
-          <Image source={content.logo} style={styles.logo} resizeMode="contain" />
+          <Image
+            source={content.logo}
+            style={[
+              styles.logo,
+              {
+                width: isMobile ? 220 : 440,
+                height: isMobile ? 90 : 180,
+              },
+            ]}
+            resizeMode="contain"
+          />
         </View>
       </View>
 
@@ -162,13 +180,30 @@ const ContentDetailScreen: React.FC = () => {
 
       {/* Reproductor SIEMPRE visible si hay fuente */}
       {videoSource && (
-        <View style={styles.playerContainer}>
-          <WebView
-            source={{ uri: videoSource }}
-            style={{ height: 220, borderRadius: 12, overflow: 'hidden' }}
-            allowsFullscreenVideo
-            mediaPlaybackRequiresUserAction={false}
-          />
+        <View style={[styles.playerContainer, { width: PLAYER_WIDTH, height: PLAYER_HEIGHT, alignSelf: 'center' }]}>
+          {Platform.OS === 'web' ? (
+            <iframe
+              src={videoSource}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                borderRadius: 12,
+                overflow: 'hidden',
+                background: '#000',
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="Reproductor"
+            />
+          ) : (
+            <WebView
+              source={{ uri: videoSource }}
+              style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}
+              allowsFullscreenVideo
+              mediaPlaybackRequiresUserAction={false}
+            />
+          )}
         </View>
       )}
 
@@ -195,18 +230,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   bannerContainer: {
-    width: '100%',
-    height: 220,
+    // width y height ahora se asignan dinámicamente en el componente
     justifyContent: 'center',
     alignItems: 'flex-start',
     position: 'relative',
     overflow: 'hidden',
     marginBottom: 12,
+    alignSelf: 'center', // Centra el banner
   },
   backgroundImage: {
     width: '100%',
     height: '100%',
     position: 'absolute',
+    resizeMode: 'cover', // Igual que BannerCarousel
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -217,12 +253,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     paddingLeft: 32,
-    zIndex: 2,
+    zIndex: 2, // Asegura que el logo esté sobre el overlay
     height: '100%',
+    position: 'relative', // Necesario para stacking en web
   },
   logo: {
-    width: 200,
-    height: 80,
+    marginBottom: 18,
+    zIndex: 2,
+    position: 'relative',
   },
   infoRow: {
     marginBottom: 10,
@@ -291,12 +329,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   playerContainer: {
-    marginHorizontal: 18,
     marginBottom: 24,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#000',
-    height: 220,
+    // alignSelf ahora se asigna dinámicamente
   },
 });
 
