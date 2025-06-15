@@ -326,8 +326,9 @@ export const ContentData: ContentItem[] = [
     descripcion: 'En un mundo de cazadores superdotados y monstruos, un débil cazador adquiere poderes a través de un misterioso programa, lo que le lleva a convertirse en uno de los cazadores más fuertes y a conquistar las mazmorras más poderosas.',
     fondo: require('../assets/images/solo-leveling-bg.webp'),
     logo: require('../assets/images/Solo_Leveling_logo.png'),
-    capitulos: 12,
+    capitulos: 25, // 12 de T1 + 13 de T2
     fuente: [
+      // TEMPORADA 1
       "https://mega.nz/embed/Pd8TXCiB#UhkyxZuaVuztYgtQ9FpFlmOznX5kV6FsoSiuiS_QkUg",
       "https://mega.nz/embed/PIFUlTYB#h9UfEbgryAPiGkMbOMdStjmrWwfgzfUZOxyGmuMRpgU",
       "https://mega.nz/embed/PUtziALS#l52dBskeEDKy15it5kiBGk7Y_tWe6dT7UqCb_5oceRQ",
@@ -339,27 +340,56 @@ export const ContentData: ContentItem[] = [
       "https://mega.nz/embed/WddlxTaS#JIzzLJUzUgX3nm96My1he2FJMHIpIpBLuzHeau3ikp0",
       "https://mega.nz/embed/CRcglJQR#DVpagTlya8cnhl4lethnT0-zAqzMy9Ka_XO-CnqcoX8",
       "https://mega.nz/embed/PZUS0KpD#12kGrf85KbeoO1PVUUwaiRyAPWfjqMHc552U2ll9Zhw",
-      "https://mega.nz/embed/3UsFHLCZ#t7FvsTQkJfT0yC1CMWiYNtPPS_u11Q8jd5IHcyZuiD8"
-    ],
-    nombresEpisodios: [
-      "1. Ya estoy acostumbrado",
-      "2. Si tuviera otra oportunidad",
-      "3. Es como un juego",
-      "4. Tengo que hacerme más fuerte",
-      "5. Un muy buen trato",
-      "6. Comienza la verdadera cacería",
-      "7. Veamos hasta dónde puedo llegar",
-      "8. Qué frustrante",
-      "9. Has estado ocultando tus habilidades",
-      "10. ¿Qué es esto, un picnic?",
-      "11. Un caballero defendiendo un trono vacío",
-      "12. Surjan"
-    ],
-    fechaEstreno: '2024',
-    puntuacion: 8.7,
-    categoria: ['Anime', 'Serie','Ciencia ficción'],
-    verticalbanner: require('../assets/images/solo-levling-vbanner.png') 
-  },
+      "https://mega.nz/embed/3UsFHLCZ#t7FvsTQkJfT0yC1CMWiYNtPPS_u11Q8jd5IHcyZuiD8",
+      // TEMPORADA 2
+      "https://mega.nz/file/sdRwFRRb#XR-VwhuTj_uhnz9i0Jhv4aEz-fszDHBUc3OOyNKpl50",
+      "https://mega.nz/file/pJIUCSiD#O_8Vm8FiJbFGHM8jSd2LqontK8lAfV0vjB0qNJ6pqSo",
+      "https://mega.nz/file/8IhG2JxD#g-Wf6B5ftzbP93zJHv8h5wKsv6ni1t-fnKLZnNDjlh8",
+      "https://mega.nz/file/wcYn1BqL#gUokZUr5gGYJH-NHM8Yk3xj-tn9MC2Vg0aya5H18C7A",
+      "https://mega.nz/file/1UwRCLYT#hre5E4O9mtN-TtRr5OUeeyge6Qm7shFULfT7EOqHhL0",
+      "https://mega.nz/file/MQ5TQDQY#GhL6wdfe_T3LMiO96L6N4vkYS4n9qk3X-GgBqDMb4i0",
+      "https://mega.nz/file/VNYCGI6Q#11Xz05Ff-FTDzYmFs5Reszq_q8-KwsRpUZZ3qG1qI2E",
+      "https://mega.nz/file/dVIjwDYK#UGrVt9iLe5X7zGFaaUCk7Apa8lSSEVzLYE5pxEx0iBM",
+      "https://mega.nz/file/AUhjlDJZ#29VtkXKdISpreOOPlqcgevT7jiCIejzTrBHaoXmv9KA",
+      "https://mega.nz/file/VRIhmYQA#Uo5EIB24-kuehfJeFySYgmTcPvC_O55kyE-BULrgf5o",
+      "https://mega.nz/file/VA5RTRKS#nHrfMV4lCQF2Mzb4_4HQUmwrbl0NQ_kt6R5FiJ5r4WA",
+      "https://mega.nz/file/AFR21CxR#LfNy_4SSyBr8GYBpUJzf_u6pRfolrc79g1m8xQE-tYQ",
+      "https://mega.nz/file/8ExRVTYD#hkE2rjlADCmksk5S_-18MHUUXTxJ3-AutWv5ySw3_EA"
+  ],
+  nombresEpisodios: [
+    // TEMPORADA 1
+    "T1 - Ya estoy acostumbrado",
+    "T1 - Si tuviera otra oportunidad",
+    "T1 - Es como un juego",
+    "T1 - Tengo que hacerme más fuerte",
+    "T1 - Un muy buen trato",
+    "T1 - Comienza la verdadera cacería",
+    "T1 - Veamos hasta dónde puedo llegar",
+    "T1 - Qué frustrante",
+    "T1 - Has estado ocultando tus habilidades",
+    "T1 - ¿Qué es esto, un picnic?",
+    "T1 - Un caballero defendiendo un trono vacío",
+    "T1 - Surjan",
+    // TEMPORADA 2
+    "T2 - No eres de Rango E",
+    "T2 - Parece que tú mismo no lo sabes",
+    "T2 - Aún queda mucho camino",
+    "T2 - Tengo que dejar de fingir",
+    "T2 - Estamos entrenados para esto",
+    "T2 - No menosprecies a los míos",
+    "T2 - El décimo Cazador de rango S",
+    "T2 - Mirar hacia arriba me estaba cansando",
+    "T2 - Valió la pena",
+    "T2 - Necesitamos un héroe",
+    "T2 - Se va a poner aún más intenso",
+    "T2 - ¿Eres el rey de los humanos",
+    "T2 - Al siguiente objetivo"
+  ],
+  fechaEstreno: '2024',
+  puntuacion: 8.7,
+  categoria: ['Anime', 'Serie', 'Ciencia ficción'],
+  verticalbanner: require('../assets/images/solo-levling-vbanner.png')
+},
   {
     id: 'Fear Street Part One: 1994',
     nombre: 'Fear Street Part One: 1994',
