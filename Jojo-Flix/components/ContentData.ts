@@ -430,20 +430,7 @@ export const ContentData: ContentItem[] = [
     categoria: ['Película', 'Terror'],
     verticalbanner: require('../assets/images/28_weeks_later-892655817-mmed.jpg')
   },
-  {
-    id: 'Star Wars. Episodio III: La venganza de los Sith',
-    nombre: 'Star Wars. Episodio III: La venganza de los Sith',
-    descripcion: 'Último capítulo de la trilogía de precuelas de Star Wars, en el que Anakin Skywalker definitivamente se pasa al lado oscuro. En el Episodio III aparece el General Grievous, un ser implacable mitad-alien mitad-robot, el líder del ejército separatista Droid. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
-    fondo: require('../assets/images/starwars3banner.webp'),
-    logo: require('../assets/images/starwars3logo.png'),
-    capitulos: 1,
-    fuente: ['https://mega.nz/embed/jBcRhBSK#yFiZj-DF0e5RYCASBjGCSbplESYIweEFth9Trwl5Rmk'],
-    nombresEpisodios: ['Película completa'],
-    fechaEstreno: '2005',
-    puntuacion: 8.2,
-    categoria: ['Película', 'Ciencia ficción', 'Acción'],
-    verticalbanner: require('../assets/images/starwars3verticalbanner.jpg')
-  },
+  
   {
     id: 'Megamente 2',
     nombre: 'Megamente 2',
@@ -618,7 +605,49 @@ export const ContentData: ContentItem[] = [
     categoria: ['Serie', 'LGTBIQ+', 'Comedia'],
     verticalbanner: require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg')
   },
-   {
+  {
+    id: 'Star Wars. Episodio I: La amenaza fantasma',
+    nombre: 'Star Wars. Episodio I: La amenaza fantasma',
+    descripcion: 'Primer capítulo de la trilogía de precuelas de Star Wars, en el que se nos presenta a Anakin Skywalker, un niño esclavo con un gran potencial en la Fuerza. En el Episodio I aparece el villano Darth Maul, un temible Sith con un sable de luz de doble hoja. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
+    fondo: require('../assets/images/starwars1b.webp'),
+    logo: require('../assets/images/Star-Wars-transparent-logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/4BIxxDiT#YyYKlHAeJViWBB4LSRo7csHpSIpp9qC2UfVi4x6xecE'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2005',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Ciencia ficción', 'Acción', 'Star Wars'],
+    verticalbanner: require('../assets/images/starwars1v.jpg')
+  },
+  {
+    id: 'Star Wars. Episodio II: El ataque de los clones',
+    nombre: 'Star Wars. Episodio II: El ataque de los clones',
+    descripcion: 'Segundo capítulo de la trilogía de precuelas de Star Wars, en el que Anakin Skywalker se convierte en un Jedi y comienza a enamorarse de Padmé Amidala. En el Episodio II aparece el Conde Dooku, un antiguo Jedi que se ha pasado al lado oscuro y lidera el ejército separatista Droid. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
+    fondo: require('../assets/images/starwars2banner.webp'),
+    logo: require('../assets/images/Star-Wars-transparent-logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/VMohUZYa#EUpHouwnbVumaMVXi7etvC_PEvpQSGK1ml-_fi0Imhg'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '1999',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Ciencia ficción', 'Acción', 'Star Wars'],
+    verticalbanner: require('../assets/images/star_wars_episode_ii_attack_of_the_clones-495166632-large.jpg')
+  },
+  {
+    id: 'Star Wars. Episodio III: La venganza de los Sith',
+    nombre: 'Star Wars. Episodio III: La venganza de los Sith',
+    descripcion: 'Último capítulo de la trilogía de precuelas de Star Wars, en el que Anakin Skywalker definitivamente se pasa al lado oscuro. En el Episodio III aparece el General Grievous, un ser implacable mitad-alien mitad-robot, el líder del ejército separatista Droid. Los Sith son los amos del lado oscuro de la Fuerza y los enemigos de los Jedi. Fueron prácticamente exterminados por los Jedi hace mil años, pero esta orden del mal sobrevivió en la clandestinidad.',
+    fondo: require('../assets/images/starwars3banner.webp'),
+    logo: require('../assets/images/starwars3logo.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/jBcRhBSK#yFiZj-DF0e5RYCASBjGCSbplESYIweEFth9Trwl5Rmk'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2005',
+    puntuacion: 8.2,
+    categoria: ['Película', 'Ciencia ficción', 'Acción', 'Star Wars'],
+    verticalbanner: require('../assets/images/starwars3verticalbanner.jpg')
+  },
+  {
     id: 'Star Wars. Episodio IV: Una nueva esperanza',
     nombre: 'star Wars. Episodio IV: Una nueva esperanza',
     descripcion: 'Hace mucho tiempo en una galaxia muy, muy lejana ... Son tiempos de guerra civil. Naves rebeldes han atacado desde una base secreta y han obtenido su primera victoria contra el malvado Imperio Galáctico. Durante la batalla, espías rebeldes lograron robar los planos secretos del arma más extrema del Imperio, la Estrella de la Muerte, una estación espacial blindada con suficiente potencia para destruir un planeta entero. Perseguida por los siniestros agentes del Imperio, la Princesa Leia se dirige velozmente a casa en su nave espacial, mientras resguarda los planos que pueden salvar a su pueblo y restaurar la libertad en la galaxia',
@@ -629,7 +658,7 @@ export const ContentData: ContentItem[] = [
     nombresEpisodios: ['Película completa'],
     fechaEstreno: '',
     puntuacion: 9.8,
-    categoria: ['Película', 'Acción'],
+    categoria: ['Película', 'Acción', 'Ciencia ficción', 'Star Wars'],
     verticalbanner: require('../assets/images/starwars4v.jpg')
   },
   {
@@ -643,7 +672,7 @@ export const ContentData: ContentItem[] = [
     nombresEpisodios: ['Película completa'],
     fechaEstreno: '',
     puntuacion: 9.8,
-    categoria: ['Película', 'Acción'],
+    categoria: ['Película', 'Acción', 'Ciencia ficción', 'Star Wars'],
     verticalbanner: require('../assets/images/EpVv.webp')
   },
 ];

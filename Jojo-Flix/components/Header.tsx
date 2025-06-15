@@ -87,18 +87,35 @@ const Header: React.FC<HeaderProps> = ({
         {/* Logo centrado */}
         <View style={styles.centerLogo}>
           <TouchableOpacity onPress={handleLogo} activeOpacity={0.8}>
-            <MaskedView
-              maskElement={
-                <Text style={styles.logoText}>JOJO-FLIX</Text>
-              }
-            >
-              <LinearGradient
-                colors={['#DF2892', '#fff']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.gradient}
-              />
-            </MaskedView>
+            {Platform.OS === 'web' ? (
+              <span
+                style={{
+                  fontFamily: 'BN, Arial, sans-serif', // Debe ser exactamente 'BN'
+                  fontWeight: 'bold',
+                  fontSize: 48,
+                  letterSpacing: 2,
+                  background: 'linear-gradient(180deg, #ff5fa2 0%, #fff 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  display: 'inline-block',
+                }}
+              >
+                JOJO-FLIX
+              </span>
+            ) : (
+              <Text style={{
+                fontFamily: 'BN',
+                fontWeight: 'bold',
+                fontSize: 48,
+                letterSpacing: 2,
+                color: '#ff5fa2',
+                textShadowColor: 'rgba(0,0,0,0.5)',
+                textShadowOffset: { width: 2, height: 2 },
+                textShadowRadius: 8,
+              }}>
+                JOJO-FLIX
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -153,15 +170,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoText: {
-    fontFamily: 'Bebas Neue',
-    fontSize: 40,
-    letterSpacing: 2,
-    color: 'black',
-    fontWeight: 'normal',
-    includeFontPadding: false,
-    textAlign: 'center',
   },
   gradient: {
     width: 140,

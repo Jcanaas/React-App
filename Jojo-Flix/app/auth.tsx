@@ -129,118 +129,118 @@ export default function AuthScreen() {
 
   if (!fontsLoaded) return null; // Espera a que la fuente esté lista
 
+  const isWeb = Platform.OS === 'web';
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <LinearGradient
-        colors={['#FF7EB3', '#DF2892', '#18181b']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{ flex: 1 }} // Asegúrate de que ocupe todo el alto
+    <LinearGradient
+      colors={['#FF7EB3', '#DF2892', '#18181b']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={{ flex: 1 }} // Asegúrate de que ocupe todo el alto
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 10} 
       >
-        <KeyboardAvoidingView
-          style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 10} 
+        <Animated.View
+          style={{
+            transform: [
+              { translateX: cardAnim.x },
+              { translateY: cardAnim.y },
+            ],
+            width: '100%',
+            alignItems: 'center',
+          }}
         >
-          <Animated.View
-            style={{
-              transform: [
-                { translateX: cardAnim.x },
-                { translateY: cardAnim.y },
-              ],
-              width: '100%',
-              alignItems: 'center',
-            }}
+          <BlurView
+            intensity={18}
+            tint="dark"
+            style={styles.card}
           >
-            <BlurView
-              intensity={18}
-              tint="dark"
-              style={styles.card}
-            >
-              <TouchableOpacity onPress={onLogoPress} style={styles.logoContainer} activeOpacity={1}>
-                <MaskedView
-                  maskElement={
-                    <Text style={styles.logoText}>JOJO-FLIX</Text>
-                  }
-                >
-                  <LinearGradient
-                    colors={['#DF2892', '#fff']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.gradient}
-                  />
-                </MaskedView>
-              </TouchableOpacity>
-              <Text style={styles.title}>{isRegister ? 'Crear cuenta' : 'Iniciar sesión'}</Text>
-              {/* <Text style={styles.subtitle}>Bienvenido a Jojo-Flix</Text> */}
-              {success && (
-                <View style={{ backgroundColor: '#22c55e', padding: 10, borderRadius: 8, marginBottom: 10 }}>
-                  <Text style={{ color: '#fff', textAlign: 'center' }}>
-                    ¡Autenticación exitosa!
-                  </Text>
-                </View>
-              )}
-              {isRegister && (
-                <View style={styles.inputContainer}>
-                  <Ionicons name="person-outline" size={20} color="#fff" style={styles.icon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Nombre"
-                    value={name}
-                    onChangeText={setName}
-                    placeholderTextColor="#aaa"
-                  />
-                </View>
-              )}
-              <View style={styles.inputContainer}>
-                <Ionicons name="mail-outline" size={20} color="#fff" style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Correo"
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  placeholderTextColor="#aaa"
+            <TouchableOpacity onPress={onLogoPress} style={styles.logoContainer} activeOpacity={1}>
+              <MaskedView
+                maskElement={
+                  <Text style={styles.logoText}>JOJO-FLIX</Text>
+                }
+              >
+                <LinearGradient
+                  colors={['#DF2892', '#fff']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.gradient}
                 />
-              </View>
-              <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color="#fff" style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Contraseña"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  placeholderTextColor="#aaa"
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#aaa" />
-                </TouchableOpacity>
-              </View>
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-              <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
-                {loading ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                    <Animated.View style={{ marginRight: 8, transform: [{ rotate: glowAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }] }}>
-                      <Ionicons name="reload" size={18} color="#fff" />
-                    </Animated.View>
-                    <Text style={styles.buttonText}>Cargando...</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.buttonText}>{isRegister ? 'Registrarse' : 'Entrar'}</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
-                <Text style={styles.toggle}>
-                  {isRegister ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+              </MaskedView>
+            </TouchableOpacity>
+            <Text style={styles.title}>{isRegister ? 'Crear cuenta' : 'Iniciar sesión'}</Text>
+            {/* <Text style={styles.subtitle}>Bienvenido a Jojo-Flix</Text> */}
+            {success && (
+              <View style={{ backgroundColor: '#22c55e', padding: 10, borderRadius: 8, marginBottom: 10 }}>
+                <Text style={{ color: '#fff', textAlign: 'center' }}>
+                  ¡Autenticación exitosa!
                 </Text>
+              </View>
+            )}
+            {isRegister && (
+              <View style={styles.inputContainer}>
+                <Ionicons name="person-outline" size={20} color="#fff" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nombre"
+                  value={name}
+                  onChangeText={setName}
+                  placeholderTextColor="#aaa"
+                />
+              </View>
+            )}
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#fff" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Correo"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholderTextColor="#aaa"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#fff" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholderTextColor="#aaa"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#aaa" />
               </TouchableOpacity>
-            </BlurView>
-          </Animated.View>
-        </KeyboardAvoidingView>
-      </LinearGradient>
-    </TouchableWithoutFeedback>
+            </View>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <TouchableOpacity style={styles.button} onPress={handleAuth} disabled={loading}>
+              {loading ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                  <Animated.View style={{ marginRight: 8, transform: [{ rotate: glowAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }] }}>
+                    <Ionicons name="reload" size={18} color="#fff" />
+                  </Animated.View>
+                  <Text style={styles.buttonText}>Cargando...</Text>
+                </View>
+              ) : (
+                <Text style={styles.buttonText}>{isRegister ? 'Registrarse' : 'Entrar'}</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
+              <Text style={styles.toggle}>
+                {isRegister ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+              </Text>
+            </TouchableOpacity>
+          </BlurView>
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
