@@ -1,12 +1,12 @@
+// Header.tsx
 import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, StatusBar, Text, Image } from 'react-native';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSearch } from './SearchContent';
 import { useRouter, usePathname } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
-import { db, auth } from '../components/firebaseConfig'; // asegúrate de importar db
+import { db, auth } from '../components/firebaseConfig';
 
 interface HeaderProps {
   onLogoPress?: () => void;
@@ -23,7 +23,6 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,38 +44,21 @@ const Header: React.FC<HeaderProps> = ({
     fetchUserPhoto();
   }, [auth.currentUser]);
 
-  // Si no estamos en index, navega al index. Si estamos, ejecuta la acción original.
   const handleMenu = () => {
-    if (pathname !== '/') {
-      router.push('/');
-    } else if (onMenuPress) {
-      onMenuPress();
-    }
+    pathname !== '/' ? router.push('/') : onMenuPress?.();
   };
-
   const handleLogo = () => {
-    if (pathname !== '/') {
-      router.push('/');
-    } else if (onLogoPress) {
-      onLogoPress();
-    }
+    pathname !== '/' ? router.push('/') : onLogoPress?.();
   };
-
   const handleSearch = () => {
-    if (pathname !== '/') {
-      router.push('/');
-    } else if (onSearchPress) {
-      onSearchPress();
-    }
+    pathname !== '/' ? router.push('/') : onSearchPress?.();
   };
-
-  const handleUser = () => {
-    router.push('/user-info');
-  };
+  const handleUser = () => router.push('/user-info');
 
   return (
     <View style={styles.container}>
       <View style={styles.innerRow}>
+
         {/* Lado izquierdo */}
         <View style={styles.side}>
           <TouchableOpacity onPress={handleMenu} style={styles.menuButton}>
@@ -90,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({
             {Platform.OS === 'web' ? (
               <span
                 style={{
-                  fontFamily: 'BN, Arial, sans-serif', // Debe ser exactamente 'BN'
+                  fontFamily: 'Bebas Neue',
                   fontWeight: 'bold',
                   fontSize: 48,
                   letterSpacing: 2,
@@ -103,18 +85,21 @@ const Header: React.FC<HeaderProps> = ({
                 JOJO-FLIX
               </span>
             ) : (
-              <Text style={{
-                fontFamily: 'BN',
-                fontWeight: 'bold',
-                fontSize: 48,
-                letterSpacing: 2,
-                color: '#ff5fa2',
-                textShadowColor: 'rgba(0,0,0,0.5)',
-                textShadowOffset: { width: 2, height: 2 },
-                textShadowRadius: 8,
-              }}>
-                JOJO-FLIX
-              </Text>
+              <MaskedView
+                maskElement={
+                  <Text style={styles.maskedText}>JOJO-FLIX</Text>
+                }
+              >
+                <LinearGradient
+                  colors={['#ff5fa2', '#fff']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                >
+                  <Text style={[styles.maskedText, { opacity: 0 }]}>
+                    JOJO-FLIX
+                  </Text>
+                </LinearGradient>
+              </MaskedView>
             )}
           </TouchableOpacity>
         </View>
@@ -136,6 +121,7 @@ const Header: React.FC<HeaderProps> = ({
             )}
           </TouchableOpacity>
         </View>
+
       </View>
     </View>
   );
@@ -156,35 +142,38 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: 56,
     paddingHorizontal: 16,
-    position: 'relative',
+  },
+  side: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 70,
   },
   menuButton: {
     padding: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: 8,
     width: 38,
     height: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: 4,
+    marginLeft: 8,
   },
   centerLogo: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  gradient: {
-    width: 140,
-    height: 48,
-  },
-  side: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    minWidth: 70, // Ajusta este valor según el ancho de tus iconos
-  },
-  iconButton: {
-    marginLeft: 8,
-    padding: 4,
-  },
+  maskedText: {
+  fontFamily: 'Bebas Neue',
+  fontSize: 48,
+  letterSpacing: 2,
+  textAlign: 'center',
+  color: 'black', // necesario para que MaskedView funcione bien
+  includeFontPadding: false,
+},
+
   userAvatar: {
     width: 32,
     height: 32,
