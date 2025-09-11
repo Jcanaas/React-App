@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Image, TouchableOpacity, StyleSheet, Dimensions, FlatList } from 'react-native';
-import { ContentItem } from './ContentData';
 import { useRouter } from 'expo-router';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { Dimensions, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { ContentItem } from './ContentData';
+import OptimizedImage from './OptimizedImage';
 
 const { width } = Dimensions.get('window');
 const isMobile = width < 700; // Umbral para móvil/escritorio
@@ -22,7 +23,7 @@ interface Props {
 
 const REPEAT = 10;
 
-const VerticalTripleCarousel: React.FC<Props> = ({ items }) => {
+const VerticalTripleCarousel: React.FC<Props> = memo(({ items }) => {
   const router = useRouter();
   // Repite los items para simular loop
   const loopItems = Array(REPEAT).fill(items).flat();
@@ -38,7 +39,30 @@ const VerticalTripleCarousel: React.FC<Props> = ({ items }) => {
         });
       }, 10);
     }
-  }, [items]);
+  }, [items.length, loopItems.length]);
+
+  const renderItem = useCallback(({ item }: { item: ContentItem }) => (
+    <TouchableOpacity
+      style={styles.item}
+      activeOpacity={0.8}
+      onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
+    >
+      <OptimizedImage
+        source={item.verticalbanner}
+        style={styles.image}
+        resizeMode="cover"
+        showLoader={true}
+      />
+    </TouchableOpacity>
+  ), [router]);
+
+  const keyExtractor = useCallback((item: ContentItem, idx: number) => `${item.id}-${idx}`, []);
+
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: ITEM_WIDTH + GAP,
+    offset: (ITEM_WIDTH + GAP) * index,
+    index,
+  }), []);
 
   return (
     <FlatList
@@ -46,32 +70,23 @@ const VerticalTripleCarousel: React.FC<Props> = ({ items }) => {
       data={loopItems}
       horizontal
       showsHorizontalScrollIndicator={false}
-      keyExtractor={(_, idx) => idx.toString()}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.item}
-          activeOpacity={0.8}
-          onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
-        >
-          <Image
-            source={item.verticalbanner}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        </TouchableOpacity>
-      )}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
       contentContainerStyle={styles.container}
-      getItemLayout={(_, index) => ({
-        length: ITEM_WIDTH + GAP,
-        offset: (ITEM_WIDTH + GAP) * index,
-        index,
-      })}
+      getItemLayout={getItemLayout}
       snapToInterval={ITEM_WIDTH + GAP}
       decelerationRate="fast"
       initialNumToRender={VISIBLE_ITEMS * 2}
+      // Optimizaciones de rendimiento
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={5}
+      updateCellsBatchingPeriod={50}
+      windowSize={10}
     />
   );
-};
+});
+
+VerticalTripleCarousel.displayName = 'VerticalTripleCarousel';
 
 const styles = StyleSheet.create({
   container: {

@@ -12,12 +12,17 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.JojoFlix"
+      "package": "com.anonymous.JojoFlix",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
+      ],
+      "notifications": {
+        "icon": "./assets/images/icon.png",
+        "color": "#DF2892"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -32,7 +37,15 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#DF2892"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#DF2892",
+          "defaultChannel": "default"
         }
       ]
     ],

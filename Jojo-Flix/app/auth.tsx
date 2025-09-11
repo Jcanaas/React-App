@@ -1,43 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, Animated, Easing, Dimensions, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, Platform } from 'react-native';
-import { Gyroscope } from 'expo-sensors';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../components/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-import { useRouter } from 'expo-router';
-import { useFonts } from 'expo-font';
 import { BlurView } from 'expo-blur';
+import { useFonts } from 'expo-font';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Gyroscope } from 'expo-sensors';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Easing, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { auth, db } from '../components/firebaseConfig';
+import { useAuthNavigation } from '../hooks/useAuthNavigation';
 
 const { width } = Dimensions.get('window');
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // Estado para el nombre
+  const [name, setName] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  // Estado para saber si el teclado está abierto
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [logoPressCount, setLogoPressCount] = useState(0);
   const [gyroActive, setGyroActive] = useState(false);
   const cardAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const router = useRouter(); // <--- AGREGA ESTA LÍNEA
+  
+  // Usar el hook de navegación de autenticación
+  const { isAuthenticated, loading: authLoading } = useAuthNavigation();
 
   // Giroscopio
   useEffect(() => {
     let subscription: any;
     if (gyroActive) {
       subscription = Gyroscope.addListener(gyroscopeData => {
-        // ¡Hazlo más exagerado!
         Animated.spring(cardAnim, {
           toValue: {
-            x: gyroscopeData.y * 300, // Aumenta el multiplicador para más movimiento
+            x: gyroscopeData.y * 300,
             y: gyroscopeData.x * 300,
           },
           useNativeDriver: true,
@@ -45,9 +45,8 @@ export default function AuthScreen() {
           bounciness: 90,
         }).start();
       });
-      Gyroscope.setUpdateInterval(90); // Más fluido (60fps)
+      Gyroscope.setUpdateInterval(90);
     } else {
-      // Vuelve al centro cuando se desactiva
       Animated.spring(cardAnim, {
         toValue: { x: 0, y: 0 },
         useNativeDriver: true,
@@ -59,18 +58,16 @@ export default function AuthScreen() {
     };
   }, [gyroActive]);
 
-  // Logo tap: activa/desactiva el giroscopio cada 3 toques
   const onLogoPress = () => {
     setLogoPressCount(count => {
       if (count + 1 >= 3) {
         setGyroActive(active => !active);
-        return 0; // reinicia el contador
+        return 0;
       }
       return count + 1;
     });
   };
 
-  // Simple animated glow for the button
   const glowAnim = React.useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
     Animated.loop(
@@ -94,40 +91,59 @@ export default function AuthScreen() {
     setError('');
     setSuccess(false);
     setLoading(true);
+    
     try {
       if (isRegister) {
-        // 1. Crea el usuario en Auth
+        console.log('Creando cuenta para:', email);
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // 2. Imagen de perfil por defecto
         const defaultProfileImage = 'https://raw.githubusercontent.com/Jcanaas/JoJo-Flix/main/img/user_pink.png';
-        // 3. Guarda el usuario en Firestore
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           name,
           email,
           uid: userCredential.user.uid,
           profileImage: defaultProfileImage,
         });
+        console.log('Cuenta creada exitosamente');
       } else {
+        console.log('Iniciando sesión para:', email);
         await signInWithEmailAndPassword(auth, email, password);
+        console.log('Sesión iniciada exitosamente');
       }
+      
       setSuccess(true);
-      setLoading(false);
-      setTimeout(() => {
-        router.replace('/');
-      }, 1000); // Espera 1 segundo antes de redirigir
-      return;
+      // El hook useAuthNavigation se encargará de la navegación automáticamente
     } catch (e: any) {
+      console.error('Error de autenticación:', e.message);
       setError(e.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Carga la fuente antes de renderizar
   const [fontsLoaded] = useFonts({
     'Bebas Neue': require('../assets/fonts/BN.ttf'),
   });
 
-  if (!fontsLoaded) return null; // Espera a que la fuente esté lista
+  // Mostrar loading mientras cargan las fuentes o se verifica la autenticación
+  if (!fontsLoaded || authLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818' }}>
+        <Animated.View style={{ 
+          transform: [{ rotate: glowAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }] 
+        }}>
+          <Ionicons name="reload" size={30} color="#DF2892" />
+        </Animated.View>
+        <Text style={{ color: '#fff', marginTop: 10 }}>
+          {!fontsLoaded ? 'Cargando...' : 'Verificando sesión...'}
+        </Text>
+      </View>
+    );
+  }
+
+  // Si ya está autenticado, no mostrar nada (el hook se encarga de la navegación)
+  if (isAuthenticated) {
+    return null;
+  }
 
   const isWeb = Platform.OS === 'web';
 
@@ -136,7 +152,7 @@ export default function AuthScreen() {
       colors={['#FF7EB3', '#DF2892', '#18181b']}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
-      style={{ flex: 1 }} // Asegúrate de que ocupe todo el alto
+      style={{ flex: 1 }}
     >
       <KeyboardAvoidingView
         style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}
@@ -173,7 +189,6 @@ export default function AuthScreen() {
               </MaskedView>
             </TouchableOpacity>
             <Text style={styles.title}>{isRegister ? 'Crear cuenta' : 'Iniciar sesión'}</Text>
-            {/* <Text style={styles.subtitle}>Bienvenido a Jojo-Flix</Text> */}
             {success && (
               <View style={{ backgroundColor: '#22c55e', padding: 10, borderRadius: 8, marginBottom: 10 }}>
                 <Text style={{ color: '#fff', textAlign: 'center' }}>

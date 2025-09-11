@@ -3,7 +3,7 @@ import { initializeAuth } from 'firebase/auth';
 // @ts-ignore
 import { getReactNativePersistence } from '@firebase/auth/dist/rn/index.js';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore, deleteField } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCAbt9D5lmZV3MSygsK-IgkHQP9V3nPohU",
@@ -16,11 +16,36 @@ const firebaseConfig = {
   measurementId: "G-SCH4DH1QDF"
 };
 
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
+// Configurar Auth con persistencia mejorada
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 
-// Añade y exporta la instancia de Firestore:
+// Solo para desarrollo: conectar al emulador si está disponible
+// if (__DEV__) {
+//   try {
+//     connectAuthEmulator(auth, 'http://localhost:9099');
+//   } catch (error) {
+//     console.log('Auth emulator no disponible');
+//   }
+// }
+
+// Configurar Firestore
 export const db = getFirestore(app);
+
+// Función para verificar el estado de autenticación
+export const getCurrentUser = () => {
+  return new Promise((resolve) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+};
+
+// Log para debugging
+console.log('Firebase configurado correctamente');
+console.log('Auth persistence configurado con AsyncStorage');

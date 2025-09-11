@@ -5,6 +5,7 @@ import { signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import FavoritesCarousel from '../components/FavoritesCarousel';
 import { useRouter } from 'expo-router';
 
 const placeholderImg = 'https://ui-avatars.com/api/?name=User&background=DF2892&color=fff';
@@ -65,57 +66,50 @@ const UserInfoScreen = () => {
   return (
     <View style={styles.screen}>
       <Header />
-      <View style={styles.container}>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
         {loading ? (
-          <ActivityIndicator color="#DF2892" size="large" />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color="#DF2892" size="large" />
+          </View>
         ) : !userData ? (
           <Text style={styles.title}>No hay datos de usuario</Text>
         ) : (
           <>
             {/* Avatar con opción de cambiar */}
-            <TouchableOpacity style={styles.avatarWrapper} onPress={() => setModalVisible(true)}>
-              <View style={styles.avatarBorder}>
-                <Image
-                  source={{ uri: userData.profileImage || placeholderImg }}
-                  style={styles.avatar}
-                  resizeMode="contain"
-                  defaultSource={{ uri: placeholderImg }}
-                />
-              </View>
-              <Text style={styles.changePhotoText}>Cambiar foto</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>Información del usuario</Text>
-            <Text style={styles.name}>{userData.name}</Text>
-            <Text style={styles.email}>{userData.email}</Text>
-            {/* Sección Favoritos */}
-            <View style={styles.favSection}>
-              <Text style={styles.favTitle}>Favoritos</Text>
-              {favoritos.length === 0 ? (
-                <Text style={styles.favEmpty}>Todavía no tienes favoritos.</Text>
-              ) : (
-                favoritos.map(([favId, fav]: any, idx: number) => (
-                  <TouchableOpacity
-                    key={favId}
-                    onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: favId } })}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.favName}>
-                      {fav.nombre || fav.titulo}
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              )}
+            <View style={styles.userInfoSection}>
+              <TouchableOpacity style={styles.avatarWrapper} onPress={() => setModalVisible(true)}>
+                <View style={styles.avatarBorder}>
+                  <Image
+                    source={{ uri: userData.profileImage || placeholderImg }}
+                    style={styles.avatar}
+                    resizeMode="contain"
+                    defaultSource={{ uri: placeholderImg }}
+                  />
+                </View>
+                <Text style={styles.changePhotoText}>Cambiar foto</Text>
+              </TouchableOpacity>
+              <Text style={styles.title}>Información del usuario</Text>
+              <Text style={styles.name}>{userData.name}</Text>
+              <Text style={styles.email}>{userData.email}</Text>
             </View>
+            
+            {/* Sección Favoritos con Carousel */}
+            <FavoritesCarousel 
+              favoriteIds={favoritos.map(([favId]) => favId)}
+            />
+            
             {/* Botón de cerrar sesión */}
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={() => signOut(auth)}
-            >
-              <Text style={styles.logoutText}>Cerrar sesión</Text>
-            </TouchableOpacity>
+            <View style={styles.logoutSection}>
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={() => signOut(auth)}
+              >
+                <Text style={styles.logoutText}>Cerrar sesión</Text>
+              </TouchableOpacity>
+            </View>
           </>
         )}
-      </View>
+      </ScrollView>
       <Footer />
 
       {/* Modal para cambiar imagen */}
@@ -169,6 +163,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#181818',
   },
+  scrollContainer: {
+    flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userInfoSection: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -208,22 +219,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 24,
   },
-  favSection: {
-    marginTop: 30,
-    width: '100%',
-    alignItems: 'center',
-  },
-  favTitle: {
-    color: '#DF2892',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  favEmpty: {
-    color: '#aaa',
-    fontSize: 16,
-    fontStyle: 'italic',
-  },
   logoutButton: {
     marginTop: 32,
     backgroundColor: '#DF2892',
@@ -232,19 +227,16 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
   },
+  logoutSection: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
   logoutText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 1,
-  },
-  favName: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
   },
   changePhotoText: {
     color: '#DF2892',

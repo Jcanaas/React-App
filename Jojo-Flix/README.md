@@ -1,50 +1,186 @@
-# Welcome to your Expo app 👋
+# Jojo-Flix - Tu Plataforma de Streaming Personal
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+¡Bienvenido a **Jojo-Flix**! Una aplicación móvil que simula Netflix, donde puedes ver series y películas de anime, ciencia ficción, terror y mucho más. Desarrollada con React Native y Expo.
 
-## Get started
+## ¿Qué es Jojo-Flix?
 
-1. Install dependencies
+Jojo-Flix es una aplicación de streaming que incluye:
+- Series de anime como Monster, Beck, Solo Leveling
+- Películas como Dune, Star Wars, Fear Street
+- Contenido LGBTIQ+ con diseños especiales
+- Sistema de búsqueda y filtros por categorías
+- Autenticación de usuarios con Firebase
+- Funciona en Android, iOS y Web
 
+## Instalación y Configuración
+
+### Prerrequisitos
+Antes de empezar, asegúrate de tener instalado:
+- [Node.js](https://nodejs.org/) (versión 16 o superior)
+- [Git](https://git-scm.com/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+
+### Pasos de instalación
+
+1. **Clona el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/Jojo-Flix.git
+   cd Jojo-Flix
+   ```
+
+2. **Instala las dependencias**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. **Inicia la aplicación**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. **Abre la app en tu dispositivo**
+   - **En tu teléfono**: Escanea el código QR con la app Expo Go
+   - **En el navegador**: Presiona `w` para abrir en web
+   - **Android**: Presiona `a` para abrir en emulador Android
+   - **iOS**: Presiona `i` para abrir en simulador iOS
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Estructura del Proyecto
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Carpetas Principales
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Jojo-Flix/
+├── app/                    # Pantallas de la aplicación
+│   ├── (tabs)/            # Pantallas con navegación por pestañas
+│   │   ├── index.tsx      # Pantalla principal (Home)
+│   │   └── layout.tsx     # Layout de las pestañas
+│   ├── auth.tsx           # Pantalla de login y registro
+│   ├── content-detail-screen.tsx # Detalles de películas/series
+│   └── _layout.tsx        # Layout principal de la app
+├── components/            # Componentes reutilizables
+├── assets/               # Imágenes, fuentes y recursos
+├── constants/            # Colores y configuraciones
+└── android/              # Configuración específica de Android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Archivos Importantes
 
-## Learn more
+#### Componentes (`/components/`)
+- **`ContentData.ts`**: Base de datos con todas las series y películas
+- **`BannerCarousel.tsx`**: Carrusel principal de la pantalla de inicio
+- **`VerticalTripleCarousel.tsx`**: Carruseles por categorías
+- **`Header.tsx`**: Barra superior con búsqueda y menú
+- **`SearchModal.tsx`**: Modal de búsqueda de contenido
+- **`UserContext.tsx`**: Gestión del estado del usuario
+- **`firebaseConfig.ts`**: Configuración de Firebase para autenticación
 
-To learn more about developing your project with Expo, look at the following resources:
+#### Pantallas (`/app/`)
+- **`auth.tsx`**: Pantalla de inicio de sesión y registro
+- **`(tabs)/index.tsx`**: Pantalla principal con carruseles
+- **`content-detail-screen.tsx`**: Detalles de cada serie/película
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+#### Configuración
+- **`package.json`**: Dependencias y scripts del proyecto
+- **`app.json`**: Configuración de la aplicación Expo
+- **`eas.json`**: Configuración para crear APKs
+- **`tsconfig.json`**: Configuración de TypeScript
 
-## Join the community
+#### Recursos (`/assets/`)
+- **`/images/`**: Todas las imágenes de series, películas y logos
+- **`/fonts/`**: Fuentes personalizadas como Bebas Neue
 
-Join our community of developers creating universal apps.
+## Características Principales
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Sistema de Usuarios
+- **Registro**: Crea tu cuenta con email y contraseña
+- **Login**: Inicia sesión de forma segura
+- **Persistencia**: Tu sesión se mantiene activa
+- **Firebase**: Base de datos segura para usuarios
+
+### Pantalla Principal
+- **Banner Destacado**: Las mejores series en rotación automática
+- **Categorías**: Contenido organizado por género (Anime, Terror, LGBTIQ+, etc.)
+- **Navegación Fluida**: Scroll suave con efectos visuales
+
+### Búsqueda y Filtros
+- **Búsqueda Rápida**: Encuentra series por nombre
+- **Filtros**: Selecciona múltiples categorías
+- **Resultados Instantáneos**: Búsqueda en tiempo real
+
+### Reproductor de Video
+- **Enlaces Directos**: Videos alojados en Mega.nz
+- **Información Completa**: Sinopsis, episodios, puntuación
+- **Diseño Atractivo**: Banners y logos de alta calidad
+
+## Tecnologías Utilizadas
+
+### Frontend
+- **React Native**: Framework para apps móviles
+- **Expo**: Herramientas de desarrollo y deployment
+- **TypeScript**: Tipado estático para mejor código
+- **Expo Router**: Navegación moderna basada en archivos
+
+### Backend y Servicios
+- **Firebase Auth**: Autenticación de usuarios
+- **Firestore**: Base de datos de usuarios
+- **Mega.nz**: Alojamiento de videos
+
+### Librerías Principales
+- **Linear Gradient**: Gradientes hermosos
+- **Blur View**: Efectos de desenfoque
+- **Async Storage**: Almacenamiento local
+- **Vector Icons**: Iconos vectoriales
+
+## Cómo Usar la App
+
+1. **Registro/Login**: Al abrir la app, regístrate o inicia sesión
+2. **Explora**: Navega por los carruseles de contenido
+3. **Busca**: Usa el ícono de búsqueda para encontrar contenido específico
+4. **Filtra**: Usa el menú para filtrar por categorías
+5. **Reproduce**: Toca cualquier serie/película para ver detalles y reproducir
+
+## Características Especiales
+
+- **Texto Rainbow**: El contenido LGBTIQ+ tiene efectos de texto especiales
+- **Responsive**: Se adapta a diferentes tamaños de pantalla
+- **Efectos Visuales**: Gradientes, blur y animaciones suaves
+- **Auto-scroll**: Los carruseles se mueven automáticamente
+- **Easter Eggs**: ¡Prueba tocar el logo 3 veces en la pantalla de login!
+
+## Compilar para Producción
+
+Para crear una APK de Android:
+
+```bash
+# Instala EAS CLI si no lo tienes
+npm install -g @expo/eas-cli
+
+# Compila la APK
+eas build --platform android --profile preview
+```
+
+## Contribuir
+
+¿Quieres agregar más series o mejorar la app?
+
+1. Haz fork del repositorio
+2. Crea una nueva rama: `git checkout -b nueva-caracteristica`
+3. Añade tu contenido en `ContentData.ts`
+4. Haz commit: `git commit -m 'Agregar nueva serie'`
+5. Push: `git push origin nueva-caracteristica`
+6. Crea un Pull Request
+
+## Licencia
+
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+
+## Soporte
+
+Si tienes problemas o preguntas:
+- Abre un issue en GitHub
+- Contacta al desarrollador
+- Revisa la documentación de [Expo](https://docs.expo.dev/)
+
+---
+
+¡Disfruta de Jojo-Flix!

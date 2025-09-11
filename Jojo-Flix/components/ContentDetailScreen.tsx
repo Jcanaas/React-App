@@ -6,12 +6,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { auth, db } from '../components/firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
+import { useContentOMDb } from '../hooks/useOMDb';
+import RealActorCast from './RealActorCast';
+import OMDbReviews from './OMDbReviews';
 
+// Constantes de dimensiones
 const windowWidth = Dimensions.get('window').width;
-// Solo para el reproductor:
-const PLAYER_WIDTH = Math.round(windowWidth * 0.9); // Ahora 90% del ancho
+const PLAYER_WIDTH = Math.round(windowWidth * 0.9);
 const PLAYER_HEIGHT = Math.round(PLAYER_WIDTH / (16 / 9));
-const isMobile = windowWidth < 700; // Igual que en BannerCarousel
+const isMobile = windowWidth < 700;
 const BANNER_ASPECT_RATIO = isMobile ? 16 / 9 : 21 / 8;
 const bannerHeight = Math.round(windowWidth / BANNER_ASPECT_RATIO);
 
@@ -29,14 +32,22 @@ const ContentDetailScreen: React.FC = () => {
 
   const [showEpisodes, setShowEpisodes] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
+  const [activeTab, setActiveTab] = useState<'player' | 'cast' | 'reviews'>('player');
 
   // Estado para favoritos
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
+  // OMDb Integration
   const isSerie = Array.isArray(content.categoria)
     ? content.categoria.includes('Serie')
     : content.categoria === 'Serie';
+  
+  // Usar OMDb con el título del contenido
+  const { omdbData, loading: omdbLoading, error: omdbError } = useContentOMDb(
+    content.nombre, 
+    !isSerie // true para películas, false para series
+  );
 
   const videoSource =
     isSerie && content.fuente.length > 0
@@ -139,73 +150,123 @@ const ContentDetailScreen: React.FC = () => {
       {/* Descripción */}
       <Text style={styles.descripcion}>{content.descripcion}</Text>
 
-      {/* Episodios para series */}
-      {isSerie && content.nombresEpisodios.length > 0 && (
-        <View style={styles.episodiosContainer}>
-          <TouchableOpacity
-            style={styles.episodiosHeader}
-            onPress={() => setShowEpisodes(!showEpisodes)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.episodiosTitle}>
-              Episodios ({content.nombresEpisodios.length})
-            </Text>
-            <MaterialIcons
-              name={showEpisodes ? 'expand-less' : 'expand-more'}
-              size={28}
-              color="#fff"
-            />
-          </TouchableOpacity>
-          {showEpisodes && (
-            <View>
-              {content.nombresEpisodios.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.episodioItem,
-                    selectedEpisode === index && styles.episodioItemSelected,
-                  ]}
-                  onPress={() => {
-                    setSelectedEpisode(index);
-                    setShowEpisodes(false);
-                  }}
-                >
-                  <Text style={styles.episodioText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
+      {/* Tabs de navegación */}
+      <View style={styles.tabsContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'player' && styles.activeTab]}
+          onPress={() => setActiveTab('player')}
+        >
+          <MaterialIcons name="play-circle-outline" size={18} color={activeTab === 'player' ? '#000' : '#888'} />
+          <Text style={[styles.tabText, activeTab === 'player' && styles.activeTabText]}>
+            Play
+          </Text>
+        </TouchableOpacity>
 
-      {/* Reproductor SIEMPRE visible si hay fuente */}
-      {videoSource && (
-        <View style={[styles.playerContainer, { width: PLAYER_WIDTH, height: PLAYER_HEIGHT, alignSelf: 'center' }]}>
-          {Platform.OS === 'web' ? (
-            <iframe
-              src={videoSource}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                borderRadius: 12,
-                overflow: 'hidden',
-                background: '#000',
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="Reproductor"
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'cast' && styles.activeTab]}
+          onPress={() => setActiveTab('cast')}
+        >
+          <MaterialIcons name="people" size={18} color={activeTab === 'cast' ? '#000' : '#888'} />
+          <Text style={[styles.tabText, activeTab === 'cast' && styles.activeTabText]}>
+            Reparto
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
+          onPress={() => setActiveTab('reviews')}
+        >
+          <MaterialIcons name="rate-review" size={18} color={activeTab === 'reviews' ? '#000' : '#888'} />
+          <Text style={[styles.tabText, activeTab === 'reviews' && styles.activeTabText]}>
+            Críticas
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Contenido de los tabs */}
+      <View style={styles.tabContent}>
+        {activeTab === 'player' && (
+          <View>
+            {/* Episodios para series (manteniendo la funcionalidad original) */}
+            {isSerie && content.nombresEpisodios.length > 0 && (
+              <View style={styles.episodiosContainer}>
+                <TouchableOpacity
+                  style={styles.episodiosHeader}
+                  onPress={() => setShowEpisodes(!showEpisodes)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.episodiosTitle}>
+                    Episodios ({content.nombresEpisodios.length})
+                  </Text>
+                  <MaterialIcons
+                    name={showEpisodes ? 'expand-less' : 'expand-more'}
+                    size={28}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+                {showEpisodes && (
+                  <View>
+                    {content.nombresEpisodios.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.episodioItem,
+                          selectedEpisode === index && styles.episodioItemSelected,
+                        ]}
+                        onPress={() => {
+                          setSelectedEpisode(index);
+                          setShowEpisodes(false);
+                        }}
+                      >
+                        <Text style={styles.episodioText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Reproductor de video */}
+            <View style={styles.playerContainer}>
+              <View style={styles.playerWrapper}>
+                <WebView
+                  style={styles.webView}
+                  source={{ uri: videoSource }}
+                  allowsInlineMediaPlayback={true}
+                  mediaPlaybackRequiresUserAction={false}
+                  javaScriptEnabled={true}
+                  domStorageEnabled={true}
+                  startInLoadingState={true}
+                  scalesPageToFit={true}
+                />
+              </View>
+            </View>
+          </View>
+        )}
+
+        {activeTab === 'cast' && (
+          <View style={styles.castContainer}>
+            <RealActorCast 
+              actors={omdbData?.actors || []}
+              director={omdbData?.director || ''}
+              writer={omdbData ? omdbData.title : undefined}
+              loading={omdbLoading}
             />
-          ) : (
-            <WebView
-              source={{ uri: videoSource }}
-              style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}
-              allowsFullscreenVideo
-              mediaPlaybackRequiresUserAction={false}
+          </View>
+        )}
+
+        {activeTab === 'reviews' && (
+          <View style={styles.reviewsContainer}>
+            <OMDbReviews 
+              ratings={omdbData?.ratings || []}
+              imdbRating={omdbData?.rating || 'N/A'}
+              imdbVotes={omdbData ? '0' : 'N/A'}
+              awards={omdbData?.awards || 'N/A'}
+              loading={omdbLoading}
             />
-          )}
-        </View>
-      )}
+          </View>
+        )}
+      </View>
 
       {/* Botón de volver */}
       {onBack && (
@@ -334,6 +395,75 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#000',
     // alignSelf ahora se asigna dinámicamente
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 20,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: isMobile ? 12 : 16,
+    paddingVertical: 12,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    minWidth: isMobile ? 90 : 110,
+    maxWidth: isMobile ? 130 : 160,
+  },
+  activeTab: {
+    backgroundColor: '#fff',
+  },
+  tabText: {
+    color: '#fff',
+    fontSize: isMobile ? 12 : 14,
+    fontWeight: '600',
+    marginLeft: 4,
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  activeTabText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  tabContent: {
+    paddingHorizontal: 20,
+  },
+  playerWrapper: {
+    width: PLAYER_WIDTH,
+    height: PLAYER_HEIGHT,
+    alignSelf: 'center',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  webView: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  castContainer: {
+    paddingVertical: 10,
+  },
+  reviewsContainer: {
+    paddingVertical: 10,
   },
 });
 

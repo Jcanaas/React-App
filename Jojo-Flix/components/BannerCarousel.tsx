@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Image, FlatList, Dimensions, StyleSheet, TouchableOpacity, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { Dimensions, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ContentData, ContentItem } from './ContentData';
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = windowWidth < 700; // Ajusta el umbral si lo necesitas
@@ -15,7 +15,7 @@ interface BannerCarouselProps {
   onVerPress?: (item: ContentItem) => void;
 }
 
-const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5000 }) => {
+const BannerCarousel: React.FC<BannerCarouselProps> = memo(({ nombres, intervalMs = 5000 }) => {
   const router = useRouter();
   const banners = ContentData.filter(item => nombres.includes(item.nombre));
   // Duplica los banners para simular el loop
@@ -40,7 +40,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
     return () => clearInterval(timer);
   }, [currentIndex, realLength, intervalMs, loopBanners.length]);
 
-  const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const onMomentumScrollEnd = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / windowWidth);
     let correctedIndex = newIndex;
@@ -55,9 +55,9 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
       flatListRef.current?.scrollToIndex({ index: correctedIndex, animated: false });
     }
     setCurrentIndex(correctedIndex);
-  };
+  }, [realLength, loopBanners.length]);
 
-  const renderItem = ({ item }: { item: ContentItem }) => (
+  const renderItem = useCallback(({ item }: { item: ContentItem }) => (
     <View style={styles.bannerContainer}>
       <Image source={item.fondo} style={styles.backgroundImage} />
       <View style={styles.overlay} />
@@ -73,7 +73,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
         </TouchableOpacity>
       </View>
     </View>
-  );
+  ), [router]);
 
   return (
     <FlatList
@@ -92,9 +92,18 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ nombres, intervalMs = 5
       initialScrollIndex={initialIndex}
       onMomentumScrollEnd={onMomentumScrollEnd}
       style={{ flexGrow: 0 }}
+      // Optimizaciones de rendimiento
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={2}
+      updateCellsBatchingPeriod={50}
+      windowSize={5}
+      initialNumToRender={2}
+      decelerationRate="fast"
     />
   );
-};
+});
+
+BannerCarousel.displayName = 'BannerCarousel';
 
 const styles = StyleSheet.create({
   bannerContainer: {

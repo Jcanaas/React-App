@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
-import { View, ActivityIndicator, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useFonts } from 'expo-font';
-import { useUser } from '../../components/UserContext';
-import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, View } from 'react-native';
 import BannerCarousel from '../../components/BannerCarousel';
-import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
-import SearchModal from '../../components/SearchModal';
 import CategoryModal from '../../components/CategoryModal';
+import ContinueWatching from '../../components/ContinueWatching';
+import Footer from '../../components/Footer';
+import Header from '../../components/Header';
+import SearchModal from '../../components/SearchModal';
+import SeasonalBanner from '../../components/SeasonalBanner';
+import VerticalTripleCarouselsByCategory from '../../components/VerticalTripleCarouselsByCategory';
+import { useAuthNavigation } from '../../hooks/useAuthNavigation';
+import notificationManager from '../../services/NotificationService';
+import { useSeasonalNotifications } from '../../services/SeasonalNotificationService';
 
 export default function Home() {
   const [fontsLoaded] = useFonts({
@@ -19,63 +23,90 @@ export default function Home() {
   const [categoryVisible, setCategoryVisible] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { user } = useUser();
-  const [userChecked, setUserChecked] = useState(false);
-
-  React.useEffect(() => {
-    if (user !== undefined) setUserChecked(true);
-  }, [user]);
-
+  const { user, loading, isAuthenticated } = useAuthNavigation();
   const router = useRouter();
-  const segments = useSegments();
-  const navigationState = useRootNavigationState();
+  const { scheduleSeasonalNotif, getCurrentEvent } = useSeasonalNotifications();
 
-  React.useEffect(() => {
-    if (userChecked && navigationState?.key && segments.length > 0 && !user) {
-      router.replace('/auth');
+  // Configurar notificaciones cuando el usuario está autenticado
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      console.log('Usuario autenticado - configurando notificaciones');
+      
+      // Configurar notificaciones básicas
+      notificationManager.setupNotifications().then(() => {
+        notificationManager.updateLastActivity();
+        console.log('Notificaciones básicas configuradas');
+      });
+
+      // Configurar notificaciones estacionales
+      scheduleSeasonalNotif().then(() => {
+        console.log('Notificaciones estacionales configuradas');
+      });
     }
-  }, [user, userChecked, segments, navigationState?.key]);
+  }, [isAuthenticated, loading, scheduleSeasonalNotif]);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  // Memoizar los nombres del banner para evitar re-renders
+  const bannerNames = useMemo(() => [
+    'Beck: Mongolian Chop Squad',
+    'Monster',
+    'Old Boy'
+  ], []);
+
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
     const isBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
     setShowFooter(isBottom);
-  };
+  }, []);
 
-  if (!fontsLoaded) {
+  const handleSearchPress = useCallback(() => setSearchVisible(true), []);
+  const handleMenuPress = useCallback(() => setCategoryVisible(true), []);
+
+  const handleContentPress = useCallback((item: any) => {
+    router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
+  }, [router]);
+
+  const handleSearchSelect = useCallback((item: any) => {
+    setSearchVisible(false);
+    router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
+  }, [router]);
+
+  // Mostrar loading mientras cargan las fuentes o se verifica la autenticación
+  if (!fontsLoaded || loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818' }}>
+        <ActivityIndicator size="large" color="#DF2892" />
+        <Text style={{ color: '#fff', marginTop: 10 }}>
+          {!fontsLoaded ? 'Cargando fuentes...' : 'Verificando sesión...'}
+        </Text>
       </View>
     );
   }
 
-  if (!user) {
+  // Si no está autenticado, no mostrar nada (el hook se encarga de la navegación)
+  if (!isAuthenticated) {
     return null;
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#181818', position: 'relative' }}>
+      {/* <AuthDebugger /> */}
       <Header
-        onSearchPress={() => setSearchVisible(true)}
-        onMenuPress={() => setCategoryVisible(true)}
+        onSearchPress={handleSearchPress}
+        onMenuPress={handleMenuPress}
       />
       <ScrollView
         style={{ flex: 1 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{ minHeight: 900, paddingBottom: 100 }}
+        removeClippedSubviews={true}
       >
-        <BannerCarousel
-          nombres={[
-            'Beck: Mongolian Chop Squad',
-            'Monster',
-            'Old Boy'
-          ]}
-        />
+        <BannerCarousel nombres={bannerNames} />
+        <SeasonalBanner />
+        <ContinueWatching onContentPress={handleContentPress} />
         <VerticalTripleCarouselsByCategory
           filterCategories={selectedCategories}
-          onPress={item => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}
+          onPress={handleContentPress}
         />
       </ScrollView>
       {showFooter && <Footer />}
@@ -88,10 +119,7 @@ export default function Home() {
       <SearchModal
         visible={searchVisible}
         setVisible={setSearchVisible}
-        onSelect={item => {
-          setSearchVisible(false);
-          router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
-        }}
+        onSelect={handleSearchSelect}
       />
     </View>
   );

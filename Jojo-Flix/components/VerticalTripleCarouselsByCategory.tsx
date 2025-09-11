@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo, memo } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ContentItem, ContentData } from './ContentData';
@@ -62,40 +62,47 @@ const RainbowText: React.FC<{ children: string }> = ({ children }) => {
   );
 };
 
-const VerticalTripleCarouselsByCategory: React.FC<Props> = ({ onPress, filterCategories }) => {
-  const categories = getCategories(ContentData);
+const VerticalTripleCarouselsByCategory: React.FC<Props> = memo(({ onPress, filterCategories }) => {
+  const categories = useMemo(() => getCategories(ContentData), []);
 
-  const filteredData = filterCategories && filterCategories.length > 0
-    ? ContentData.filter(item =>
-        (item.categoria ?? []).some(cat => filterCategories.includes(cat))
-      )
-    : ContentData;
+  const filteredData = useMemo(() => {
+    return filterCategories && filterCategories.length > 0
+      ? ContentData.filter(item =>
+          (item.categoria ?? []).some(cat => filterCategories.includes(cat))
+        )
+      : ContentData;
+  }, [filterCategories]);
+
+  const categorizedItems = useMemo(() => {
+    return categories.map(category => ({
+      category,
+      items: filteredData.filter(item => (item.categoria ?? []).includes(category))
+    })).filter(({ items }) => items.length > 0);
+  }, [categories, filteredData]);
 
   return (
     <View>
-      {categories.map((category, idx) => {
-        const items = filteredData.filter(item => (item.categoria ?? []).includes(category));
-        if (items.length === 0) return null;
-        return (
-          <View
-            key={category}
-            style={{
-              marginBottom: 8,
-              marginTop: idx === 0 ? 24 : 0,
-            }}
-          >
-            {category === 'LGTBIQ+' ? (
-              <RainbowText>{category}</RainbowText>
-            ) : (
-              <Text style={styles.category}>{category}</Text>
-            )}
-            <VerticalTripleCarousel items={items} onPress={onPress} />
-          </View>
-        );
-      })}
+      {categorizedItems.map(({ category, items }, idx) => (
+        <View
+          key={category}
+          style={{
+            marginBottom: 8,
+            marginTop: idx === 0 ? 24 : 0,
+          }}
+        >
+          {category === 'LGTBIQ+' ? (
+            <RainbowText>{category}</RainbowText>
+          ) : (
+            <Text style={styles.category}>{category}</Text>
+          )}
+          <VerticalTripleCarousel items={items} onPress={onPress} />
+        </View>
+      ))}
     </View>
   );
-};
+});
+
+VerticalTripleCarouselsByCategory.displayName = 'VerticalTripleCarouselsByCategory';
 
 const styles = StyleSheet.create({
   category: {
