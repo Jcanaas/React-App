@@ -1,6 +1,6 @@
 // OMDb API Service
 // API Key: a8f97814
-// Documentación: http://www.omdbapi.com/
+// Documentación: https://www.omdbapi.com/
 
 export interface OMDbMovie {
   Title: string;
@@ -66,7 +66,7 @@ export interface OMDbSearchResult {
 class OMDbService {
   private static instance: OMDbService;
   private apiKey: string = 'a8f97814';
-  private baseUrl: string = 'http://www.omdbapi.com/';
+  private baseUrl: string = 'https://www.omdbapi.com/';
 
   static getInstance(): OMDbService {
     if (!OMDbService.instance) {

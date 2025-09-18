@@ -1,7 +1,8 @@
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import BannerCarousel from '../../components/BannerCarousel';
 import CategoryModal from '../../components/CategoryModal';
 import ContinueWatching from '../../components/ContinueWatching';
@@ -64,6 +65,10 @@ export default function Home() {
     router.push('/social');
   }, [router]);
 
+  const handleMusicPlayerPress = useCallback(() => {
+    router.push('/music-player');
+  }, [router]);
+
   const handleContentPress = useCallback((item: any) => {
     router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
   }, [router]);
@@ -112,6 +117,18 @@ export default function Home() {
           filterCategories={selectedCategories}
           onPress={handleContentPress}
         />
+        
+        {/* Botón temporal para el reproductor de música */}
+        <View style={styles.musicPlayerSection}>
+          <TouchableOpacity 
+            style={styles.musicPlayerButton}
+            onPress={handleMusicPlayerPress}
+          >
+            <MaterialIcons name="music-note" size={24} color="#fff" />
+            <Text style={styles.musicPlayerText}>Reproductor de Música</Text>
+            <Text style={styles.musicPlayerSubtext}>Beck - Follow Me [Live]</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       {showFooter && <Footer />}
       <CategoryModal
@@ -128,3 +145,34 @@ export default function Home() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  musicPlayerSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  musicPlayerButton: {
+    backgroundColor: '#DF2892',
+    padding: 20,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  musicPlayerText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 12,
+    flex: 1,
+  },
+  musicPlayerSubtext: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+    marginLeft: 12,
+  },
+});
