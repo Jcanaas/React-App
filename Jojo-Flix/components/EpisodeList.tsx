@@ -1,8 +1,7 @@
-import React, { useState, memo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { TMDBSeason, TMDBEpisode } from '../services/TMDBService';
-import tmdbService from '../services/TMDBService';
+import React, { memo, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import tmdbService, { TMDBEpisode, TMDBSeason } from '../services/TMDBService';
 
 interface EpisodeListProps {
   season: TMDBSeason | null;

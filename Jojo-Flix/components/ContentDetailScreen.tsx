@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Vibration, Dimensions, Platform } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { ContentData, ContentItem } from './ContentData';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+import { deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { auth, db } from '../components/firebaseConfig';
-import { doc, getDoc, setDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { useContentOMDb } from '../hooks/useOMDb';
-import RealActorCast from './RealActorCast';
+import { ContentData } from './ContentData';
 import OMDbReviews from './OMDbReviews';
+import UserReviews from './UserReviews';
+import RealActorCast from './RealActorCast';
 
 // Constantes de dimensiones
 const windowWidth = Dimensions.get('window').width;
@@ -33,10 +35,14 @@ const ContentDetailScreen: React.FC = () => {
   const [showEpisodes, setShowEpisodes] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
   const [activeTab, setActiveTab] = useState<'player' | 'cast' | 'reviews'>('player');
+  const [activeReviewTab, setActiveReviewTab] = useState<'critics' | 'users'>('users');
 
   // Estado para favoritos
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
+  
+  // Estado para controlar orientación en pantalla completa
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // OMDb Integration
   const isSerie = Array.isArray(content.categoria)
@@ -68,6 +74,28 @@ const ContentDetailScreen: React.FC = () => {
     };
     checkFavorite();
   }, [content.id]);
+
+  // Manejar orientación de pantalla
+  useEffect(() => {
+    // Al montar el componente, bloquear en vertical
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+    
+    // Limpiar al desmontar
+    return () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+    };
+  }, []);
+
+  // Manejar cambios de pantalla completa
+  useEffect(() => {
+    if (isFullscreen) {
+      // Permitir todas las orientaciones en pantalla completa
+      ScreenOrientation.unlockAsync();
+    } else {
+      // Bloquear en vertical cuando no esté en pantalla completa
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+    }
+  }, [isFullscreen]);
 
   // Función para añadir/quitar de favoritos
   const toggleFavorite = async () => {
@@ -233,11 +261,89 @@ const ContentDetailScreen: React.FC = () => {
                   style={styles.webView}
                   source={{ uri: videoSource }}
                   allowsInlineMediaPlayback={true}
+                  allowsFullscreenVideo={true}
+                  allowsProtectedMedia={true}
                   mediaPlaybackRequiresUserAction={false}
                   javaScriptEnabled={true}
                   domStorageEnabled={true}
                   startInLoadingState={true}
                   scalesPageToFit={true}
+                  mixedContentMode="compatibility"
+                  thirdPartyCookiesEnabled={true}
+                  sharedCookiesEnabled={true}
+                  userAgent="Mozilla/5.0 (Linux; Android 10; Mobile; rv:109.0) Gecko/117.0 Firefox/117.0"
+                  injectedJavaScript={`
+                    // Función para detectar cambios de pantalla completa
+                    function setupFullscreenDetection() {
+                      // Detectar cambios en el estado de pantalla completa
+                      document.addEventListener('fullscreenchange', function() {
+                        const isFullscreen = !!document.fullscreenElement;
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                          type: 'fullscreenChange',
+                          isFullscreen: isFullscreen
+                        }));
+                      });
+                      
+                      document.addEventListener('webkitfullscreenchange', function() {
+                        const isFullscreen = !!document.webkitFullscreenElement;
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                          type: 'fullscreenChange',
+                          isFullscreen: isFullscreen
+                        }));
+                      });
+                      
+                      // Configurar videos cuando estén disponibles
+                      var videos = document.querySelectorAll('video');
+                      videos.forEach(function(video) {
+                        video.setAttribute('controls', 'true');
+                        video.setAttribute('controlsList', '');
+                        video.style.width = '100%';
+                        video.style.height = '100%';
+                        
+                        // Detectar cambios de pantalla completa específicos del video
+                        video.addEventListener('webkitbeginfullscreen', function() {
+                          window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'fullscreenChange',
+                            isFullscreen: true
+                          }));
+                        });
+                        
+                        video.addEventListener('webkitendfullscreen', function() {
+                          window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'fullscreenChange',
+                            isFullscreen: false
+                          }));
+                        });
+                      });
+                    }
+                    
+                    // Ejecutar cuando el DOM esté listo
+                    if (document.readyState === 'loading') {
+                      document.addEventListener('DOMContentLoaded', setupFullscreenDetection);
+                    } else {
+                      setupFullscreenDetection();
+                    }
+                    
+                    // También ejecutar después de un breve delay para videos que se cargan dinámicamente
+                    setTimeout(setupFullscreenDetection, 1000);
+                    
+                    true; // Importante para que funcione el script
+                  `}
+                  onMessage={(event) => {
+                    try {
+                      const data = JSON.parse(event.nativeEvent.data);
+                      if (data.type === 'fullscreenChange') {
+                        console.log('Fullscreen changed:', data.isFullscreen);
+                        setIsFullscreen(data.isFullscreen);
+                      }
+                    } catch (error) {
+                      console.log('WebView message:', event.nativeEvent.data);
+                    }
+                  }}
+                  onError={(syntheticEvent) => {
+                    const { nativeEvent } = syntheticEvent;
+                    console.log('WebView error: ', nativeEvent);
+                  }}
                 />
               </View>
             </View>
@@ -257,13 +363,47 @@ const ContentDetailScreen: React.FC = () => {
 
         {activeTab === 'reviews' && (
           <View style={styles.reviewsContainer}>
-            <OMDbReviews 
-              ratings={omdbData?.ratings || []}
-              imdbRating={omdbData?.rating || 'N/A'}
-              imdbVotes={omdbData ? '0' : 'N/A'}
-              awards={omdbData?.awards || 'N/A'}
-              loading={omdbLoading}
-            />
+            {/* Review Tabs */}
+            <View style={styles.reviewTabs}>
+              <TouchableOpacity
+                style={[styles.reviewTab, activeReviewTab === 'users' && styles.activeReviewTab]}
+                onPress={() => setActiveReviewTab('users')}
+              >
+                <MaterialIcons name="people" size={18} color={activeReviewTab === 'users' ? '#000' : '#888'} />
+                <Text style={[styles.reviewTabText, activeReviewTab === 'users' && styles.activeReviewTabText]}>
+                  Usuarios JojoFlix
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.reviewTab, activeReviewTab === 'critics' && styles.activeReviewTab]}
+                onPress={() => setActiveReviewTab('critics')}
+              >
+                <MaterialIcons name="star" size={18} color={activeReviewTab === 'critics' ? '#000' : '#888'} />
+                <Text style={[styles.reviewTabText, activeReviewTab === 'critics' && styles.activeReviewTabText]}>
+                  Críticos
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Review Content */}
+            {activeReviewTab === 'users' && (
+              <UserReviews
+                movieId={omdbData?.imdbId || content.id?.toString() || 'unknown'}
+                movieTitle={content.nombre}
+                moviePoster={content.verticalbanner}
+              />
+            )}
+
+            {activeReviewTab === 'critics' && (
+              <OMDbReviews 
+                ratings={omdbData?.ratings || []}
+                imdbRating={omdbData?.rating || 'N/A'}
+                imdbVotes={omdbData ? '0' : 'N/A'}
+                awards={omdbData?.awards || 'N/A'}
+                loading={omdbLoading}
+              />
+            )}
           </View>
         )}
       </View>
@@ -464,6 +604,34 @@ const styles = StyleSheet.create({
   },
   reviewsContainer: {
     paddingVertical: 10,
+  },
+  reviewTabs: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: 16,
+  },
+  reviewTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  activeReviewTab: {
+    backgroundColor: '#fff',
+  },
+  reviewTabText: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  activeReviewTabText: {
+    color: '#000',
   },
 });
 

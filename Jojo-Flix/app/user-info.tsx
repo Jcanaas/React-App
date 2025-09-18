@@ -74,7 +74,7 @@ const UserInfoScreen = () => {
         ) : !userData ? (
           <Text style={styles.title}>No hay datos de usuario</Text>
         ) : (
-          <>
+          <View>
             {/* Avatar con opción de cambiar */}
             <View style={styles.userInfoSection}>
               <TouchableOpacity style={styles.avatarWrapper} onPress={() => setModalVisible(true)}>
@@ -92,12 +92,10 @@ const UserInfoScreen = () => {
               <Text style={styles.name}>{userData.name}</Text>
               <Text style={styles.email}>{userData.email}</Text>
             </View>
-            
             {/* Sección Favoritos con Carousel */}
             <FavoritesCarousel 
               favoriteIds={favoritos.map(([favId]) => favId)}
             />
-            
             {/* Botón de cerrar sesión */}
             <View style={styles.logoutSection}>
               <TouchableOpacity
@@ -107,7 +105,7 @@ const UserInfoScreen = () => {
                 <Text style={styles.logoutText}>Cerrar sesión</Text>
               </TouchableOpacity>
             </View>
-          </>
+          </View>
         )}
       </ScrollView>
       <Footer />

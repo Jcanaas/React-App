@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useWatchProgress } from './WatchProgressService';
+import { useEffect, useRef, useState } from 'react';
 import notificationManager from './NotificationService';
 import { useSeasonalNotifications } from './SeasonalNotificationService';
+import { useWatchProgress } from './WatchProgressService';
 
 export interface ViewingSession {
   contentId: string;

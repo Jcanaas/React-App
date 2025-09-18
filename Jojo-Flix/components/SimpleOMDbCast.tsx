@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, Dimensions } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import SimpleActorService, { SimpleActorPhoto } from '../services/SimpleActorService';
 
 interface SimpleOMDbCastProps {

@@ -1,6 +1,6 @@
-import React, { memo, useCallback } from 'react';
-import { Dimensions, FlatList, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import React, { memo, useCallback } from 'react';
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ContentData, ContentItem } from './ContentData';
 import OptimizedImage from './OptimizedImage';
 

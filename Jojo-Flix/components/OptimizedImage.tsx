@@ -1,5 +1,5 @@
-import React, { memo, useState, useRef, useEffect } from 'react';
-import { Image, View, ActivityIndicator, Text, Animated, ImageStyle } from 'react-native';
+import React, { memo, useEffect, useRef } from 'react';
+import { ActivityIndicator, Animated, Image, ImageStyle, Text, View } from 'react-native';
 import { useOptimizedImage } from '../hooks/useOptimizedImage';
 
 interface OptimizedImageProps {

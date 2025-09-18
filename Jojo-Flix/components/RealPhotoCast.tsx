@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import RealActorPhotoService, { RealActorPhoto } from '../services/RealActorPhotoService';
 
 interface RealPhotoCastProps {

@@ -84,9 +84,8 @@ const SeasonalBanner: React.FC<SeasonalBannerProps> = memo(({ onContentPress }) 
       {isExpanded && (
         <View style={styles.expandedContent}>
           <Text style={styles.description}>{event.body}</Text>
-          
           {content.length > 0 && (
-            <>
+            <View>
               <Text style={styles.sectionTitle}>✨ Contenido especial:</Text>
               <ScrollView 
                 horizontal 
@@ -114,7 +113,7 @@ const SeasonalBanner: React.FC<SeasonalBannerProps> = memo(({ onContentPress }) 
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-            </>
+            </View>
           )}
 
           {/* Botón de acción */}

@@ -1,6 +1,6 @@
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { ContentData } from '../components/ContentData';
 
@@ -261,6 +261,106 @@ class NotificationManager implements NotificationService {
   getExpoPushToken(): string | null {
     return this.expoPushToken;
   }
+
+  // Mostrar notificación local para mensaje nuevo
+  async showMessageNotification(senderName: string, message: string, chatId: string): Promise<void> {
+    try {
+      // Verificar si la app está en primer plano
+      const appState = await Notifications.getNotificationChannelsAsync();
+      
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `💬 ${senderName}`,
+          body: message.length > 100 ? message.substring(0, 100) + '...' : message,
+          data: { 
+            chatId,
+            type: 'chat_message',
+            senderName 
+          },
+          sound: 'default',
+          vibrate: [0, 250, 250, 250],
+          badge: 1, // Incrementar badge en iOS
+        },
+        trigger: null, // Mostrar inmediatamente
+      });
+      
+      console.log('✅ Notificación de mensaje mostrada para:', senderName);
+    } catch (error) {
+      console.error('❌ Error mostrando notificación de mensaje:', error);
+    }
+  }
+
+  // Mostrar notificaciones de resumen para múltiples mensajes no leídos
+  async showUnreadSummaryNotification(totalUnread: number, chatDetails: Array<{senderName: string, count: number}>): Promise<void> {
+    try {
+      if (totalUnread === 0) return;
+
+      let title = '';
+      let body = '';
+
+      if (totalUnread === 1) {
+        const singleChat = chatDetails[0];
+        title = `💬 ${singleChat.senderName}`;
+        body = `${singleChat.count} mensaje${singleChat.count > 1 ? 's' : ''} sin leer`;
+      } else {
+        title = `💬 ${totalUnread} mensajes sin leer`;
+        body = `Tienes mensajes de ${chatDetails.length} conversacion${chatDetails.length > 1 ? 'es' : ''}`;
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: { 
+            type: 'unread_summary',
+            totalUnread,
+            chatCount: chatDetails.length
+          },
+          sound: 'default',
+          vibrate: [0, 250, 250, 250],
+          badge: totalUnread,
+        },
+        trigger: null,
+      });
+      
+      console.log('✅ Notificación de resumen mostrada:', { totalUnread, chats: chatDetails.length });
+    } catch (error) {
+      console.error('❌ Error mostrando notificación de resumen:', error);
+    }
+  }
+
+  // Mostrar notificación para solicitud de amistad
+  async showFriendRequestNotification(senderName: string): Promise<void> {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '👥 Nueva solicitud de amistad',
+          body: `${senderName} quiere ser tu amigo`,
+          data: { 
+            type: 'friend_request',
+            senderName 
+          },
+          sound: 'default',
+          vibrate: [0, 250, 250, 250],
+        },
+        trigger: null,
+      });
+      
+      console.log('✅ Notificación de amistad mostrada para:', senderName);
+    } catch (error) {
+      console.error('❌ Error mostrando notificación de amistad:', error);
+    }
+  }
+
+  // Configurar listener para cuando el usuario toca una notificación
+  setupNotificationTapListener(callback: (notification: any) => void) {
+    return Notifications.addNotificationResponseReceivedListener(callback);
+  }
+
+  // Configurar listener para notificaciones recibidas cuando la app está en primer plano
+  setupForegroundNotificationListener(callback: (notification: any) => void) {
+    return Notifications.addNotificationReceivedListener(callback);
+  }
 }
 
 export { NotificationManager };
@@ -268,14 +368,21 @@ export default NotificationManager.getInstance();
 
 // Hook para usar el servicio de notificaciones
 export const useNotifications = () => {
-  const setupNotifications = () => notificationService.setupNotifications();
-  const updateActivity = () => notificationService.rescheduleAfterActivity();
-  const cancelAll = () => notificationService.cancelAllNotifications();
+  const instance = NotificationManager.getInstance();
+  const setupNotifications = () => instance.setupNotifications();
+  const updateActivity = () => instance.rescheduleAfterActivity();
+  const cancelAll = () => instance.cancelAllNotifications();
 
   return {
     setupNotifications,
     updateActivity,
     cancelAll,
-    getToken: () => notificationService.getExpoPushToken(),
+    getToken: () => instance.getExpoPushToken(),
+    showMessageNotification: (senderName: string, message: string, chatId: string) => 
+      instance.showMessageNotification(senderName, message, chatId),
+    showFriendRequestNotification: (senderName: string) => 
+      instance.showFriendRequestNotification(senderName),
+    showUnreadSummaryNotification: (totalUnread: number, chatDetails: Array<{senderName: string, count: number}>) => 
+      instance.showUnreadSummaryNotification(totalUnread, chatDetails),
   };
 };

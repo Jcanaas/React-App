@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import React, { memo } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import { ContentItem } from './ContentData';
 

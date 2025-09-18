@@ -1,7 +1,7 @@
 // Componente que busca fotos REALES de actores específicos por nombre
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface RealActorCastProps {
   actors: string[];

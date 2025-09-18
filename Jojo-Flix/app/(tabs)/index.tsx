@@ -60,6 +60,9 @@ export default function Home() {
 
   const handleSearchPress = useCallback(() => setSearchVisible(true), []);
   const handleMenuPress = useCallback(() => setCategoryVisible(true), []);
+  const handleSocialPress = useCallback(() => {
+    router.push('/social');
+  }, [router]);
 
   const handleContentPress = useCallback((item: any) => {
     router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } });
@@ -93,6 +96,7 @@ export default function Home() {
       <Header
         onSearchPress={handleSearchPress}
         onMenuPress={handleMenuPress}
+        onSocialPress={handleSocialPress}
       />
       <ScrollView
         style={{ flex: 1 }}

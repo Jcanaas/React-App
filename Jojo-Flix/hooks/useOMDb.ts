@@ -1,7 +1,7 @@
 // React Hooks para OMDb API
-import { useState, useEffect } from 'react';
-import OMDbService, { OMDbMovie, OMDbSeries, OMDbSeason, OMDbSearchResult } from '../services/OMDbService';
+import { useEffect, useState } from 'react';
 import EnhancedActorService, { ActorPhoto } from '../services/EnhancedActorService';
+import OMDbService, { OMDbMovie, OMDbSearchResult, OMDbSeason, OMDbSeries } from '../services/OMDbService';
 
 // Hook para obtener detalles de contenido
 export function useOMDbDetails(title: string | null, type?: 'movie' | 'series') {

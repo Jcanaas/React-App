@@ -99,7 +99,7 @@ const SmartActorImage: React.FC<{
   return (
     <View style={styles.imageContainer}>
       {!failed ? (
-        <>
+        <View>
           <Image
             source={{ uri: imageUrl }}
             style={[styles.actorImage, { borderColor: `#${actorData.backgroundColor}` }]}
@@ -107,13 +107,12 @@ const SmartActorImage: React.FC<{
             onError={handleImageError}
             resizeMode="cover"
           />
-          
           {loading && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="small" color="#fff" />
             </View>
           )}
-        </>
+        </View>
       ) : (
         // Fallback con iniciales y emoji
         <View style={[styles.fallbackAvatar, { backgroundColor: `#${actorData.backgroundColor}` }]}>

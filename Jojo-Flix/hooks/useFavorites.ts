@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useState } from 'react';
 import { ContentItem } from '../components/ContentData';
 
 const FAVORITES_KEY = 'favoriteContent';

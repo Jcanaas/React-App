@@ -1,7 +1,7 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useWatchProgress, WatchProgress } from '../services/WatchProgressService';
 
 interface ContinueWatchingProps {

@@ -40,11 +40,16 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ visible, setVisible, sele
   };
 
   const toggleCategory = (cat: string) => {
-    setSelected(
-      selected.includes(cat)
-        ? selected.filter(c => c !== cat)
-        : [...selected, cat]
-    );
+    const newSelected = selected.includes(cat)
+      ? selected.filter(c => c !== cat)
+      : [...selected, cat];
+    
+    setSelected(newSelected);
+    
+    // Cerrar automáticamente el modal después de una breve pausa
+    setTimeout(() => {
+      handleClose();
+    }, 300);
   };
 
   return (
@@ -78,9 +83,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ visible, setVisible, sele
               </TouchableOpacity>
             )}
           />
-          <TouchableOpacity style={styles.applyBtn} onPress={handleClose}>
-            <Text style={styles.applyBtnText}>Aplicar</Text>
-          </TouchableOpacity>
         </Animated.View>
       </View>
     </Modal>
@@ -129,19 +131,6 @@ const styles = StyleSheet.create({
   categoryTextSelected: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  applyBtn: {
-    marginTop: 18,
-    backgroundColor: '#DF2892',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    marginBottom: 35,
-  },
-  applyBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
 });
 

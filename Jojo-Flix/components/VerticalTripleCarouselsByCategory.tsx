@@ -1,7 +1,6 @@
-import React, { useRef, useEffect, useMemo, memo } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ContentItem, ContentData } from './ContentData';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { ContentData, ContentItem } from './ContentData';
 import VerticalTripleCarousel from './VerticalTripleCarousel';
 
 interface Props {
