@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Dimensions } from 'react-native';
+import { Audio } from 'expo-av';
 import { MaterialIcons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 
 interface MusicPlayerProps {
   musicSource?: any;
@@ -17,16 +19,163 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
   artist = "Beck",
   onClose
 }) => {
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSliding, setIsSliding] = useState(false);
+  const positionUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Configurar audio al montar el componente
+  useEffect(() => {
+    configureAudio();
+    return () => {
+      cleanupAudio();
+    };
+  }, []);
+
+  const configureAudio = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (error) {
+      console.error('Error configurando audio:', error);
+    }
+  };
+
+  const cleanupAudio = async () => {
+    if (positionUpdateInterval.current) {
+      clearInterval(positionUpdateInterval.current);
+    }
+    if (sound) {
+      try {
+        await sound.unloadAsync();
+      } catch (error) {
+        console.error('Error limpiando audio:', error);
+      }
+    }
+  };
+
+  const loadSound = async () => {
+    if (sound) return;
+
+    setIsLoading(true);
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        musicSource,
+        {
+          shouldPlay: false,
+          isLooping: false,
+          volume: 1.0,
+          positionMillis: 0, // Asegurar que empiece desde el principio
+        },
+        onPlaybackStatusUpdate
+      );
+      
+      setSound(newSound);
+      
+      // Resetear posición al cargar
+      setPosition(0);
+      
+      // Obtener duración
+      const status = await newSound.getStatusAsync();
+      if (status.isLoaded && status.durationMillis) {
+        setDuration(status.durationMillis);
+      }
+    } catch (error) {
+      console.error('Error cargando audio:', error);
+      Alert.alert('Error', 'No se pudo cargar el archivo de audio');
+    }
+    setIsLoading(false);
+  };
+
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (status.isLoaded) {
+      if (!isSliding) {
+        setPosition(status.positionMillis || 0);
+      }
+      
+      if (status.durationMillis) {
+        setDuration(status.durationMillis);
+      }
+      
+      setIsPlaying(status.isPlaying);
+      
+      // Si la canción terminó
+      if (status.didJustFinish) {
+        setIsPlaying(false);
+        setPosition(0);
+      }
+    }
+  };
+
+  const playPauseSound = async () => {
+    if (!sound) {
+      await loadSound();
+      return;
+    }
+
+    try {
+      const status = await sound.getStatusAsync();
+      if (status.isLoaded) {
+        if (isPlaying) {
+          await sound.pauseAsync();
+        } else {
+          await sound.playAsync();
+        }
+      }
+    } catch (error) {
+      console.error('Error reproduciendo/pausando:', error);
+      Alert.alert('Error', 'No se pudo reproducir el audio');
+    }
+  };
+
+  const stopSound = async () => {
+    if (sound) {
+      try {
+        await sound.stopAsync();
+        setPosition(0);
+      } catch (error) {
+        console.error('Error deteniendo audio:', error);
+      }
+    }
+  };
+
+  const seekToPosition = async (value: number) => {
+    if (sound && !isSliding) {
+      try {
+        await sound.setPositionAsync(value);
+      } catch (error) {
+        console.error('Error buscando posición:', error);
+      }
+    }
+  };
+
+  const formatTime = (milliseconds: number) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleSliderStart = () => {
+    setIsSliding(true);
+  };
+
+  const handleSliderComplete = async (value: number) => {
+    setIsSliding(false);
+    setPosition(value);
+    await seekToPosition(value);
+  };
 
   const handlePlayPause = () => {
-    Alert.alert(
-      'Reproductor de Música',
-      'Para usar el reproductor completo, instala las dependencias necesarias:\n\nnpm install expo-av @react-native-community/slider\n\nPor ahora, este es un reproductor de demostración.',
-      [
-        { text: 'OK', onPress: () => setIsPlaying(!isPlaying) }
-      ]
-    );
+    playPauseSound();
   };
 
   return (
@@ -50,30 +199,45 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
         <Text style={styles.trackArtist}>{artist}</Text>
       </View>
 
-      {/* Fake Progress Bar */}
+      {/* Progress Bar */}
       <View style={styles.progressContainer}>
-        <Text style={styles.timeText}>0:00</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: isPlaying ? '45%' : '0%' }]} />
-        </View>
-        <Text style={styles.timeText}>3:24</Text>
+        <Text style={styles.timeText}>{formatTime(position)}</Text>
+        <Slider
+          style={styles.progressBar}
+          minimumValue={0}
+          maximumValue={duration || 1}
+          value={position}
+          onSlidingStart={handleSliderStart}
+          onSlidingComplete={handleSliderComplete}
+          onValueChange={(value) => {
+            if (isSliding) {
+              setPosition(value);
+            }
+          }}
+          minimumTrackTintColor="#FF6B6B"
+          maximumTrackTintColor="#666"
+          disabled={!sound || duration === 0}
+        />
+        <Text style={styles.timeText}>{formatTime(duration)}</Text>
       </View>
 
       {/* Controls */}
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.controlButton, styles.stopButton]}
-          onPress={() => setIsPlaying(false)}
+          onPress={stopSound}
+          disabled={!sound}
         >
           <MaterialIcons name="stop" size={24} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={handlePlayPause}
-          style={[styles.controlButton, styles.playButton]}
+          style={[styles.controlButton, styles.playButton, { opacity: isLoading ? 0.5 : 1 }]}
+          disabled={isLoading}
         >
           <MaterialIcons 
-            name={isPlaying ? "pause" : "play-arrow"} 
+            name={isLoading ? "hourglass-empty" : (isPlaying ? "pause" : "play-arrow")} 
             size={32} 
             color="#fff" 
           />
@@ -81,7 +245,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
         <TouchableOpacity
           style={[styles.controlButton, styles.restartButton]}
-          onPress={() => setIsPlaying(false)}
+          onPress={() => seekToPosition(0)}
+          disabled={!sound}
         >
           <MaterialIcons name="replay" size={24} color="#fff" />
         </TouchableOpacity>

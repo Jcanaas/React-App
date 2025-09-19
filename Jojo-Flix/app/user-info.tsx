@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity, Modal, TextInput, ScrollView, Alert, Button } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity, Modal, TextInput, ScrollView, Alert, Button, FlatList } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { auth, db } from '../components/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FavoritesCarousel from '../components/FavoritesCarousel';
+import { reviewService, UserReview } from '../services/ReviewService';
 import { useRouter } from 'expo-router';
 
 const placeholderImg = 'https://ui-avatars.com/api/?name=User&background=DF2892&color=fff';
@@ -24,6 +26,8 @@ const exampleImages = [
 
 const UserInfoScreen = () => {
   const [userData, setUserData] = useState<{ name: string; email: string; profileImage?: string; favoritos?: { [key: string]: any } } | null>(null);
+  const [userReviews, setUserReviews] = useState<UserReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
@@ -42,7 +46,22 @@ const UserInfoScreen = () => {
       }
       setLoading(false);
     };
+    
+    const loadUserReviews = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const reviews = await reviewService.getUserReviews(user.uid);
+          setUserReviews(reviews);
+        } catch (error) {
+          console.error('Error loading user reviews:', error);
+        }
+      }
+      setReviewsLoading(false);
+    };
+    
     fetchUser();
+    loadUserReviews();
   }, []);
 
   const handleChangeProfileImage = async (url: string) => {
@@ -59,6 +78,53 @@ const UserInfoScreen = () => {
     }
     setSaving(false);
   };
+
+  const renderStarRating = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <MaterialIcons
+          key={i}
+          name={i <= rating ? 'star' : 'star-border'}
+          size={16}
+          color="#FFD700"
+        />
+      );
+    }
+    return <View style={styles.starsContainer}>{stars}</View>;
+  };
+
+  const renderReview = ({ item }: { item: UserReview }) => (
+    <TouchableOpacity 
+      style={styles.reviewCard}
+      onPress={() => {
+        // Navegar al detalle del contenido
+        router.push(`/content-detail-screen?id=${item.movieId}&type=movie`);
+      }}
+    >
+      <View style={styles.reviewHeader}>
+        {item.moviePoster && typeof item.moviePoster === 'string' ? (
+          <Image source={{ uri: item.moviePoster }} style={styles.reviewPoster} />
+        ) : (
+          <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+            <MaterialIcons name="movie" size={24} color="#666" />
+          </View>
+        )}
+        <View style={styles.reviewInfo}>
+          <Text style={styles.reviewTitle}>{item.movieTitle}</Text>
+          {renderStarRating(item.rating)}
+          <Text style={styles.reviewDate}>
+            {item.timestamp.toLocaleDateString()}
+          </Text>
+        </View>
+      </View>
+      {item.reviewText && (
+        <Text style={styles.reviewText} numberOfLines={3}>
+          {item.reviewText}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
 
   // Obtener favoritos del usuario (con id)
   const favoritos = userData?.favoritos ? Object.entries(userData.favoritos) : [];
@@ -96,6 +162,31 @@ const UserInfoScreen = () => {
             <FavoritesCarousel 
               favoriteIds={favoritos.map(([favId]) => favId)}
             />
+
+            {/* Sección de Reseñas */}
+            <View style={styles.reviewsSection}>
+              <Text style={styles.sectionTitle}>Mis Reseñas</Text>
+              {reviewsLoading ? (
+                <ActivityIndicator color="#DF2892" size="large" style={styles.loader} />
+              ) : userReviews.length > 0 ? (
+                <FlatList
+                  data={userReviews}
+                  keyExtractor={(item) => item.id || ''}
+                  renderItem={renderReview}
+                  scrollEnabled={false}
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <View style={styles.emptyReviewsState}>
+                  <MaterialIcons name="rate-review" size={48} color="#666" />
+                  <Text style={styles.emptyReviewsTitle}>Sin reseñas</Text>
+                  <Text style={styles.emptyReviewsText}>
+                    Aún no has escrito ninguna reseña
+                  </Text>
+                </View>
+              )}
+            </View>
+
             {/* Botón de cerrar sesión */}
             <View style={styles.logoutSection}>
               <TouchableOpacity
@@ -291,6 +382,75 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 8,
     marginHorizontal: 4,
+  },
+  // Nuevos estilos para reseñas
+  reviewsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    color: '#DF2892',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  loader: {
+    marginVertical: 20,
+  },
+  reviewCard: {
+    backgroundColor: '#222',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  reviewPoster: {
+    width: 50,
+    height: 75,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  reviewInfo: {
+    flex: 1,
+  },
+  reviewTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  reviewDate: {
+    color: '#888',
+    fontSize: 12,
+  },
+  reviewText: {
+    color: '#ccc',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  emptyReviewsState: {
+    alignItems: 'center',
+    paddingVertical: 30,
+  },
+  emptyReviewsTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  emptyReviewsText: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

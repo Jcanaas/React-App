@@ -118,15 +118,16 @@ export default function Home() {
           onPress={handleContentPress}
         />
         
-        {/* Botón temporal para el reproductor de música */}
+        {/* Botón para el reproductor de música */}
         <View style={styles.musicPlayerSection}>
           <TouchableOpacity 
             style={styles.musicPlayerButton}
             onPress={handleMusicPlayerPress}
+            activeOpacity={0.7}
           >
-            <MaterialIcons name="music-note" size={24} color="#fff" />
-            <Text style={styles.musicPlayerText}>Reproductor de Música</Text>
-            <Text style={styles.musicPlayerSubtext}>Beck - Follow Me [Live]</Text>
+            <MaterialIcons name="headphones" size={20} color="#DF2892" />
+            <Text style={styles.musicPlayerText}>Bandas Sonoras</Text>
+            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -148,31 +149,22 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   musicPlayerSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   musicPlayerButton: {
-    backgroundColor: '#DF2892',
-    padding: 20,
-    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    paddingVertical: 16,
+    paddingHorizontal: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   musicPlayerText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '500',
     marginLeft: 12,
     flex: 1,
-  },
-  musicPlayerSubtext: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
-    marginLeft: 12,
   },
 });

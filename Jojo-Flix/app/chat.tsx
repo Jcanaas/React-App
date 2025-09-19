@@ -124,7 +124,7 @@ const ChatScreen = () => {
       ]}>
         {!isMyMessage && (
           <View style={styles.senderInfo}>
-            {item.senderAvatar ? (
+            {item.senderAvatar && typeof item.senderAvatar === 'string' ? (
               <Image source={{ uri: item.senderAvatar }} style={styles.senderAvatar} />
             ) : (
               <View style={styles.defaultSenderAvatar}>

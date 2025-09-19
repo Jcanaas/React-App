@@ -1,3 +1,9 @@
+export interface SoundtrackItem {
+  title: string;
+  file: any;
+  duration?: string;
+}
+
 export interface ContentItem {
   id: string;
   nombre: string;
@@ -11,6 +17,7 @@ export interface ContentItem {
   puntuacion: number;
   categoria?: string[];
   verticalbanner: any;
+  soundtracks?: SoundtrackItem[];
 }
 
 export const ContentData: ContentItem[] = [
@@ -81,6 +88,31 @@ export const ContentData: ContentItem[] = [
     puntuacion: 8.9,
     categoria: ['Anime', 'Serie'],
     verticalbanner: require('../assets/images/beckverticalbanner.png'),
+    soundtracks: [
+      { title: "Brainstorm", file: require('../assets/Music/Beck/Brainstorm.mp3'), duration: "4:12" },
+      { title: "By Her", file: require('../assets/Music/Beck/By Her.mp3'), duration: "3:47" },
+      { title: "Face (Acoustic)", file: require('../assets/Music/Beck/Face [Acoustic].mp3'), duration: "2:58" },
+      { title: "Face", file: require('../assets/Music/Beck/Face.mp3'), duration: "3:21" },
+      { title: "Follow Me (Live)", file: require('../assets/Music/Beck/Follow Me [Live].mp3'), duration: "4:33" },
+      { title: "I've Got a Feeling (Live)", file: require('../assets/Music/Beck/I\'ve Got a Feeling [Live].mp3'), duration: "3:15" },
+      { title: "In the Darkness", file: require('../assets/Music/Beck/In the Darkness.mp3'), duration: "3:44" },
+      { title: "Journey", file: require('../assets/Music/Beck/Journey.mp3'), duration: "4:01" },
+      { title: "Koyuki's 1st Practice", file: require('../assets/Music/Beck/Koyuki\'s 1st Practice.mp3'), duration: "1:23" },
+      { title: "Koyuki's 2nd Practice", file: require('../assets/Music/Beck/Koyuki\'s 2nd Practice.mp3'), duration: "1:45" },
+      { title: "Koyuki's 3rd Practice", file: require('../assets/Music/Beck/Koyuki\'s 3rd Practice.mp3'), duration: "2:11" },
+      { title: "Like a Foojin", file: require('../assets/Music/Beck/Like a Foojin.mp3'), duration: "3:56" },
+      { title: "Lost Melody", file: require('../assets/Music/Beck/Lost Melody.mp3'), duration: "4:18" },
+      { title: "Moon on the Water (Dying Breed)", file: require('../assets/Music/Beck/Moon on the Water [Dying Breed].mp3'), duration: "4:22" },
+      { title: "Moon on the Water (Pool)", file: require('../assets/Music/Beck/Moon on the Water [Pool].mp3'), duration: "4:07" },
+      { title: "Moon on the Water", file: require('../assets/Music/Beck/Moon on the Water.mp3'), duration: "3:53" },
+      { title: "My World Down", file: require('../assets/Music/Beck/My World Down.mp3'), duration: "3:29" },
+      { title: "Ryuusuke's Warmup", file: require('../assets/Music/Beck/Ryuusuke\'s Warmup.mp3'), duration: "1:12" },
+      { title: "Slip Out (Practice)", file: require('../assets/Music/Beck/Slip Out [Practice].mp3'), duration: "2:35" },
+      { title: "Slip Out", file: require('../assets/Music/Beck/Slip out.mp3'), duration: "3:48" },
+      { title: "Sly", file: require('../assets/Music/Beck/Sly.mp3'), duration: "3:31" },
+      { title: "Spice of Life", file: require('../assets/Music/Beck/Spice of Life.mp3'), duration: "4:05" },
+      { title: "Takano's Demo", file: require('../assets/Music/Beck/Takano\'s Demo.mp3'), duration: "2:43" }
+    ],
   },
   {
     id: 'The Last of Us',
@@ -583,7 +615,14 @@ export const ContentData: ContentItem[] = [
     fechaEstreno: '2024',
     puntuacion: 8.8,
     categoria: ['Serie', 'Anime'],
-    verticalbanner: require('../assets/images/bocchi_the_rock_re-639827727-large.jpg')
+    verticalbanner: require('../assets/images/bocchi_the_rock_re-639827727-large.jpg'),
+    soundtracks: [
+      { title: "Seisyun Complex", file: require('../assets/Music/Bocchi the rock/01. seisyun complex.mp3'), duration: "3:24" },
+      { title: "Distortion!!", file: require('../assets/Music/Bocchi the rock/03. Distortion!!.mp3'), duration: "3:12" },
+      { title: "Guitar, Loneliness and Blue Planet", file: require('../assets/Music/Bocchi the rock/05. Guitar, Loneliness and Blue Planet.mp3'), duration: "4:15" },
+      { title: "That Band", file: require('../assets/Music/Bocchi the rock/07. That band.mp3'), duration: "3:48" },
+      { title: "Never Forget", file: require('../assets/Music/Bocchi the rock/11. Never forget.mp3'), duration: "4:02" }
+    ]
   },
   {
     id: 'Aqui no hay quien viva',
@@ -745,7 +784,13 @@ export const ContentData: ContentItem[] = [
     fechaEstreno: '2018',
     puntuacion: 9,
     categoria: ['Película'],
-    verticalbanner: require('../assets/images/La_ciudad_de_las_estrellas_La_La_Land-262021831-large.jpg')
+    verticalbanner: require('../assets/images/La_ciudad_de_las_estrellas_La_La_Land-262021831-large.jpg'),
+    soundtracks: [
+      { title: "Another Day Of Sun", file: require("../assets/Music/La La Land/Another Day Of Sun [WxCz0UNUNeQ].mp3"), duration: "3:47" },
+      { title: "Someone In The Crowd", file: require("../assets/Music/La La Land/Someone In The Crowd [-62YbRZqxjs].mp3"), duration: "4:18" },
+      { title: "A Lovely Night", file: require("../assets/Music/La La Land/A Lovely Night [trrH4sVZ0dQ].mp3"), duration: "3:56" },
+      { title: "Mia & Sebastian's Theme", file: require("../assets/Music/La La Land/Mia and Sebastian Theme.mp3"), duration: "1:37" }
+    ],
   },
   {
     id: 'Jojos Bizarre Adventure',
@@ -902,7 +947,7 @@ fuente: [
     nombresEpisodios: ['Película completa'],
     fechaEstreno: '2018',
     puntuacion: 3.5,
-    categoria: ['Película'],
+    categoria: ['Película', 'Comedia', 'Terror'],
     verticalbanner: require('../assets/images/R.jpeg')
   },
   {

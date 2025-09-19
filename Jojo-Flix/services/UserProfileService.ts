@@ -7,6 +7,7 @@ export interface UserProfile {
   displayName: string;
   email: string;
   photoURL?: string;
+  customAvatar?: string;
   joinDate: Date;
   totalReviews: number;
   averageRating: number;
@@ -233,6 +234,7 @@ class UserProfileService {
           displayName: legacyData.name || legacyData.email?.split('@')[0] || 'Usuario',
           email: legacyData.email || '',
           photoURL: legacyData.profileImage || null,
+          customAvatar: legacyData.profileImage || undefined,
           joinDate: new Date(), // Fecha por defecto
           totalReviews: 0, // Se podría calcular
           averageRating: 0, // Se podría calcular

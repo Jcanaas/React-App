@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { auth, db } from '../components/firebaseConfig';
@@ -11,6 +11,7 @@ import { ContentData } from './ContentData';
 import OMDbReviews from './OMDbReviews';
 import UserReviews from './UserReviews';
 import RealActorCast from './RealActorCast';
+import { favoritesService } from '../services/FavoritesService';
 
 // Constantes de dimensiones
 const windowWidth = Dimensions.get('window').width;
@@ -63,13 +64,11 @@ const ContentDetailScreen: React.FC = () => {
   // Comprobar si ya es favorito al cargar
   useEffect(() => {
     const checkFavorite = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      const userRef = doc(db, 'users', user.uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        setIsFavorite(!!(data.favoritos && data.favoritos[content.id]));
+      try {
+        const isInFavorites = await favoritesService.isInFavorites(content.id);
+        setIsFavorite(isInFavorites);
+      } catch (error) {
+        console.error('Error verificando favoritos:', error);
       }
     };
     checkFavorite();
@@ -101,30 +100,41 @@ const ContentDetailScreen: React.FC = () => {
   const toggleFavorite = async () => {
     Vibration.vibrate(5);
     setFavLoading(true);
+    
     const user = auth.currentUser;
     if (!user) {
+      Alert.alert('Inicia sesión', 'Debes iniciar sesión para agregar favoritos');
       setFavLoading(false);
       return;
     }
-    const userRef = doc(db, 'users', user.uid);
-    const snap = await getDoc(userRef);
-    let favoritos: { [key: string]: any } = {};
-    if (snap.exists()) {
-      favoritos = { ...(snap.data().favoritos || {}) };
+
+    try {
+      if (isFavorite) {
+        // Remover de favoritos
+        await favoritesService.removeFromFavorites(content.id);
+        setIsFavorite(false);
+        Alert.alert('✓', 'Removido de favoritos');
+      } else {
+        // Agregar a favoritos
+        const contentType = isSerie ? 'tv' : 'movie';
+        await favoritesService.addToFavorites({
+          contentId: content.id,
+          contentType,
+          title: content.nombre,
+          poster: content.verticalbanner || content.fondo || '',
+          overview: content.descripcion,
+          releaseDate: content.fechaEstreno,
+          rating: content.puntuacion
+        });
+        setIsFavorite(true);
+        Alert.alert('✓', 'Agregado a favoritos');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      Alert.alert('Error', 'No se pudo actualizar favoritos');
+    } finally {
+      setFavLoading(false);
     }
-    if (isFavorite) {
-      // Borra solo la clave anidada en Firestore
-      await updateDoc(userRef, { [`favoritos.${content.id}`]: deleteField() });
-    } else {
-      favoritos[content.id] = {
-        titulo: content.nombre,
-        fecha: new Date().toISOString(),
-        tipo: Array.isArray(content.categoria) ? content.categoria.join(', ') : content.categoria,
-      };
-      await setDoc(userRef, { favoritos }, { merge: true });
-    }
-    setIsFavorite(!isFavorite);
-    setFavLoading(false);
   };
 
   return (

@@ -17,6 +17,8 @@ import { userProfileService, UserProfile } from '../services/UserProfileService'
 import { friendsService } from '../services/FriendsService';
 import { reviewService } from '../services/ReviewService';
 import { chatService } from '../services/ChatService';
+import { favoritesService, FavoriteItem } from '../services/FavoritesService';
+import { validateImageUri } from '../utils/imageUtils';
 
 interface Review {
   id: string;
@@ -40,35 +42,46 @@ const UserProfileScreen = () => {
   const { userId } = useLocalSearchParams();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
+  const [userFavorites, setUserFavorites] = useState<FavoriteItem[]>([]);
   const [areFriends, setAreFriends] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
   const [activeTab, setActiveTab] = useState<'reviews' | 'favorites'>('reviews');
 
   const currentUser = auth.currentUser;
-  const isOwnProfile = userId === currentUser?.uid;
+  
+  // Normalizar userId que puede venir como array
+  const normalizedUserId = Array.isArray(userId) ? userId[0] : userId;
+  const isOwnProfile = normalizedUserId === currentUser?.uid;
 
   useEffect(() => {
-    if (!userId || typeof userId !== 'string') {
+    console.log('🔍 UserProfile useEffect - userId:', normalizedUserId);
+    
+    if (!normalizedUserId || typeof normalizedUserId !== 'string') {
+      console.error('❌ ID de usuario inválido:', normalizedUserId);
       Alert.alert('Error', 'ID de usuario inválido');
       router.back();
       return;
     }
 
+    console.log('✅ Cargando perfil para userId:', normalizedUserId);
     loadUserProfile();
     loadUserReviews();
+    loadUserFavorites();
     checkFriendshipStatus();
-  }, [userId]);
+  }, [normalizedUserId]);
 
   const loadUserProfile = async () => {
     try {
-      if (typeof userId === 'string') {
-        const profile = await userProfileService.getCompleteUserProfile(userId);
+      if (typeof normalizedUserId === 'string') {
+        const profile = await userProfileService.getCompleteUserProfile(normalizedUserId);
         setUserProfile(profile);
       }
     } catch (error) {
+      console.error('Error loading user profile:', error);
       Alert.alert('Error', 'No se pudo cargar el perfil del usuario');
     } finally {
       setLoading(false);
@@ -77,24 +90,24 @@ const UserProfileScreen = () => {
 
   const loadUserReviews = async () => {
     try {
-      if (typeof userId === 'string') {
-        const reviews = await reviewService.getUserReviews(userId);
+      if (typeof normalizedUserId === 'string') {
+        const reviews = await reviewService.getUserReviews(normalizedUserId);
         // Mapear UserReview a Review interface
         const mappedReviews = reviews.map(review => ({
           id: review.id || '',
           contentId: review.movieId,
           contentTitle: review.movieTitle,
-          contentPoster: review.moviePoster || '',
+          contentPoster: typeof review.moviePoster === 'string' ? review.moviePoster : '',
           rating: review.rating,
           review: review.reviewText,
           timestamp: review.timestamp,
           type: 'movie',
           title: review.movieTitle,
-          poster: review.moviePoster || '',
+          poster: typeof review.moviePoster === 'string' ? review.moviePoster : '',
           likes: review.likes,
           userId: review.userId,
           userName: review.userName,
-          userAvatar: review.userAvatar || undefined
+          userAvatar: typeof review.userAvatar === 'string' ? review.userAvatar : undefined
         }));
         setUserReviews(mappedReviews);
       }
@@ -105,17 +118,30 @@ const UserProfileScreen = () => {
     }
   };
 
+  const loadUserFavorites = async () => {
+    try {
+      if (typeof normalizedUserId === 'string') {
+        const favorites = await favoritesService.getUserFavorites(normalizedUserId);
+        setUserFavorites(favorites);
+      }
+    } catch (error) {
+      console.error('Error loading user favorites:', error);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
   const checkFriendshipStatus = async () => {
-    if (!currentUser || isOwnProfile || typeof userId !== 'string') return;
+    if (!currentUser || isOwnProfile || typeof normalizedUserId !== 'string') return;
 
     try {
-      const friends = await friendsService.areUsersFriends(currentUser.uid, userId);
+      const friends = await friendsService.areUsersFriends(currentUser.uid, normalizedUserId);
       setAreFriends(friends);
 
       if (!friends) {
         // Verificar si ya se envió una solicitud
         const requests = await friendsService.getPendingFriendRequests();
-        const requestExists = requests.some(req => req.fromUserId === currentUser.uid && req.toUserId === userId);
+        const requestExists = requests.some(req => req.fromUserId === currentUser.uid && req.toUserId === normalizedUserId);
         setRequestSent(requestExists);
       }
     } catch (error) {
@@ -124,14 +150,15 @@ const UserProfileScreen = () => {
   };
 
   const sendFriendRequest = async () => {
-    if (!currentUser || typeof userId !== 'string') return;
+    if (!currentUser || typeof normalizedUserId !== 'string') return;
 
     setSendingRequest(true);
     try {
-      await friendsService.sendFriendRequest(currentUser.uid, userId);
+      await friendsService.sendFriendRequest(normalizedUserId);
       setRequestSent(true);
       Alert.alert('Éxito', 'Solicitud de amistad enviada');
     } catch (error) {
+      console.error('Error sending friend request:', error);
       Alert.alert('Error', 'No se pudo enviar la solicitud de amistad');
     } finally {
       setSendingRequest(false);
@@ -139,12 +166,13 @@ const UserProfileScreen = () => {
   };
 
   const startChat = async () => {
-    if (!currentUser || typeof userId !== 'string') return;
+    if (!currentUser || typeof normalizedUserId !== 'string') return;
 
     try {
-      const chatId = await chatService.getOrCreateChat(userId);
+      const chatId = await chatService.getOrCreateChat(normalizedUserId);
       router.push(`/chat?chatId=${chatId}`);
     } catch (error) {
+      console.error('Error starting chat:', error);
       Alert.alert('Error', 'No se pudo iniciar el chat');
     }
   };
@@ -167,7 +195,13 @@ const UserProfileScreen = () => {
   const renderReview = ({ item }: { item: Review }) => (
     <View style={styles.reviewCard}>
       <View style={styles.reviewHeader}>
-        <Image source={{ uri: item.contentPoster }} style={styles.reviewPoster} />
+        {item.contentPoster && typeof item.contentPoster === 'string' ? (
+          <Image source={{ uri: item.contentPoster }} style={styles.reviewPoster} />
+        ) : (
+          <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+            <MaterialIcons name="movie" size={24} color="#666" />
+          </View>
+        )}
         <View style={styles.reviewInfo}>
           <Text style={styles.reviewTitle}>{item.contentTitle}</Text>
           {renderStarRating(item.rating)}
@@ -184,11 +218,26 @@ const UserProfileScreen = () => {
     </View>
   );
 
-  const renderFavoriteItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.favoriteCard}>
-      <Image source={{ uri: item.poster }} style={styles.favoritePoster} />
+  const renderFavoriteItem = ({ item }: { item: FavoriteItem }) => (
+    <TouchableOpacity 
+      style={styles.favoriteCard}
+      onPress={() => {
+        // Navegar al detalle del contenido
+        router.push(`/content-detail-screen?id=${item.contentId}&type=${item.contentType}`);
+      }}
+    >
+      {item.poster && typeof item.poster === 'string' ? (
+        <Image source={{ uri: item.poster }} style={styles.favoritePoster} />
+      ) : (
+        <View style={[styles.favoritePoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+          <MaterialIcons name={item.contentType === 'movie' ? 'movie' : 'tv'} size={24} color="#666" />
+        </View>
+      )}
       <Text style={styles.favoriteTitle} numberOfLines={2}>
         {item.title}
+      </Text>
+      <Text style={styles.favoriteDate}>
+        {item.addedAt.toLocaleDateString()}
       </Text>
     </TouchableOpacity>
   );
@@ -230,8 +279,15 @@ const UserProfileScreen = () => {
       {/* Profile Info */}
       <View style={styles.profileSection}>
         <View style={styles.avatarContainer}>
-          {userProfile.photoURL || userProfile.customAvatar ? (
-            <Image source={{ uri: userProfile.photoURL || userProfile.customAvatar }} style={styles.avatar} />
+          {(userProfile.photoURL && typeof userProfile.photoURL === 'string') || 
+           (userProfile.customAvatar && typeof userProfile.customAvatar === 'string') ? (
+            <Image 
+              source={{ 
+                uri: (typeof userProfile.photoURL === 'string' ? userProfile.photoURL : '') || 
+                     (typeof userProfile.customAvatar === 'string' ? userProfile.customAvatar : '') 
+              }} 
+              style={styles.avatar} 
+            />
           ) : (
             <View style={styles.defaultAvatar}>
               <MaterialIcons name="account-circle" size={80} color="#666" />
@@ -284,7 +340,7 @@ const UserProfileScreen = () => {
           </View>
           
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statNumber}>{userFavorites.length}</Text>
             <Text style={styles.statLabel}>Favoritos</Text>
           </View>
           
@@ -347,14 +403,31 @@ const UserProfileScreen = () => {
             </View>
           )
         ) : (
-          // Por ahora no mostramos favoritos hasta implementar el sistema completo
-          <View style={styles.emptyState}>
-            <MaterialIcons name="favorite-border" size={64} color="#666" />
-            <Text style={styles.emptyTitle}>Próximamente</Text>
-            <Text style={styles.emptyText}>
-              La funcionalidad de favoritos estará disponible pronto
-            </Text>
-          </View>
+          // Mostrar favoritos reales
+          favoritesLoading ? (
+            <ActivityIndicator size="large" color="#DF2892" style={styles.loader} />
+          ) : userFavorites.length > 0 ? (
+            <FlatList
+              data={userFavorites}
+              keyExtractor={(item) => item.id}
+              renderItem={renderFavoriteItem}
+              numColumns={2}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              columnWrapperStyle={styles.favoritesRow}
+            />
+          ) : (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="favorite-border" size={64} color="#666" />
+              <Text style={styles.emptyTitle}>Sin favoritos</Text>
+              <Text style={styles.emptyText}>
+                {isOwnProfile 
+                  ? 'Aún no has agregado contenido a favoritos'
+                  : 'Este usuario no tiene favoritos'
+                }
+              </Text>
+            </View>
+          )
         )}
       </View>
     </ScrollView>
@@ -586,6 +659,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     textAlign: 'center',
+  },
+  favoriteDate: {
+    color: '#666',
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 4,
   },
   emptyState: {
     alignItems: 'center',

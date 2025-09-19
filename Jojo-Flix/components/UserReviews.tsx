@@ -312,7 +312,7 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
         <View style={styles.reviewHeader}>
           <View style={styles.reviewAuthor}>
             <TouchableOpacity onPress={() => handleUserAvatarPress(review.userId)}>
-              {review.userAvatar ? (
+              {review.userAvatar && typeof review.userAvatar === 'string' ? (
                 <Image
                   source={{ uri: review.userAvatar }}
                   style={styles.userAvatar}

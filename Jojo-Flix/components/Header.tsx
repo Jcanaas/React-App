@@ -13,6 +13,7 @@ interface HeaderProps {
   onMenuPress?: () => void;
   onSearchPress?: () => void;
   onSocialPress?: () => void;
+  hideStatusBarPadding?: boolean; // Nueva prop para controlar el padding superior
 }
 
 const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
@@ -22,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   onMenuPress,
   onSearchPress,
   onSocialPress,
+  hideStatusBarPadding = false,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -93,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({
   const handleUser = () => router.push('/user-info');
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, hideStatusBarPadding && styles.containerWithoutPadding]}>
       <View style={styles.innerRow}>
 
         {/* Lado izquierdo */}
@@ -222,6 +224,9 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: '#222',
+  },
+  containerWithoutPadding: {
+    paddingTop: 12, // Solo el padding básico, sin statusBarHeight
   },
 });
 
