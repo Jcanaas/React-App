@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { auth } from '../components/firebaseConfig';
 import { chatService, ChatMessage } from '../services/ChatService';
 import { useNotificationContext } from '../contexts/NotificationContext';
+import { achievementService } from '../services/AchievementService';
 
 const ChatScreen = () => {
   const router = useRouter();
@@ -83,6 +84,17 @@ const ChatScreen = () => {
     try {
       await chatService.sendMessage(chatId, messageToSend);
       console.log('✅ Mensaje enviado correctamente');
+      
+      // 🎮 GAMIFICACIÓN: Incrementar contador de mensajes
+      if (auth.currentUser) {
+        try {
+          await achievementService.incrementStat(auth.currentUser.uid, 'totalMessages', 1);
+          console.log('🏆 Estadísticas de gamificación actualizadas: +1 mensaje');
+        } catch (gamificationError) {
+          console.error('⚠️ Error actualizando gamificación:', gamificationError);
+          // No afecta la funcionalidad principal, solo registrar el error
+        }
+      }
     } catch (error) {
       console.error('❌ Error enviando mensaje:', error);
       // Si hay error, restaurar el mensaje

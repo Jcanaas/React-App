@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useRef, ReactNode, useEffec
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
 import { SoundtrackItem, ContentItem } from '../components/ContentData';
+import { achievementService } from '../services/AchievementService';
+import { auth } from '../components/firebaseConfig';
+import StatsLogger from '../utils/statsLogger';
 
 // Configurar el comportamiento de las notificaciones
 Notifications.setNotificationHandler({
@@ -93,6 +96,17 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
   const isLoadingTrack = useRef(false); // Evitar cargas múltiples
   const currentSoundRef = useRef<Audio.Sound | null>(null); // Referencia inmutable al sonido actual
   const lastTrackChangeTime = useRef<number>(0); // Para debouncing
+  
+  // 🎮 GAMIFICACIÓN: Referencias para tracking de tiempo de música
+  const musicTimeTracker = useRef<{
+    lastUpdateTime: number;
+    accumulatedTime: number; // tiempo acumulado en segundos
+    lastSentTime: number; // último tiempo enviado para evitar envíos duplicados
+  }>({
+    lastUpdateTime: 0,
+    accumulatedTime: 0,
+    lastSentTime: 0
+  });
 
   // Cleanup al desmontar
   useEffect(() => {
@@ -262,6 +276,56 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
       }
       
       setIsPlaying(status.isPlaying);
+      
+      // 🎮 GAMIFICACIÓN: Trackear tiempo de música cuando está reproduciéndose
+      if (status.isPlaying && auth.currentUser) {
+        const now = Date.now();
+        
+        // Si es la primera vez o se reanudó la reproducción
+        if (musicTimeTracker.current.lastUpdateTime === 0) {
+          musicTimeTracker.current.lastUpdateTime = now;
+        }
+        
+        // Calcular tiempo transcurrido desde la última actualización
+        const timeDiff = (now - musicTimeTracker.current.lastUpdateTime) / 1000; // en segundos
+        
+        // Solo contar si es un intervalo razonable (entre 0.5 y 2 segundos)
+        if (timeDiff >= 0.5 && timeDiff <= 2) {
+          musicTimeTracker.current.accumulatedTime += timeDiff;
+          
+          // Enviar estadísticas cada 5 minutos (300 segundos)
+          const totalMinutesAccumulated = Math.floor(musicTimeTracker.current.accumulatedTime / 60);
+          const blocksOf5Minutes = Math.floor(totalMinutesAccumulated / 5);
+          const blocksSent = Math.floor(musicTimeTracker.current.lastSentTime / 5);
+          
+          // Log del progreso actual
+          StatsLogger.logProgress('music', musicTimeTracker.current.accumulatedTime, (blocksSent + 1) * 5);
+          
+          if (blocksOf5Minutes > blocksSent) {
+            const minutesToSend = (blocksOf5Minutes - blocksSent) * 5;
+            
+            // Solo enviar si son minutos válidos (múltiplos de 5 y no excesivos)
+            if (minutesToSend >= 5 && minutesToSend <= 30) {
+              // Enviar de manera asíncrona sin bloquear la UI
+              achievementService.incrementStat(auth.currentUser.uid, 'totalMusicTime', minutesToSend)
+                .then(() => {
+                  StatsLogger.logMusicTime(minutesToSend, auth.currentUser!.uid, blocksOf5Minutes);
+                  musicTimeTracker.current.lastSentTime = blocksOf5Minutes * 5;
+                })
+                .catch(error => {
+                  console.error('⚠️ Error actualizando tiempo de música:', error);
+                });
+            } else {
+              console.warn(`⚠️ Minutos de música inválidos: ${minutesToSend}, ignorando`);
+            }
+          }
+        }
+        
+        musicTimeTracker.current.lastUpdateTime = now;
+      } else {
+        // Pausado o detenido, resetear el tiempo de última actualización
+        musicTimeTracker.current.lastUpdateTime = 0;
+      }
       
       // Si la canción terminó, pasar a la siguiente automáticamente
       if (status.didJustFinish && playlist.length > 0) {

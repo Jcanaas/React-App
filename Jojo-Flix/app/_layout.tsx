@@ -9,8 +9,11 @@ import { useScreenOrientation } from '@/hooks/useScreenOrientation';
 import { UserProvider } from '../components/UserContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { AudioPlayerProvider, useAudioPlayer } from '../contexts/AudioPlayerContext';
+import { RobustGamificationProvider } from '../contexts/RobustGamificationContext';
 import GlobalMusicPlayer from '../components/GlobalMusicPlayer';
 import MiniMusicPlayer from '../components/MiniMusicPlayer';
+import AppTimeTracker from '../components/AppTimeTracker';
+import { AchievementNotificationManager } from '../components/AchievementNotificationManager';
 import { View, StyleSheet, Modal } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -19,34 +22,41 @@ function AppContent() {
   const { currentTrack, isPlayerVisible } = useAudioPlayer();
   
   return (
-    <View style={styles.container}>
-      <Stack
-        screenOptions={{
-          animation: 'none', // Esto elimina la animación de transición entre pantallas
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="(tabs)/index" />
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="chat" />
-        <Stack.Screen name="user-profile" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      
-      {/* Reproductor mini cuando hay música pero el player está cerrado */}
-      {currentTrack && !isPlayerVisible && <MiniMusicPlayer />}
-      
-      {/* Reproductor global completo */}
-      <Modal
-        visible={currentTrack !== null && isPlayerVisible}
-        animationType="slide"
-        presentationStyle="fullScreen"
-      >
-        <GlobalMusicPlayer />
-      </Modal>
-      
-      <StatusBar style="auto" />
-    </View>
+    <AppTimeTracker>
+      <View style={styles.container}>
+        <Stack
+          screenOptions={{
+            animation: 'none', // Esto elimina la animación de transición entre pantallas
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="(tabs)/index" />
+          <Stack.Screen name="auth" />
+          <Stack.Screen name="chat" />
+          <Stack.Screen name="user-profile" />
+          <Stack.Screen name="achievements-main" />
+          <Stack.Screen name="robust-achievements" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        
+        {/* Reproductor mini cuando hay música pero el player está cerrado */}
+        {currentTrack && !isPlayerVisible && <MiniMusicPlayer />}
+        
+        {/* Reproductor global completo */}
+        <Modal
+          visible={currentTrack !== null && isPlayerVisible}
+          animationType="slide"
+          presentationStyle="fullScreen"
+        >
+          <GlobalMusicPlayer />
+        </Modal>
+        
+        {/* Sistema de notificaciones de logros */}
+        <AchievementNotificationManager />
+        
+        <StatusBar style="auto" />
+      </View>
+    </AppTimeTracker>
   );
 }
 
@@ -70,9 +80,11 @@ export default function RootLayout() {
       <UserProvider>
         <NotificationProvider>
           <AudioPlayerProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <AppContent />
-            </ThemeProvider>
+            <RobustGamificationProvider>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <AppContent />
+              </ThemeProvider>
+            </RobustGamificationProvider>
           </AudioPlayerProvider>
         </NotificationProvider>
       </UserProvider>

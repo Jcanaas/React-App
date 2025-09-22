@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import FavoritesCarousel from '../components/FavoritesCarousel';
 import { reviewService, UserReview } from '../services/ReviewService';
 import { useRouter } from 'expo-router';
+import { useRobustGamification } from '../contexts/RobustGamificationContext';
 
 const placeholderImg = 'https://ui-avatars.com/api/?name=User&background=DF2892&color=fff';
 
@@ -33,6 +34,17 @@ const UserInfoScreen = () => {
   const [customUrl, setCustomUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  
+  // Hook de gamificación
+  const {
+    userAchievements,
+    userProgress,
+    achievementSummary,
+    totalPoints,
+    completionPercentage,
+    refreshAllData: reloadGamification,
+    isLoading
+  } = useRobustGamification();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,7 +63,18 @@ const UserInfoScreen = () => {
       const user = auth.currentUser;
       if (user) {
         try {
+          console.log('👤 PANEL DE USUARIO: Cargando reseñas para usuario:', user.uid);
           const reviews = await reviewService.getUserReviews(user.uid);
+          console.log('👤 PANEL DE USUARIO: Reseñas encontradas:', reviews.length);
+          reviews.forEach(review => {
+            console.log('👤 PANEL DE USUARIO: Reseña details:', {
+              id: review.id,
+              movieId: review.movieId,
+              movieTitle: review.movieTitle,
+              rating: review.rating,
+              moviePoster: review.moviePoster
+            });
+          });
           setUserReviews(reviews);
         } catch (error) {
           console.error('Error loading user reviews:', error);
@@ -103,7 +126,8 @@ const UserInfoScreen = () => {
       }}
     >
       <View style={styles.reviewHeader}>
-        {item.moviePoster && typeof item.moviePoster === 'string' ? (
+        {item.moviePoster && typeof item.moviePoster === 'string' && 
+         (item.moviePoster.startsWith('http') || item.moviePoster.startsWith('data:')) ? (
           <Image source={{ uri: item.moviePoster }} style={styles.reviewPoster} />
         ) : (
           <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
@@ -185,6 +209,32 @@ const UserInfoScreen = () => {
                   </Text>
                 </View>
               )}
+            </View>
+
+            {/* Sección de Logros */}
+            <View style={styles.achievementsSection}>
+              <TouchableOpacity 
+                style={styles.achievementsButton}
+                onPress={() => router.push('/achievements-main')}
+              >
+                <View style={styles.achievementsButtonContent}>
+                  <View style={styles.achievementsButtonLeft}>
+                    <MaterialIcons name="emoji-events" size={24} color="#FFD700" />
+                    <View style={styles.achievementsInfo}>
+                      <Text style={styles.achievementsTitle}>Mis Logros</Text>
+                      <Text style={styles.achievementsSubtitle}>
+                        Nivel {Math.floor((totalPoints || 0) / 1000) + 1} • {userAchievements?.filter(a => a.isCompleted).length || 0} logros • {totalPoints || 0} puntos
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.achievementsButtonRight}>
+                    <View style={styles.progressCircle}>
+                      <Text style={styles.progressText}>{Math.round(completionPercentage || 0)}%</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={24} color="#666" />
+                  </View>
+                </View>
+              </TouchableOpacity>
             </View>
 
             {/* Botón de cerrar sesión */}
@@ -451,6 +501,60 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 14,
     textAlign: 'center',
+  },
+  // Estilos para logros
+  achievementsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  achievementsButton: {
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  achievementsButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  achievementsButtonLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  achievementsInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  achievementsTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  achievementsSubtitle: {
+    color: '#888',
+    fontSize: 12,
+  },
+  achievementsButtonRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  progressCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#DF2892',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  progressText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

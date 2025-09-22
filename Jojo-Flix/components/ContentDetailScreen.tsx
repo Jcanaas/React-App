@@ -399,9 +399,23 @@ const ContentDetailScreen: React.FC = () => {
             {/* Review Content */}
             {activeReviewTab === 'users' && (
               <UserReviews
-                movieId={omdbData?.imdbId || content.id?.toString() || 'unknown'}
+                movieId={(() => {
+                  // SOLUCIÓN: Dar prioridad al content.id para mantener consistencia
+                  const movieId = content.id?.toString() || omdbData?.imdbId || 'unknown';
+                  console.log('📽️ CONTENT DETAIL: Pasando movieId a UserReviews:', movieId);
+                  console.log('📽️ CONTENT DETAIL: Valores disponibles:', {
+                    contentId: content.id,
+                    contentIdString: content.id?.toString(),
+                    omdbId: omdbData?.imdbId,
+                    finalMovieId: movieId,
+                    prioridadUsada: content.id ? 'content.id' : omdbData?.imdbId ? 'omdb.imdbId' : 'unknown'
+                  });
+                  return movieId;
+                })()}
                 movieTitle={content.nombre}
-                moviePoster={content.verticalbanner}
+                moviePoster={typeof content.verticalbanner === 'string' ? content.verticalbanner : 
+                           omdbData?.poster || 
+                           `https://ui-avatars.com/api/?name=${encodeURIComponent(content.nombre)}&background=DF2892&color=fff&size=300`}
               />
             )}
 

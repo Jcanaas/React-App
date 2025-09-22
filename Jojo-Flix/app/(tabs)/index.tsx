@@ -97,7 +97,6 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#181818', position: 'relative' }}>
-      {/* <AuthDebugger /> */}
       <Header
         onSearchPress={handleSearchPress}
         onMenuPress={handleMenuPress}

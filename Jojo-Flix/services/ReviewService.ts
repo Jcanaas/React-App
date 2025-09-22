@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../components/firebaseConfig';
 import { userProfileService } from './UserProfileService';
+import { achievementService } from './AchievementService';
 
 export interface UserReview {
   id?: string;
@@ -71,6 +72,14 @@ class ReviewService {
       const user = auth.currentUser;
       if (!user) throw new Error('Usuario no autenticado');
 
+      console.log('📝 REVIEW SERVICE: Creando reseña con movieId:', reviewData.movieId);
+      console.log('📝 REVIEW SERVICE: Datos de entrada:', {
+        userId: reviewData.userId,
+        movieId: reviewData.movieId,
+        movieTitle: reviewData.movieTitle,
+        rating: reviewData.rating
+      });
+
       // Verificar si el usuario ya ha reseñado esta película
       const existingReview = await this.getUserReviewForMovie(reviewData.movieId, user.uid);
       if (existingReview) {
@@ -112,6 +121,15 @@ class ReviewService {
       // Actualizar estadísticas del usuario
       await userProfileService.updateUserStats(user.uid);
       
+      // 🎮 GAMIFICACIÓN: Incrementar contador de reseñas
+      try {
+        await achievementService.incrementStat(user.uid, 'totalReviews', 1);
+        console.log('🏆 Estadísticas de gamificación actualizadas: +1 reseña');
+      } catch (gamificationError) {
+        console.error('⚠️ Error actualizando gamificación:', gamificationError);
+        // No afecta la funcionalidad principal, solo registrar el error
+      }
+      
       console.log('✅ Reseña creada:', docRef.id);
       return docRef.id;
     } catch (error) {
@@ -123,30 +141,80 @@ class ReviewService {
   // Obtener reseñas de una película específica
   async getMovieReviews(movieId: string, limitCount: number = 20): Promise<UserReview[]> {
     try {
-      const q = query(
-        this.reviewsCollection,
-        where('movieId', '==', movieId),
-        where('reported', '==', false),
-        orderBy('timestamp', 'desc'),
-        limit(limitCount)
-      );
+      console.log('🔍 Buscando reseñas para movieId:', movieId);
+      console.log('📊 Límite de resultados:', limitCount);
+      
+      // Intentar primero con la consulta completa (requiere índice)
+      try {
+        const q = query(
+          this.reviewsCollection,
+          where('movieId', '==', movieId),
+          where('reported', '==', false),
+          orderBy('timestamp', 'desc'),
+          limit(limitCount)
+        );
 
-      const querySnapshot = await getDocs(q);
-      const reviews: UserReview[] = [];
+        console.log('📝 Query con índice preparada, ejecutando...');
+        const querySnapshot = await getDocs(q);
+        const reviews: UserReview[] = [];
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        reviews.push({
-          id: doc.id,
-          ...data,
-          timestamp: data.timestamp.toDate()
-        } as UserReview);
-      });
+        console.log('📄 Documentos encontrados:', querySnapshot.size);
 
-      console.log(`✅ Obtenidas ${reviews.length} reseñas para película ${movieId}`);
-      return reviews;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('📋 Documento de reseña:', doc.id, data);
+          reviews.push({
+            id: doc.id,
+            ...data,
+            timestamp: data.timestamp.toDate()
+          } as UserReview);
+        });
+
+        console.log(`✅ Obtenidas ${reviews.length} reseñas para película ${movieId}`);
+        return reviews;
+        
+      } catch (indexError: any) {
+        // Si falla por falta de índice, intentar sin orderBy
+        console.log('⚠️ Error con índice, intentando consulta simple:', indexError.code);
+        
+        if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
+          console.log('💡 Usando consulta sin orderBy...');
+          
+          const simpleQuery = query(
+            this.reviewsCollection,
+            where('movieId', '==', movieId),
+            where('reported', '==', false)
+          );
+
+          const querySnapshot = await getDocs(simpleQuery);
+          const reviews: UserReview[] = [];
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            reviews.push({
+              id: doc.id,
+              ...data,
+              timestamp: data.timestamp.toDate()
+            } as UserReview);
+          });
+
+          // Ordenar manualmente por timestamp
+          reviews.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          
+          // Aplicar límite manualmente
+          const limitedReviews = reviews.slice(0, limitCount);
+          
+          console.log(`✅ Obtenidas ${limitedReviews.length} reseñas (consulta simple) para película ${movieId}`);
+          return limitedReviews;
+        }
+        
+        throw indexError;
+      }
+      
     } catch (error: any) {
       console.error('❌ Error obteniendo reseñas:', error);
+      console.error('❌ Código de error:', error.code);
+      console.error('❌ Mensaje de error:', error.message);
       
       // Si es un error de permisos, devolver array vacío
       if (error.code === 'permission-denied' || error.message?.includes('permission')) {
@@ -161,28 +229,84 @@ class ReviewService {
   // Obtener reseñas de un usuario específico
   async getUserReviews(userId: string, limitCount: number = 10): Promise<UserReview[]> {
     try {
-      const q = query(
-        this.reviewsCollection,
-        where('userId', '==', userId),
-        orderBy('timestamp', 'desc'),
-        limit(limitCount)
-      );
+      console.log('👤 Buscando reseñas del usuario:', userId);
+      console.log('📊 Límite de resultados:', limitCount);
+      
+      // Intentar primero con orderBy
+      try {
+        const q = query(
+          this.reviewsCollection,
+          where('userId', '==', userId),
+          orderBy('timestamp', 'desc'),
+          limit(limitCount)
+        );
 
-      const querySnapshot = await getDocs(q);
-      const reviews: UserReview[] = [];
+        console.log('📝 Query con índice preparada para usuario, ejecutando...');
+        const querySnapshot = await getDocs(q);
+        const reviews: UserReview[] = [];
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        reviews.push({
-          id: doc.id,
-          ...data,
-          timestamp: data.timestamp.toDate()
-        } as UserReview);
-      });
+        console.log('📄 Documentos de usuario encontrados:', querySnapshot.size);
 
-      return reviews;
-    } catch (error) {
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('📋 Reseña de usuario:', doc.id, {
+            movieId: data.movieId,
+            movieTitle: data.movieTitle,
+            rating: data.rating,
+            timestamp: data.timestamp
+          });
+          reviews.push({
+            id: doc.id,
+            ...data,
+            timestamp: data.timestamp.toDate()
+          } as UserReview);
+        });
+
+        console.log(`✅ Obtenidas ${reviews.length} reseñas del usuario ${userId}`);
+        return reviews;
+        
+      } catch (indexError: any) {
+        // Si falla por falta de índice, intentar sin orderBy
+        console.log('⚠️ Error con índice de usuario, intentando consulta simple:', indexError.code);
+        
+        if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
+          console.log('💡 Usando consulta simple para usuario...');
+          
+          const simpleQuery = query(
+            this.reviewsCollection,
+            where('userId', '==', userId)
+          );
+
+          const querySnapshot = await getDocs(simpleQuery);
+          const reviews: UserReview[] = [];
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            reviews.push({
+              id: doc.id,
+              ...data,
+              timestamp: data.timestamp.toDate()
+            } as UserReview);
+          });
+
+          // Ordenar manualmente por timestamp
+          reviews.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          
+          // Aplicar límite manualmente
+          const limitedReviews = reviews.slice(0, limitCount);
+          
+          console.log(`✅ Obtenidas ${limitedReviews.length} reseñas (consulta simple) del usuario ${userId}`);
+          return limitedReviews;
+        }
+        
+        throw indexError;
+      }
+      
+    } catch (error: any) {
       console.error('❌ Error obteniendo reseñas del usuario:', error);
+      console.error('❌ Código de error:', error.code);
+      console.error('❌ Mensaje de error:', error.message);
+      
       return [];
     }
   }
@@ -190,10 +314,12 @@ class ReviewService {
   // Verificar si el usuario ya ha reseñado una película
   async getUserReviewForMovie(movieId: string, userId: string): Promise<UserReview | null> {
     try {
+      console.log('🔍 Verificando reseña existente para:', { movieId, userId });
+      
       // Verificar si el usuario está autenticado
       const user = auth.currentUser;
       if (!user) {
-        console.log('Usuario no autenticado');
+        console.log('❌ Usuario no autenticado');
         return null;
       }
 
@@ -203,12 +329,25 @@ class ReviewService {
         where('userId', '==', userId)
       );
 
+      console.log('📝 Query para reseña específica preparada, ejecutando...');
       const querySnapshot = await getDocs(q);
       
-      if (querySnapshot.empty) return null;
+      console.log('📄 Documentos encontrados para reseña específica:', querySnapshot.size);
+      
+      if (querySnapshot.empty) {
+        console.log('❌ No se encontró reseña del usuario para esta película');
+        return null;
+      }
 
       const doc = querySnapshot.docs[0];
       const data = doc.data();
+      
+      console.log('✅ Reseña encontrada:', {
+        id: doc.id,
+        movieTitle: data.movieTitle,
+        rating: data.rating,
+        moviePoster: data.moviePoster
+      });
       
       return {
         id: doc.id,
@@ -293,6 +432,38 @@ class ReviewService {
       console.log(`✅ ${hasMarked ? 'Removido' : 'Marcado'} como útil reseña ${reviewId}`);
     } catch (error) {
       console.error('❌ Error marcando reseña como útil:', error);
+      throw error;
+    }
+  }
+
+  // Función específica para actualizar solo el movieId de una reseña
+  async updateReviewMovieId(reviewId: string, newMovieId: string): Promise<void> {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('Usuario no autenticado');
+
+      const reviewRef = doc(this.reviewsCollection, reviewId);
+      const reviewDoc = await getDoc(reviewRef);
+      
+      if (!reviewDoc.exists()) throw new Error('Reseña no encontrada');
+
+      const reviewData = reviewDoc.data() as UserReview;
+      
+      // Verificar que el usuario es el autor
+      if (reviewData.userId !== user.uid) {
+        throw new Error('No tienes permisos para editar esta reseña');
+      }
+
+      console.log(`🔧 Actualizando movieId: ${reviewData.movieId} → ${newMovieId}`);
+
+      await updateDoc(reviewRef, {
+        movieId: newMovieId,
+        timestamp: new Date() // Actualizar timestamp para reflejar el cambio
+      });
+
+      console.log('✅ MovieId actualizado exitosamente');
+    } catch (error) {
+      console.error('❌ Error actualizando movieId:', error);
       throw error;
     }
   }

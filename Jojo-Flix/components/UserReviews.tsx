@@ -45,12 +45,15 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
   const currentUser = auth.currentUser;
 
   useEffect(() => {
+    console.log('🎬 PESTAÑA DE PELÍCULA: Props recibidas:', { movieId, movieTitle, moviePoster });
+    console.log('🎬 PESTAÑA DE PELÍCULA: Iniciando carga de datos...');
     loadData();
     
     // Escuchar cambios en el estado de autenticación
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user !== currentUser) {
         // El estado de autenticación cambió, recargar datos
+        console.log('🎬 PESTAÑA DE PELÍCULA: Usuario cambió, recargando...');
         loadData();
       }
     });
@@ -67,11 +70,9 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
       
       // Actualizar datos de usuario en reseñas existentes (solo una vez por sesión)
       if (currentUserData && !hasUpdatedReviewsInSession) {
-        console.log('🔄 Actualizando datos de usuario en reseñas (primera vez en sesión)...');
         try {
           await reviewService.updateExistingReviewsUserData();
           hasUpdatedReviewsInSession = true;
-          console.log('✅ Reseñas actualizadas automáticamente');
         } catch (updateError) {
           console.error('⚠️ Error actualizando reseñas:', updateError);
         }
@@ -92,7 +93,6 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
       
       // Si es un error de permisos, mostrar mensaje específico
       if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-        console.log('⚠️ Error de permisos - configurar reglas de Firestore');
         Alert.alert(
           'Configuración Pendiente',
           'Las reseñas están temporalmente deshabilitadas. El administrador necesita configurar los permisos de la base de datos.',
@@ -398,6 +398,9 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
     );
   }
 
+  // Calcular reseñas de otros usuarios
+  const otherReviews = reviews.filter(review => review.userId !== currentUser?.uid);
+
   return (
     <ScrollView
       style={styles.container}
@@ -410,17 +413,15 @@ const UserReviews: React.FC<UserReviewsProps> = ({ movieId, movieTitle, moviePos
       {renderUserReviewSection()}
 
       {/* Other Reviews */}
-      {reviews.length > 0 && (
+      {otherReviews.length > 0 && (
         <View style={styles.reviewsSection}>
           <Text style={styles.sectionTitle}>
-            Otras Reseñas ({reviews.length})
+            Otras Reseñas ({otherReviews.length})
           </Text>
 
-          {reviews
-            .filter(review => review.userId !== currentUser?.uid)
-            .map(review => renderReviewItem(review))}
+          {otherReviews.map(review => renderReviewItem(review))}
 
-          {!showAllReviews && reviews.length >= 10 && (
+          {!showAllReviews && otherReviews.length >= 10 && (
             <TouchableOpacity
               style={styles.showMoreButton}
               onPress={() => {

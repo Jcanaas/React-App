@@ -118,15 +118,24 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           spoilerWarning
         };
 
+        console.log('📝 REVIEW FORM: Creando reseña con datos:', {
+          userId: reviewData.userId,
+          movieId: reviewData.movieId,
+          movieTitle: reviewData.movieTitle,
+          rating: reviewData.rating
+        });
+
         // Solo agregar campos opcionales si tienen valor
         if (moviePoster) {
           reviewData.moviePoster = moviePoster;
+          console.log('📝 REVIEW FORM: Agregando poster:', moviePoster);
         }
         if (user.photoURL) {
           reviewData.userAvatar = user.photoURL;
         }
 
         const reviewId = await reviewService.createReview(reviewData);
+        console.log('✅ REVIEW FORM: Reseña creada con ID:', reviewId);
 
         const newReview: UserReview = {
           id: reviewId,

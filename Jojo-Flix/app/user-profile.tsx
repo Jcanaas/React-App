@@ -192,55 +192,136 @@ const UserProfileScreen = () => {
     return <View style={styles.starsContainer}>{stars}</View>;
   };
 
-  const renderReview = ({ item }: { item: Review }) => (
-    <View style={styles.reviewCard}>
-      <View style={styles.reviewHeader}>
-        {item.contentPoster && typeof item.contentPoster === 'string' ? (
-          <Image source={{ uri: item.contentPoster }} style={styles.reviewPoster} />
+  // Mapeo de contenido a imágenes locales
+  const LOCAL_POSTERS: { [key: string]: any } = {
+    // Star Wars
+    'A New Hope': require('../assets/images/starwars4v.jpg'),
+    'Star Wars: Episode IV - A New Hope': require('../assets/images/starwars4v.jpg'),
+    'The Empire Strikes Back': require('../assets/images/starwars1v.jpg'),
+    'Star Wars: Episode V - The Empire Strikes Back': require('../assets/images/starwars1v.jpg'),
+    'Return of the Jedi': require('../assets/images/ReturnOfTheJediPoster1983.webp'),
+    'Star Wars: Episode VI - Return of the Jedi': require('../assets/images/ReturnOfTheJediPoster1983.webp'),
+    'Attack of the Clones': require('../assets/images/star_wars_episode_ii_attack_of_the_clones-495166632-large.jpg'),
+    'Star Wars: Episode II - Attack of the Clones': require('../assets/images/star_wars_episode_ii_attack_of_the_clones-495166632-large.jpg'),
+    'Revenge of the Sith': require('../assets/images/starwars3verticalbanner.jpg'),
+    'Star Wars: Episode III - Revenge of the Sith': require('../assets/images/starwars3verticalbanner.jpg'),
+    
+    // Movies
+    'Velocipastor': require('../assets/images/starwars4v.jpg'), // Placeholder por ahora
+    'Brokeback Mountain': require('../assets/images/call_me_by_your_name-vertical.jpg'),
+    'Call Me by Your Name': require('../assets/images/call_me_by_your_name-vertical.jpg'),
+    'Carol': require('../assets/images/carolverticalbanner.jpg'),
+    'La La Land': require('../assets/images/La_ciudad_de_las_estrellas_La_La_Land-262021831-large.jpg'),
+    'Oldboy': require('../assets/images/oldboybannervertical.jpg'),
+    'Dune': require('../assets/images/duneverticalbanner.jpg'),
+    '28 Weeks Later': require('../assets/images/28_weeks_later.jpg'),
+    'Fear Street Part One: 1994': require('../assets/images/fear_street_part_one_1994-vertical-banner.jpg'),
+    'Fear Street Part Two: 1978': require('../assets/images/fear_street_part_two_1978-vertical-banner.jpg'),
+    
+    // Series/Anime
+    'Beck': require('../assets/images/beck-verticalbanner.png'),
+    'Berserk': require('../assets/images/berserk1vericalbanner.jpg'),
+    'Bocchi the Rock!': require('../assets/images/bocchi_the_rock_re-639827727-large.jpg'),
+    'Solo Leveling': require('../assets/images/solo-levling-vbanner.png'),
+    'Monster': require('../assets/images/Monster-verticalbanner.webp'),
+    'The Last of Us': require('../assets/images/tlouverticalbanner.jpg'),
+    'JoJos Bizarre Adventure': require('../assets/images/jojovbanner.jpeg'),
+    
+    // Games (si tienes reseñas de juegos)
+    'Red Dead Redemption 2': require('../assets/images/rdr2.webp'),
+    'Metal Gear Solid': require('../assets/images/Metal Gear Solid poster.webp'),
+    'Devil May Cry 5': require('../assets/images/devil_may_cry_v.webp'),
+  };
+
+  // Función para obtener imagen local del contenido
+  const getMoviePosterUrl = (posterPath: string, movieTitle: string): any => {
+    // Primero intentar buscar por título de película
+    if (movieTitle && LOCAL_POSTERS[movieTitle]) {
+      return LOCAL_POSTERS[movieTitle];
+    }
+    
+    // Buscar por título sin considerar mayúsculas/minúsculas
+    const titleLower = movieTitle?.toLowerCase() || '';
+    for (const [key, value] of Object.entries(LOCAL_POSTERS)) {
+      if (key.toLowerCase() === titleLower) {
+        return value;
+      }
+    }
+    
+    // Buscar por palabras clave en el título
+    for (const [key, value] of Object.entries(LOCAL_POSTERS)) {
+      if (titleLower.includes(key.toLowerCase()) || key.toLowerCase().includes(titleLower)) {
+        return value;
+      }
+    }
+    
+    // Si no encuentra una imagen local, retornar null para mostrar el placeholder
+    return null;
+  };
+
+  const renderReview = ({ item }: { item: Review }) => {
+    const posterImage = getMoviePosterUrl(item.contentPoster, item.contentTitle);
+    
+    return (
+      <View style={styles.reviewCard}>
+        <View style={styles.reviewHeader}>
+          {posterImage ? (
+            <Image 
+              source={posterImage} 
+              style={styles.reviewPoster}
+              onError={() => {
+                console.log('Error loading local poster for:', item.contentTitle);
+              }}
+            />
+          ) : (
+            <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+              <MaterialIcons name="movie" size={24} color="#666" />
+            </View>
+          )}
+          <View style={styles.reviewInfo}>
+            <Text style={styles.reviewTitle}>{item.contentTitle}</Text>
+            {renderStarRating(item.rating)}
+            <Text style={styles.reviewDate}>
+              {item.timestamp.toLocaleDateString()}
+            </Text>
+          </View>
+        </View>
+        {item.review && (
+          <Text style={styles.reviewText} numberOfLines={3}>
+            {item.review}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  const renderFavoriteItem = ({ item }: { item: FavoriteItem }) => {
+    const posterImage = getMoviePosterUrl(item.poster || '', item.title);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.favoriteCard}
+        onPress={() => {
+          // Navegar al detalle del contenido
+          router.push(`/content-detail-screen?id=${item.contentId}&type=${item.contentType}`);
+        }}
+      >
+        {posterImage ? (
+          <Image source={posterImage} style={styles.favoritePoster} />
         ) : (
-          <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
-            <MaterialIcons name="movie" size={24} color="#666" />
+          <View style={[styles.favoritePoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
+            <MaterialIcons name={item.contentType === 'movie' ? 'movie' : 'tv'} size={24} color="#666" />
           </View>
         )}
-        <View style={styles.reviewInfo}>
-          <Text style={styles.reviewTitle}>{item.contentTitle}</Text>
-          {renderStarRating(item.rating)}
-          <Text style={styles.reviewDate}>
-            {item.timestamp.toLocaleDateString()}
-          </Text>
-        </View>
-      </View>
-      {item.review && (
-        <Text style={styles.reviewText} numberOfLines={3}>
-          {item.review}
+        <Text style={styles.favoriteTitle} numberOfLines={2}>
+          {item.title}
         </Text>
-      )}
-    </View>
-  );
-
-  const renderFavoriteItem = ({ item }: { item: FavoriteItem }) => (
-    <TouchableOpacity 
-      style={styles.favoriteCard}
-      onPress={() => {
-        // Navegar al detalle del contenido
-        router.push(`/content-detail-screen?id=${item.contentId}&type=${item.contentType}`);
-      }}
-    >
-      {item.poster && typeof item.poster === 'string' ? (
-        <Image source={{ uri: item.poster }} style={styles.favoritePoster} />
-      ) : (
-        <View style={[styles.favoritePoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
-          <MaterialIcons name={item.contentType === 'movie' ? 'movie' : 'tv'} size={24} color="#666" />
-        </View>
-      )}
-      <Text style={styles.favoriteTitle} numberOfLines={2}>
-        {item.title}
-      </Text>
-      <Text style={styles.favoriteDate}>
-        {item.addedAt.toLocaleDateString()}
-      </Text>
-    </TouchableOpacity>
-  );
+        <Text style={styles.favoriteDate}>
+          {item.addedAt.toLocaleDateString()}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
