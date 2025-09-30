@@ -1,8 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ContentData, ContentItem } from './ContentData';
+import OptimizedImage from './OptimizedImage';
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = windowWidth < 700; // Ajusta el umbral si lo necesitas
@@ -59,10 +60,10 @@ const BannerCarousel: React.FC<BannerCarouselProps> = memo(({ nombres, intervalM
 
   const renderItem = useCallback(({ item }: { item: ContentItem }) => (
     <View style={styles.bannerContainer}>
-      <Image source={item.fondo} style={styles.backgroundImage} />
+      <OptimizedImage source={item.fondo} style={styles.backgroundImage} showLoader={true} />
       <View style={styles.overlay} />
       <View style={styles.logoAndButtonContainer}>
-        <Image source={item.logo} style={styles.logo} resizeMode="contain" />
+        <OptimizedImage source={item.logo} style={styles.logo} resizeMode="contain" showLoader={true} />
         <TouchableOpacity
           style={styles.verButton}
           onPress={() => router.push({ pathname: '/content-detail-screen', params: { contentId: item.id } })}

@@ -19,6 +19,7 @@ import { reviewService } from '../services/ReviewService';
 import { chatService } from '../services/ChatService';
 import { favoritesService, FavoriteItem } from '../services/FavoritesService';
 import { validateImageUri } from '../utils/imageUtils';
+import { robustAchievementService, UserAchievementProgress, Achievement } from '../services/RobustAchievementService';
 
 interface Review {
   id: string;
@@ -43,13 +44,16 @@ const UserProfileScreen = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
   const [userFavorites, setUserFavorites] = useState<FavoriteItem[]>([]);
+  const [userAchievements, setUserAchievements] = useState<UserAchievementProgress[]>([]);
+  const [allAchievements] = useState<Achievement[]>(robustAchievementService.getAchievementDefinitions());
   const [areFriends, setAreFriends] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
+  const [achievementsLoading, setAchievementsLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
-  const [activeTab, setActiveTab] = useState<'reviews' | 'favorites'>('reviews');
+  const [activeTab, setActiveTab] = useState<'reviews' | 'favorites' | 'achievements'>('reviews');
 
   const currentUser = auth.currentUser;
   
@@ -67,11 +71,32 @@ const UserProfileScreen = () => {
       return;
     }
 
+    // Reiniciar estados cuando cambia el usuario
+    setUserProfile(null);
+    setUserReviews([]);
+    setUserFavorites([]);
+    setUserAchievements([]);
+    setAreFriends(false);
+    setRequestSent(false);
+    setLoading(true);
+    setReviewsLoading(true);
+    setFavoritesLoading(true);
+    setAchievementsLoading(true);
+
     console.log('✅ Cargando perfil para userId:', normalizedUserId);
-    loadUserProfile();
-    loadUserReviews();
-    loadUserFavorites();
-    checkFriendshipStatus();
+    
+    // Cargar datos en paralelo
+    Promise.all([
+      loadUserProfile(),
+      loadUserReviews(),
+      loadUserFavorites(),
+      loadUserAchievements(),
+      checkFriendshipStatus()
+    ]).then(() => {
+      console.log('🎉 Todos los datos del perfil cargados');
+    }).catch((error) => {
+      console.error('❌ Error cargando datos del perfil:', error);
+    });
   }, [normalizedUserId]);
 
   const loadUserProfile = async () => {
@@ -91,7 +116,9 @@ const UserProfileScreen = () => {
   const loadUserReviews = async () => {
     try {
       if (typeof normalizedUserId === 'string') {
+        console.log('🔍 Cargando reseñas para usuario:', normalizedUserId);
         const reviews = await reviewService.getUserReviews(normalizedUserId);
+        console.log('📝 Reseñas cargadas:', reviews.length);
         // Mapear UserReview a Review interface
         const mappedReviews = reviews.map(review => ({
           id: review.id || '',
@@ -121,13 +148,31 @@ const UserProfileScreen = () => {
   const loadUserFavorites = async () => {
     try {
       if (typeof normalizedUserId === 'string') {
+        console.log('🔍 Cargando favoritos para usuario:', normalizedUserId);
         const favorites = await favoritesService.getUserFavorites(normalizedUserId);
+        console.log('❤️ Favoritos cargados:', favorites.length);
         setUserFavorites(favorites);
       }
     } catch (error) {
       console.error('Error loading user favorites:', error);
     } finally {
       setFavoritesLoading(false);
+    }
+  };
+
+  const loadUserAchievements = async () => {
+    try {
+      if (typeof normalizedUserId === 'string') {
+        console.log('🔍 Cargando logros para usuario:', normalizedUserId);
+        const achievements = await robustAchievementService.getUserAchievements(normalizedUserId);
+        console.log('🏆 Logros cargados:', achievements.length);
+        console.log('✅ Logros completados:', achievements.filter(a => a.isCompleted).length);
+        setUserAchievements(achievements);
+      }
+    } catch (error) {
+      console.error('Error loading user achievements:', error);
+    } finally {
+      setAchievementsLoading(false);
     }
   };
 
@@ -207,6 +252,7 @@ const UserProfileScreen = () => {
     'Star Wars: Episode III - Revenge of the Sith': require('../assets/images/starwars3verticalbanner.jpg'),
     
     // Movies
+    'Secreto en la montaña': require('../assets/images/secreto-en-la-montana-cover.jpg'),
     'Velocipastor': require('../assets/images/starwars4v.jpg'), // Placeholder por ahora
     'Brokeback Mountain': require('../assets/images/call_me_by_your_name-vertical.jpg'),
     'Call Me by Your Name': require('../assets/images/call_me_by_your_name-vertical.jpg'),
@@ -220,12 +266,17 @@ const UserProfileScreen = () => {
     
     // Series/Anime
     'Beck': require('../assets/images/beck-verticalbanner.png'),
+    'Beck: Mongolian Chop Squad': require('../assets/images/beck-verticalbanner.png'),
     'Berserk': require('../assets/images/berserk1vericalbanner.jpg'),
     'Bocchi the Rock!': require('../assets/images/bocchi_the_rock_re-639827727-large.jpg'),
     'Solo Leveling': require('../assets/images/solo-levling-vbanner.png'),
     'Monster': require('../assets/images/Monster-verticalbanner.webp'),
     'The Last of Us': require('../assets/images/tlouverticalbanner.jpg'),
     'JoJos Bizarre Adventure': require('../assets/images/jojovbanner.jpeg'),
+    'JoJo\'s Bizarre Adventure': require('../assets/images/jojovbanner.jpeg'),
+    'Dexter': require('../assets/images/dexterbanner.webp'),
+    '28 Años Después': require('../assets/images/28semanasdespuesbanner.webp'),
+    'Aquí no hay quien viva': require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg'),
     
     // Games (si tienes reseñas de juegos)
     'Red Dead Redemption 2': require('../assets/images/rdr2.webp'),
@@ -235,27 +286,49 @@ const UserProfileScreen = () => {
 
   // Función para obtener imagen local del contenido
   const getMoviePosterUrl = (posterPath: string, movieTitle: string): any => {
-    // Primero intentar buscar por título de película
-    if (movieTitle && LOCAL_POSTERS[movieTitle]) {
+    if (!movieTitle) return null;
+    
+    console.log('🖼️ Buscando imagen para:', movieTitle);
+    
+    // 1. Búsqueda exacta
+    if (LOCAL_POSTERS[movieTitle]) {
+      console.log('✅ Imagen encontrada (exacta):', movieTitle);
       return LOCAL_POSTERS[movieTitle];
     }
     
-    // Buscar por título sin considerar mayúsculas/minúsculas
-    const titleLower = movieTitle?.toLowerCase() || '';
+    // 2. Búsqueda sin considerar mayúsculas/minúsculas
+    const titleLower = movieTitle.toLowerCase().trim();
     for (const [key, value] of Object.entries(LOCAL_POSTERS)) {
-      if (key.toLowerCase() === titleLower) {
+      if (key.toLowerCase().trim() === titleLower) {
+        console.log('✅ Imagen encontrada (case-insensitive):', key);
         return value;
       }
     }
     
-    // Buscar por palabras clave en el título
+    // 3. Búsqueda por palabras clave (más flexible)
     for (const [key, value] of Object.entries(LOCAL_POSTERS)) {
-      if (titleLower.includes(key.toLowerCase()) || key.toLowerCase().includes(titleLower)) {
+      const keyLower = key.toLowerCase();
+      // Verificar si el título contiene palabras clave del mapeo
+      if (titleLower.includes(keyLower) || keyLower.includes(titleLower)) {
+        console.log('✅ Imagen encontrada (keyword match):', key, 'para', movieTitle);
         return value;
       }
     }
     
-    // Si no encuentra una imagen local, retornar null para mostrar el placeholder
+    // 4. Búsqueda más agresiva por palabras individuales
+    const titleWords = titleLower.split(/\s+/);
+    for (const [key, value] of Object.entries(LOCAL_POSTERS)) {
+      const keyWords = key.toLowerCase().split(/\s+/);
+      const commonWords = titleWords.filter(word => 
+        keyWords.some(keyWord => keyWord.includes(word) || word.includes(keyWord))
+      );
+      if (commonWords.length >= Math.min(2, titleWords.length)) {
+        console.log('✅ Imagen encontrada (word match):', key, 'para', movieTitle);
+        return value;
+      }
+    }
+    
+    console.log('❌ No se encontró imagen para:', movieTitle);
     return null;
   };
 
@@ -263,35 +336,52 @@ const UserProfileScreen = () => {
     const posterImage = getMoviePosterUrl(item.contentPoster, item.contentTitle);
     
     return (
-      <View style={styles.reviewCard}>
+      <TouchableOpacity 
+        style={styles.reviewCard}
+        onPress={() => {
+          // Navegar al detalle del contenido
+          console.log('🔍 Navegando a reseña de contenido:', { contentId: item.contentId, title: item.contentTitle });
+          router.push({ pathname: '/content-detail-screen', params: { contentId: item.contentId } });
+        }}
+        activeOpacity={0.8}
+      >
         <View style={styles.reviewHeader}>
-          {posterImage ? (
-            <Image 
-              source={posterImage} 
-              style={styles.reviewPoster}
-              onError={() => {
-                console.log('Error loading local poster for:', item.contentTitle);
-              }}
-            />
-          ) : (
-            <View style={[styles.reviewPoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
-              <MaterialIcons name="movie" size={24} color="#666" />
-            </View>
-          )}
+          <View style={styles.reviewImageContainer}>
+            {posterImage ? (
+              <Image 
+                source={posterImage} 
+                style={styles.reviewPoster}
+                onError={() => {
+                  console.log('❌ Error cargando imagen local para:', item.contentTitle);
+                }}
+              />
+            ) : (
+              <View style={[styles.reviewPoster, styles.placeholderPoster]}>
+                <MaterialIcons name="movie" size={28} color="#666" />
+                <Text style={styles.placeholderText} numberOfLines={2}>
+                  {item.contentTitle.length > 10 ? item.contentTitle.substring(0, 10) + '...' : item.contentTitle}
+                </Text>
+              </View>
+            )}
+          </View>
           <View style={styles.reviewInfo}>
             <Text style={styles.reviewTitle}>{item.contentTitle}</Text>
-            {renderStarRating(item.rating)}
+            <View style={styles.reviewRating}>
+              {renderStarRating(item.rating)}
+              <Text style={styles.ratingText}>{item.rating}/5</Text>
+            </View>
             <Text style={styles.reviewDate}>
               {item.timestamp.toLocaleDateString()}
             </Text>
           </View>
+          <MaterialIcons name="chevron-right" size={24} color="#888" />
         </View>
         {item.review && (
-          <Text style={styles.reviewText} numberOfLines={3}>
+          <Text style={styles.reviewText} numberOfLines={2}>
             {item.review}
           </Text>
         )}
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -302,24 +392,93 @@ const UserProfileScreen = () => {
       <TouchableOpacity 
         style={styles.favoriteCard}
         onPress={() => {
-          // Navegar al detalle del contenido
-          router.push(`/content-detail-screen?id=${item.contentId}&type=${item.contentType}`);
+          // Navegar al detalle del contenido usando el parámetro correcto
+          console.log('🔍 Navegando a contenido desde favoritos:', { 
+            contentId: item.contentId, 
+            title: item.title,
+            contentType: item.contentType 
+          });
+          router.push({ pathname: '/content-detail-screen', params: { contentId: item.contentId } });
         }}
+        activeOpacity={0.8}
       >
-        {posterImage ? (
-          <Image source={posterImage} style={styles.favoritePoster} />
-        ) : (
-          <View style={[styles.favoritePoster, { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' }]}>
-            <MaterialIcons name={item.contentType === 'movie' ? 'movie' : 'tv'} size={24} color="#666" />
-          </View>
-        )}
-        <Text style={styles.favoriteTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.favoriteDate}>
-          {item.addedAt.toLocaleDateString()}
-        </Text>
+        <View style={styles.favoriteImageContainer}>
+          {posterImage ? (
+            <Image source={posterImage} style={styles.favoritePoster} />
+          ) : (
+            <View style={[styles.favoritePoster, styles.placeholderPoster]}>
+              <MaterialIcons name={item.contentType === 'movie' ? 'movie' : 'tv'} size={24} color="#666" />
+              <Text style={styles.placeholderText} numberOfLines={2}>
+                {item.title.length > 8 ? item.title.substring(0, 8) + '...' : item.title}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.favoriteInfo}>
+          <Text style={styles.favoriteTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.favoriteType}>
+            {item.contentType === 'movie' ? 'Película' : 'Serie'}
+          </Text>
+          <Text style={styles.favoriteDate}>
+            Agregado: {item.addedAt.toLocaleDateString()}
+          </Text>
+        </View>
+        <MaterialIcons name="chevron-right" size={24} color="#888" />
       </TouchableOpacity>
+    );
+  };
+
+  const renderAchievementItem = ({ item }: { item: UserAchievementProgress }) => {
+    const achievementDef = allAchievements.find(a => a.id === item.achievementId);
+    if (!achievementDef) return null;
+
+    const isCompleted = item.isCompleted;
+    const progressPercentage = Math.min((item.currentProgress / item.targetProgress) * 100, 100);
+
+    return (
+      <View style={[styles.achievementCard, isCompleted && styles.achievementCardCompleted]}>
+        <View style={styles.achievementHeader}>
+          <View style={[styles.achievementIcon, isCompleted && styles.achievementIconCompleted]}>
+            <MaterialIcons 
+              name={achievementDef.icon as any} 
+              size={28} 
+              color={isCompleted ? '#FFD700' : '#888'} 
+            />
+          </View>
+          <View style={styles.achievementInfo}>
+            <View style={styles.achievementTitleRow}>
+              <Text style={styles.achievementTitle}>{achievementDef.title}</Text>
+              {isCompleted && (
+                <MaterialIcons name="verified" size={20} color="#4CAF50" />
+              )}
+            </View>
+            <Text style={styles.achievementDescription}>{achievementDef.description}</Text>
+            <View style={styles.achievementProgress}>
+              <View style={styles.progressBarBackground}>
+                <View 
+                  style={[
+                    styles.progressBarFill, 
+                    { 
+                      width: `${progressPercentage}%`,
+                      backgroundColor: isCompleted ? '#4CAF50' : '#DF2892'
+                    }
+                  ]} 
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {item.currentProgress}/{item.targetProgress}
+              </Text>
+            </View>
+            {isCompleted && item.completedAt && (
+              <Text style={styles.completedText}>
+                Completado el {item.completedAt.toLocaleDateString()}
+              </Text>
+            )}
+          </View>
+        </View>
+      </View>
     );
   };
 
@@ -341,7 +500,11 @@ const UserProfileScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -416,23 +579,34 @@ const UserProfileScreen = () => {
         {/* Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{userReviews.length}</Text>
+            <Text style={styles.statNumber}>
+              {reviewsLoading ? '...' : userReviews.length}
+            </Text>
             <Text style={styles.statLabel}>Reseñas</Text>
           </View>
           
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{userFavorites.length}</Text>
+            <Text style={styles.statNumber}>
+              {favoritesLoading ? '...' : userFavorites.length}
+            </Text>
             <Text style={styles.statLabel}>Favoritos</Text>
           </View>
           
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>
-              {userReviews.length > 0 
-                ? (userReviews.reduce((sum, review) => sum + review.rating, 0) / userReviews.length).toFixed(1)
-                : '0.0'
-              }
+              {isOwnProfile ? (
+                reviewsLoading ? '...' : (
+                  userReviews.length > 0 
+                    ? (userReviews.reduce((sum, review) => sum + review.rating, 0) / userReviews.length).toFixed(1)
+                    : '0.0'
+                )
+              ) : (
+                achievementsLoading ? '...' : userAchievements.filter(a => a.isCompleted).length
+              )}
             </Text>
-            <Text style={styles.statLabel}>Puntuación media</Text>
+            <Text style={styles.statLabel}>
+              {isOwnProfile ? 'Puntuación media' : 'Logros'}
+            </Text>
           </View>
         </View>
       </View>
@@ -456,6 +630,17 @@ const UserProfileScreen = () => {
             Favoritos
           </Text>
         </TouchableOpacity>
+        
+        {!isOwnProfile && (
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'achievements' && styles.activeTab]}
+            onPress={() => setActiveTab('achievements')}
+          >
+            <Text style={[styles.tabText, activeTab === 'achievements' && styles.activeTabText]}>
+              Logros
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Content */}
@@ -483,7 +668,7 @@ const UserProfileScreen = () => {
               </Text>
             </View>
           )
-        ) : (
+        ) : activeTab === 'favorites' ? (
           // Mostrar favoritos reales
           favoritesLoading ? (
             <ActivityIndicator size="large" color="#DF2892" style={styles.loader} />
@@ -492,10 +677,9 @@ const UserProfileScreen = () => {
               data={userFavorites}
               keyExtractor={(item) => item.id}
               renderItem={renderFavoriteItem}
-              numColumns={2}
               scrollEnabled={false}
               showsVerticalScrollIndicator={false}
-              columnWrapperStyle={styles.favoritesRow}
+              contentContainerStyle={{ paddingBottom: 20 }}
             />
           ) : (
             <View style={styles.emptyState}>
@@ -506,6 +690,27 @@ const UserProfileScreen = () => {
                   ? 'Aún no has agregado contenido a favoritos'
                   : 'Este usuario no tiene favoritos'
                 }
+              </Text>
+            </View>
+          )
+        ) : (
+          // Mostrar logros de amigos
+          achievementsLoading ? (
+            <ActivityIndicator size="large" color="#DF2892" style={styles.loader} />
+          ) : userAchievements.length > 0 ? (
+            <FlatList
+              data={userAchievements}
+              keyExtractor={(item) => item.id}
+              renderItem={renderAchievementItem}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          ) : (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="emoji-events" size={64} color="#666" />
+              <Text style={styles.emptyTitle}>Sin logros</Text>
+              <Text style={styles.emptyText}>
+                Este usuario aún no ha desbloqueado ningún logro
               </Text>
             </View>
           )
@@ -659,50 +864,66 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#222',
     marginHorizontal: 16,
-    borderRadius: 8,
+    marginBottom: 16,
+    borderRadius: 12,
     padding: 4,
   },
   tab: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    borderRadius: 6,
+    justifyContent: 'center',
+    borderRadius: 8,
+    minHeight: 44,
   },
   activeTab: {
     backgroundColor: '#DF2892',
   },
   tabText: {
     color: '#888',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
+    textAlign: 'center',
   },
   activeTabText: {
     color: '#fff',
   },
   contentContainer: {
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   loader: {
     marginTop: 40,
   },
   reviewCard: {
     backgroundColor: '#222',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   reviewHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  reviewPoster: {
-    width: 50,
-    height: 75,
-    borderRadius: 4,
+  reviewImageContainer: {
+    width: 60,
+    height: 90,
     marginRight: 12,
+  },
+  reviewPoster: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
   reviewInfo: {
     flex: 1,
+    paddingRight: 8,
   },
   reviewTitle: {
     color: '#fff',
@@ -710,9 +931,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
+  reviewRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  ratingText: {
+    color: '#FFD700',
+    fontSize: 12,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
   starsContainer: {
     flexDirection: 'row',
-    marginBottom: 4,
   },
   reviewDate: {
     color: '#888',
@@ -723,29 +954,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  favoritesRow: {
-    justifyContent: 'space-between',
-  },
   favoriteCard: {
-    width: '30%',
-    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  favoriteImageContainer: {
+    width: 60,
+    height: 90,
+    marginRight: 12,
   },
   favoritePoster: {
     width: '100%',
-    aspectRatio: 2/3,
+    height: '100%',
     borderRadius: 8,
-    marginBottom: 8,
+  },
+  placeholderPoster: {
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    color: '#888',
+    fontSize: 8,
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  favoriteInfo: {
+    flex: 1,
+    paddingRight: 8,
   },
   favoriteTitle: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  favoriteType: {
+    color: '#DF2892',
     fontSize: 12,
-    textAlign: 'center',
+    fontWeight: '500',
+    marginBottom: 4,
   },
   favoriteDate: {
-    color: '#666',
-    fontSize: 10,
-    textAlign: 'center',
-    marginTop: 4,
+    color: '#888',
+    fontSize: 12,
   },
   emptyState: {
     alignItems: 'center',
@@ -763,6 +1022,85 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // Estilos para logros
+  achievementCard: {
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  achievementCardCompleted: {
+    borderColor: '#4CAF50',
+    backgroundColor: '#1a2b1a',
+  },
+  achievementHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  achievementIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  achievementIconCompleted: {
+    backgroundColor: '#FFD700',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  achievementInfo: {
+    flex: 1,
+  },
+  achievementTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  achievementTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+  },
+  achievementDescription: {
+    color: '#888',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  achievementProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressBarBackground: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#333',
+    borderRadius: 3,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#DF2892',
+    borderRadius: 3,
+  },
+  progressText: {
+    color: '#888',
+    fontSize: 12,
+    minWidth: 50,
+    textAlign: 'right',
+  },
+  completedText: {
+    color: '#4CAF50',
+    fontSize: 12,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 });
 

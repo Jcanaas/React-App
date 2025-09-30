@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { SoundtrackItem, ContentItem } from '../components/ContentData';
-import { achievementService } from '../services/AchievementService';
+import { userProgressService } from '../services/UserProgressService';
 import { auth } from '../components/firebaseConfig';
 import StatsLogger from '../utils/statsLogger';
 
-// Configurar el comportamiento de las notificaciones
+// Configurar el comportamiento de las notificaciones para media
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -16,6 +17,19 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
+
+// Configurar canales de notificación para Android
+if (Platform.OS === 'android') {
+  Notifications.setNotificationChannelAsync('music-channel', {
+    name: 'Reproductor de Música',
+    importance: Notifications.AndroidImportance.HIGH,
+    sound: null,
+    vibrationPattern: [0],
+    lightColor: '#DF2892',
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    bypassDnd: true,
+  });
+}
 
 interface AudioPlayerState {
   // Estado del reproductor
@@ -160,21 +174,20 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
       const action = response.actionIdentifier;
+      console.log('🎵 Acción de notificación recibida:', action);
       
       switch (action) {
-        case 'play_pause':
+        case 'TOGGLE_PLAYBACK':
           playPause();
           break;
-        case 'next':
+        case 'NEXT_TRACK':
           nextTrack();
           break;
-        case 'previous':
+        case 'PREVIOUS_TRACK':
           previousTrack();
           break;
-        case 'stop':
-          stop();
-          break;
         default:
+          console.log('🎵 Acción no reconocida:', action);
           break;
       }
     });
@@ -182,29 +195,36 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     return () => subscription.remove();
   }, []);
 
-  // Configurar categorías de notificación
+  // Configurar categorías de notificación multimedia
   const setupNotificationCategories = async () => {
     try {
-      await Notifications.setNotificationCategoryAsync('AUDIO_PLAYER', [
+      // Crear categoría con acciones específicas para media
+      await Notifications.setNotificationCategoryAsync('MEDIA_PLAYER', [
         {
-          identifier: 'previous',
-          buttonTitle: '⏮️',
+          identifier: 'PREVIOUS_TRACK',
+          buttonTitle: '⏮️ Anterior',
           options: {
             opensAppToForeground: false,
+            isDestructive: false,
+            isAuthenticationRequired: false,
           },
         },
         {
-          identifier: 'play_pause',
-          buttonTitle: isPlaying ? '⏸️' : '▶️',
+          identifier: 'TOGGLE_PLAYBACK',
+          buttonTitle: isPlaying ? '⏸️ Pausar' : '▶️ Reproducir',
           options: {
             opensAppToForeground: false,
+            isDestructive: false,
+            isAuthenticationRequired: false,
           },
         },
         {
-          identifier: 'next',
-          buttonTitle: '⏭️',
+          identifier: 'NEXT_TRACK',
+          buttonTitle: '⏭️ Siguiente',
           options: {
             opensAppToForeground: false,
+            isDestructive: false,
+            isAuthenticationRequired: false,
           },
         },
       ]);
@@ -221,19 +241,59 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
       await setupNotificationCategories();
       await Notifications.dismissAllNotificationsAsync();
 
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: currentTrack.title,
-          body: `${currentContent.nombre} • ${isPlaying ? 'Reproduciendo' : 'Pausado'}`,
-          data: {
-            type: 'audio_player',
-            track: currentTrack.title,
-            content: currentContent.nombre
-          },
-          categoryIdentifier: 'AUDIO_PLAYER',
-          sound: false,
+      // Preparar la imagen del álbum
+      let albumArtUrl = null;
+      if (currentContent.verticalbanner) {
+        albumArtUrl = typeof currentContent.verticalbanner === 'string' 
+          ? currentContent.verticalbanner 
+          : currentContent.verticalbanner.uri || null;
+      }
+
+      console.log('🖼️ Album art URL:', albumArtUrl);
+
+      // Crear notificación multimedia simplificada
+      const notificationContent: any = {
+        title: currentTrack.title,
+        body: currentContent.nombre,
+        subtitle: isPlaying ? '🎵 Reproduciendo' : '⏸️ Pausado',
+        categoryIdentifier: 'MEDIA_PLAYER',
+        sound: false,
+        sticky: true,
+        priority: 'high' as const,
+        color: '#DF2892',
+        badge: 0,
+        data: {
+          type: 'multimedia',
+          track: currentTrack.title,
+          artist: currentContent.nombre,
+          isPlaying: isPlaying,
+          albumArt: albumArtUrl,
         },
+      };
+
+      // Configuración específica por plataforma
+      if (Platform.OS === 'android') {
+        notificationContent.channelId = 'music-channel';
+      } else if (Platform.OS === 'ios' && albumArtUrl) {
+        // iOS: usar attachments para mostrar imagen
+        notificationContent.attachments = [{
+          type: 'UNNotificationAttachmentTypeImage',
+          identifier: 'album-artwork',
+          url: albumArtUrl,
+          typeHint: 'public.jpeg',
+        }];
+      }
+
+      console.log('📱 Enviando notificación multimedia:', {
+        title: notificationContent.title,
+        hasImage: !!albumArtUrl,
+        platform: Platform.OS,
+      });
+
+      await Notifications.scheduleNotificationAsync({
+        content: notificationContent,
         trigger: null,
+        identifier: 'multimedia-notification',
       });
     } catch (error) {
       console.error('Error mostrando notificación:', error);
@@ -307,12 +367,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
             // Solo enviar si son minutos válidos (múltiplos de 5 y no excesivos)
             if (minutesToSend >= 5 && minutesToSend <= 30) {
               // Enviar de manera asíncrona sin bloquear la UI
-              achievementService.incrementStat(auth.currentUser.uid, 'totalMusicTime', minutesToSend)
+              userProgressService.incrementStat(auth.currentUser.uid, 'totalMusicTime', minutesToSend)
                 .then(() => {
                   StatsLogger.logMusicTime(minutesToSend, auth.currentUser!.uid, blocksOf5Minutes);
                   musicTimeTracker.current.lastSentTime = blocksOf5Minutes * 5;
                 })
-                .catch(error => {
+                .catch((error: any) => {
                   console.error('⚠️ Error actualizando tiempo de música:', error);
                 });
             } else {

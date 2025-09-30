@@ -1,350 +1,270 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
-  ScrollView,
-  StyleSheet,
   Text,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  StyleSheet,
   FlatList,
-  RefreshControl,
-  Animated,
-  Dimensions
+  TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRobustGamification } from '../contexts/RobustGamificationContext';
-import { auth } from '../components/firebaseConfig';
-import { useRouter } from 'expo-router';
 import Header from '../components/Header';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  points: number;
+  completed: boolean;
+  progress: number;
+  maxProgress: number;
+  icon: keyof typeof MaterialIcons.glyphMap;
+}
 
-export default function AchievementsScreen() {
-  const router = useRouter();
-  const {
-    userProgress,
-    userAchievements,
-    achievementSummary,
-    allAchievements,
-    isLoading,
-    isInitialized,
-    totalPoints,
-    completionPercentage,
-    recentAchievements,
-    upcomingAchievements,
-    refreshAllData,
-    forceInitialization,
-    syncOnAchievementsView,
-    getAchievementDefinition
-  } = useRobustGamification();
+interface RenderAchievementProps {
+  item: Achievement;
+}
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [refreshing, setRefreshing] = useState(false);
+const SAMPLE_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: '1',
+    title: 'Primer Paso',
+    description: 'Completa tu primera acción en la aplicación',
+    category: 'beginner',
+    rarity: 'common' as const,
+    points: 10,
+    progress: 1,
+    maxProgress: 1,
+    completed: true,
+    icon: 'star',
+  },
+  {
+    id: '2',
+    title: 'Explorador',
+    description: 'Navega por 5 pantallas diferentes',
+    category: 'exploration',
+    rarity: 'common' as const,
+    points: 15,
+    progress: 3,
+    maxProgress: 5,
+    completed: false,
+    icon: 'explore',
+  },
+  {
+    id: '3',
+    title: 'Melómano',
+    description: 'Escucha 10 canciones completas',
+    category: 'music',
+    rarity: 'rare' as const,
+    points: 25,
+    progress: 7,
+    maxProgress: 10,
+    completed: false,
+    icon: 'music-note',
+  },
+  {
+    id: '4',
+    title: 'Crítico',
+    description: 'Escribe 3 reseñas de películas',
+    category: 'reviews',
+    rarity: 'rare' as const,
+    points: 30,
+    progress: 1,
+    maxProgress: 3,
+    completed: false,
+    icon: 'rate-review',
+  },
+  {
+    id: '5',
+    title: 'Maratonista',
+    description: 'Ve 5 películas en un día',
+    category: 'watching',
+    rarity: 'epic' as const,
+    points: 50,
+    progress: 0,
+    maxProgress: 5,
+    completed: false,
+    icon: 'movie',
+  },
+  {
+    id: '6',
+    title: 'Legendario',
+    description: 'Alcanza 100 puntos totales',
+    category: 'points',
+    rarity: 'legendary' as const,
+    points: 100,
+    progress: 85,
+    maxProgress: 100,
+    completed: false,
+    icon: 'emoji-events',
+  },
+];
 
-  // Animaciones
-  const fadeAnim = new Animated.Value(0);
-  const slideAnim = new Animated.Value(50);
+const CATEGORIES = [
+  { key: 'all', label: 'Todos', color: '#DF2892' },
+  { key: 'beginner', label: 'Principiante', color: '#4CAF50' },
+  { key: 'exploration', label: 'Exploración', color: '#2196F3' },
+  { key: 'music', label: 'Música', color: '#FF9800' },
+  { key: 'reviews', label: 'Reseñas', color: '#9C27B0' },
+  { key: 'watching', label: 'Películas', color: '#F44336' },
+  { key: 'points', label: 'Puntos', color: '#FFD700' },
+];
 
-  // Sincronizar SOLO una vez al entrar a la pantalla
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user?.uid && !isInitialized) {
-      console.log('🏆 [MOUNT] Primera carga de logros - leyendo BD una vez');
-      syncOnAchievementsView();
-    }
-  }, []); // Solo al montar, no dependencies que causen bucles
+const RARITY_COLORS = {
+  common: '#4CAF50',
+  rare: '#2196F3',
+  epic: '#FF9800',
+  legendary: '#9C27B0',
+};
 
-  useEffect(() => {
-    console.log('🏆 [ACHIEVEMENTS SCREEN] Estado inicial:', {
-      isLoading,
-      isInitialized,
-      userAchievementsCount: userAchievements?.length,
-      allAchievementsCount: allAchievements?.length,
-      totalPoints,
-      completionPercentage
-    });
+function RobustAchievements() {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const filteredAchievements = SAMPLE_ACHIEVEMENTS.filter(achievement => 
+    selectedCategory === 'all' || achievement.category === selectedCategory
+  );
 
-    if (!isLoading) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isLoading, isInitialized, userAchievements, allAchievements]);
+  const completedCount = SAMPLE_ACHIEVEMENTS.filter(a => a.completed).length;
+  const totalPoints = SAMPLE_ACHIEVEMENTS
+    .filter(a => a.completed)
+    .reduce((sum, a) => sum + a.points, 0);
+  const progressPercentage = Math.round((completedCount / SAMPLE_ACHIEVEMENTS.length) * 100);
 
-  // Categorías con iconos y colores
-  const categories = [
-    { key: 'all', label: 'Todos', icon: 'apps', color: '#DF2892' },
-    { key: 'reviews', label: 'Reseñas', icon: 'rate-review', color: '#FF6B6B' },
-    { key: 'social', label: 'Social', icon: 'people', color: '#4ECDC4' },
-    { key: 'music', label: 'Música', icon: 'music-note', color: '#45B7D1' },
-    { key: 'time', label: 'Tiempo', icon: 'access-time', color: '#96CEB4' }
-  ];
-
-  const rarities = [
-    { key: 'all', label: 'Todas', color: '#DF2892' },
-    { key: 'common', label: 'Común', color: '#4CAF50' },
-    { key: 'rare', label: 'Raro', color: '#2196F3' },
-    { key: 'epic', label: 'Épico', color: '#FF9800' },
-    { key: 'legendary', label: 'Legendario', color: '#9C27B0' }
-  ];
-
-  // Filtrar logros
-  const filteredAchievements = allAchievements.filter(achievement => {
-    const categoryMatch = selectedCategory === 'all' || achievement.category === selectedCategory;
-    const rarityMatch = selectedRarity === 'all' || achievement.rarity === selectedRarity;
-    return categoryMatch && rarityMatch;
-  });
-
-  // Obtener progreso del usuario para cada logro
-  const getAchievementProgress = (achievementId: string) => {
-    return userAchievements.find(ua => ua.achievementId === achievementId);
-  };
-
-  // Función de refresco
-  const onRefresh = async () => {
-    console.log('🔄 [ACHIEVEMENTS SCREEN] Iniciando refresh...');
-    setRefreshing(true);
-    try {
-      await refreshAllData();
-      console.log('✅ [ACHIEVEMENTS SCREEN] Refresh completado');
-    } catch (error) {
-      console.error('❌ [ACHIEVEMENTS SCREEN] Error refreshing:', error);
-    }
-    setRefreshing(false);
-  };
-
-  // Calcular estadísticas
-  const completedCount = userAchievements.filter(ua => ua.isCompleted).length;
-  const progressPercentage = Math.round(completionPercentage);
-  const currentLevel = Math.floor(totalPoints / 1000) + 1;
-  const pointsForNextLevel = 1000 - (totalPoints % 1000);
-
-  if (isLoading && !isInitialized) {
+  const renderAchievement = ({ item }: RenderAchievementProps) => {
+    const progressPercent = (item.progress / item.maxProgress) * 100;
+    
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#DF2892" />
-        <Text style={styles.loadingText}>Cargando logros...</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      {/* Header normal de la app */}
-      <Header />
-      
-      {/* Header con estadísticas */}
-      <Animated.View 
-        style={[
-          styles.headerContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
-        ]}
-      >
-        <LinearGradient
-          colors={['#1a1a1a', '#2d2d2d', '#1a1a1a']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{completedCount}</Text>
-                <Text style={styles.statLabel}>Logros</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{totalPoints}</Text>
-                <Text style={styles.statLabel}>Puntos</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{currentLevel}</Text>
-                <Text style={styles.statLabel}>Nivel</Text>
-              </View>
-            </View>
+      <View style={styles.achievementCard}>
+        <View style={styles.achievementHeader}>
+          <View style={styles.achievementIcon}>
+            <MaterialIcons 
+              name={item.icon} 
+              size={24} 
+              color={item.completed ? '#4CAF50' : '#666'} 
+            />
+          </View>
+          
+          <View style={styles.achievementInfo}>
+            <Text style={styles.achievementTitle}>{item.title}</Text>
+            <Text style={styles.achievementDescription}>{item.description}</Text>
             
-            <View style={styles.progressContainer}>
-              <View style={styles.progressInfo}>
-                <Text style={styles.progressText}>Progreso General</Text>
-                <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
+            <View style={styles.achievementMeta}>
+              <View style={styles.pointsContainer}>
+                <MaterialIcons name="stars" size={16} color="#FFD700" />
+                <Text style={styles.pointsText}>{item.points} pts</Text>
               </View>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { width: `${progressPercentage}%` }
-                  ]} 
-                />
+              
+              <View style={[styles.rarityBadge, { backgroundColor: RARITY_COLORS[item.rarity] }]}>
+                <Text style={styles.rarityText}>{item.rarity}</Text>
               </View>
             </View>
           </View>
-        </LinearGradient>
-      </Animated.View>
-
-      {/* Filtros */}
-      <View style={styles.filtersContainer}>
-        <Text style={styles.filterTitle}>Categorías</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-        >
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category.key}
-              style={[
-                styles.filterChip,
-                { 
-                  backgroundColor: selectedCategory === category.key 
-                    ? category.color 
-                    : '#404040' 
-                }
-              ]}
-              onPress={() => setSelectedCategory(category.key)}
-            >
-              <MaterialIcons 
-                name={category.icon as any} 
-                size={20} 
-                color={selectedCategory === category.key ? '#FFF' : '#b3b3b3'} 
+          
+          <View style={styles.achievementStatus}>
+            {item.completed ? (
+              <View style={styles.completedBadge}>
+                <MaterialIcons name="check-circle" size={32} color="#4CAF50" />
+              </View>
+            ) : (
+              <View style={styles.progressContainer}>
+                <Text style={styles.progressText}>{Math.round(progressPercent)}%</Text>
+              </View>
+            )}
+          </View>
+        </View>
+        
+        {!item.completed && (
+          <View style={styles.progressSection}>
+            <Text style={styles.progressLabel}>
+              {item.progress} / {item.maxProgress}
+            </Text>
+            <View style={styles.progressBar}>
+              <View 
+                style={[styles.progressFill, { width: `${Math.min(progressPercent, 100)}%` }]} 
               />
-              <Text style={[
-                styles.filterText,
-                { 
-                  color: selectedCategory === category.key ? '#FFF' : '#b3b3b3' 
-                }
-              ]}>
-                {category.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <Text style={styles.filterTitle}>Rareza</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-        >
-          {rarities.map((rarity) => (
-            <TouchableOpacity
-              key={rarity.key}
-              style={[
-                styles.filterChip,
-                { 
-                  backgroundColor: selectedRarity === rarity.key 
-                    ? rarity.color 
-                    : '#404040' 
-                }
-              ]}
-              onPress={() => setSelectedRarity(rarity.key)}
-            >
-              <Text style={[
-                styles.filterText,
-                { 
-                  color: selectedRarity === rarity.key ? '#FFF' : '#b3b3b3' 
-                }
-              ]}>
-                {rarity.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            </View>
+          </View>
+        )}
       </View>
+    );
+  };
 
-      {/* Lista de logros */}
+  const renderHeader = () => (
+    <View style={styles.headerSection}>
+      <LinearGradient
+        colors={['#1a1a1a', '#2d2d2d']}
+        style={styles.statsContainer}
+      >
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <MaterialIcons name="emoji-events" size={24} color="#FFD700" />
+            <Text style={styles.statValue}>{completedCount}</Text>
+            <Text style={styles.statLabel}>Logros</Text>
+          </View>
+          
+          <View style={styles.statCard}>
+            <MaterialIcons name="stars" size={24} color="#DF2892" />
+            <Text style={styles.statValue}>{totalPoints}</Text>
+            <Text style={styles.statLabel}>Puntos</Text>
+          </View>
+          
+          <View style={styles.statCard}>
+            <MaterialIcons name="trending-up" size={24} color="#4CAF50" />
+            <Text style={styles.statValue}>{progressPercentage}%</Text>
+            <Text style={styles.statLabel}>Progreso</Text>
+          </View>
+        </View>
+
+        <View style={styles.filtersSection}>
+          <Text style={styles.filterTitle}>Categorías</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filtersContainer}
+          >
+            {CATEGORIES.map(category => (
+              <TouchableOpacity
+                key={category.key}
+                style={[
+                  styles.filterButton,
+                  {
+                    backgroundColor: selectedCategory === category.key 
+                      ? category.color 
+                      : '#404040'
+                  }
+                ]}
+                onPress={() => setSelectedCategory(category.key)}
+              >
+                <Text style={[
+                  styles.filterText,
+                  {
+                    color: selectedCategory === category.key ? '#FFF' : '#CCC'
+                  }
+                ]}>
+                  {category.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Header />
+      
       <FlatList
         data={filteredAchievements}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        renderItem={({ item: achievement }) => {
-          const userProgress = getAchievementProgress(achievement.id);
-          const progress = userProgress 
-            ? (userProgress.currentProgress / userProgress.targetProgress) * 100 
-            : 0;
-          const isCompleted = userProgress?.isCompleted || false;
-
-          return (
-            <TouchableOpacity style={styles.achievementCard}>
-              <View style={styles.achievementHeader}>
-                <View style={styles.achievementInfo}>
-                  <View style={styles.achievementTitleRow}>
-                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                    <View style={[
-                      styles.rarityBadge,
-                      { backgroundColor: rarities.find(r => r.key === achievement.rarity)?.color }
-                    ]}>
-                      <Text style={styles.rarityText}>{achievement.rarity}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.achievementDescription}>{achievement.description}</Text>
-                  <View style={styles.achievementMeta}>
-                    <View style={styles.pointsContainer}>
-                      <MaterialIcons name="stars" size={16} color="#FFD700" />
-                      <Text style={styles.pointsText}>{achievement.points} puntos</Text>
-                    </View>
-                    <View style={styles.categoryContainer}>
-                      <MaterialIcons 
-                        name={categories.find(c => c.key === achievement.category)?.icon as any} 
-                        size={16} 
-                        color="#666" 
-                      />
-                      <Text style={styles.categoryText}>
-                        {categories.find(c => c.key === achievement.category)?.label}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                
-                <View style={styles.achievementStatus}>
-                  {isCompleted ? (
-                    <View style={styles.completedBadge}>
-                      <MaterialIcons name="check-circle" size={32} color="#4CAF50" />
-                    </View>
-                  ) : (
-                    <View style={styles.progressCircle}>
-                      <Text style={[styles.progressText, { color: '#FFFFFF', fontSize: 12 }]}>{Math.round(progress)}%</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-
-              {!isCompleted && (
-                <View style={styles.progressSection}>
-                  <View style={styles.progressInfo}>
-                    <Text style={styles.progressLabel}>
-                      {userProgress?.currentProgress || 0} / {achievement.targetValue}
-                    </Text>
-                  </View>
-                  <View style={styles.achievementProgressBar}>
-                    <View 
-                      style={[
-                        styles.achievementProgressFill, 
-                        { width: `${progress}%` }
-                      ]} 
-                    />
-                  </View>
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        }}
-        style={styles.achievementsList}
+        keyExtractor={item => item.id}
+        renderItem={renderAchievement}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -353,250 +273,177 @@ export default function AchievementsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+  listContainer: {
+    paddingBottom: 20,
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  headerContainer: {
-    marginBottom: 20,
-  },
-  headerGradient: {
+  headerSection: {
+    paddingHorizontal: 16,
     paddingTop: 20,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
-  headerContent: {
-    alignItems: 'center',
+  statsContainer: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '100%',
     marginBottom: 20,
   },
-  statItem: {
+  statCard: {
     alignItems: 'center',
   },
-  statNumber: {
-    fontSize: 28,
+  statValue: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFF',
+    marginTop: 5,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#FFF',
-    opacity: 0.9,
-    marginTop: 4,
+    fontSize: 12,
+    color: '#CCC',
+    marginTop: 2,
   },
-  progressContainer: {
-    width: '100%',
+  filtersSection: {
+    marginTop: 10,
+  },
+  filterTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 12,
+  },
+  filtersContainer: {
+    paddingHorizontal: 5,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  achievementCard: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  progressInfo: {
+  achievementHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    alignItems: 'center',
+    flex: 1,
+  },
+  achievementIcon: {
+    marginRight: 16,
+  },
+  achievementDetails: {
+    flex: 1,
+  },
+  achievementTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 4,
+  },
+  achievementDescription: {
+    fontSize: 14,
+    color: '#CCC',
     marginBottom: 8,
   },
-  progressText: {
-    fontSize: 16,
-    color: '#FFF',
-    fontWeight: '600',
+  achievementFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  progressPercentage: {
-    fontSize: 16,
-    color: '#FFF',
+  achievementCategory: {
+    fontSize: 12,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+  },
+  achievementPoints: {
+    fontSize: 14,
     fontWeight: 'bold',
+    color: '#FFD700',
   },
   progressBar: {
-    width: '100%',
-    height: 8,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 4,
+    height: 4,
+    backgroundColor: '#333',
+    borderRadius: 2,
+    marginTop: 8,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#DF2892',
-    borderRadius: 4,
+    borderRadius: 2,
   },
-  filtersContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 12,
-    marginTop: 16,
-  },
-  filterScroll: {
-    marginBottom: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 12,
-    borderRadius: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  achievementsList: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  achievementCard: {
-    backgroundColor: '#2d2d2d',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  achievementHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+  progressText: {
+    fontSize: 12,
+    color: '#CCC',
+    marginTop: 4,
   },
   achievementInfo: {
     flex: 1,
-    marginRight: 16,
-  },
-  achievementTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  achievementTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    flex: 1,
-  },
-  rarityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-  },
-  rarityText: {
-    fontSize: 12,
-    color: '#FFF',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  achievementDescription: {
-    fontSize: 14,
-    color: '#b3b3b3',
-    lineHeight: 20,
-    marginBottom: 12,
   },
   achievementMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   pointsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   pointsText: {
-    fontSize: 14,
-    color: '#DF2892',
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#FFD700',
     marginLeft: 4,
-    fontWeight: '600',
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  rarityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  categoryText: {
-    fontSize: 14,
-    color: '#b3b3b3',
-    marginLeft: 4,
+  rarityText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textTransform: 'uppercase',
   },
   achievementStatus: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 12,
   },
   completedBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(76, 175, 80, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    padding: 8,
   },
-  progressCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#404040',
+  progressContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#757575',
+    paddingHorizontal: 8,
   },
   progressSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#404040',
+    width: '100%',
+    marginTop: 8,
   },
   progressLabel: {
-    fontSize: 14,
-    color: '#b3b3b3',
-    marginBottom: 8,
-  },
-  achievementProgressBar: {
-    height: 6,
-    backgroundColor: '#404040',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  achievementProgressFill: {
-    height: '100%',
-    backgroundColor: '#DF2892',
-    borderRadius: 3,
-  },
-  debugButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#DF2892',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    fontSize: 12,
+    color: '#CCC',
+    marginBottom: 4,
   },
 });
+
+export default RobustAchievements;
+

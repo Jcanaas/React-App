@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View, Alert } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { auth, db } from '../components/firebaseConfig';
@@ -12,6 +12,7 @@ import OMDbReviews from './OMDbReviews';
 import UserReviews from './UserReviews';
 import RealActorCast from './RealActorCast';
 import { favoritesService } from '../services/FavoritesService';
+import OptimizedImage from './OptimizedImage';
 
 // Constantes de dimensiones
 const windowWidth = Dimensions.get('window').width;
@@ -30,7 +31,19 @@ const ContentDetailScreen: React.FC = () => {
   const content = ContentData.find(item => item.id === contentId);
 
   if (!content) {
-    return <Text style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Contenido no encontrado</Text>;
+    console.log('❌ Contenido no encontrado:', { 
+      contentId, 
+      availableIds: ContentData.slice(0, 5).map(item => ({ id: item.id, nombre: item.nombre }))
+    });
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#181818', padding: 20 }}>
+        <MaterialIcons name="error" size={64} color="#666" />
+        <Text style={{ color: '#fff', textAlign: 'center', marginTop: 16, fontSize: 18 }}>Contenido no encontrado</Text>
+        <Text style={{ color: '#888', textAlign: 'center', marginTop: 8, fontSize: 14 }}>
+          ID buscado: {contentId}
+        </Text>
+      </View>
+    );
   }
 
   const [showEpisodes, setShowEpisodes] = useState(false);
@@ -141,19 +154,18 @@ const ContentDetailScreen: React.FC = () => {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Banner */}
       <View style={[styles.bannerContainer, { width: windowWidth, height: bannerHeight }]}>
-        <Image source={content.fondo} style={styles.backgroundImage} />
+        <OptimizedImage source={content.fondo} style={styles.backgroundImage} showLoader={true} />
         <View style={styles.overlay} />
         <View style={styles.logoContainer}>
-          <Image
+          <OptimizedImage
             source={content.logo}
-            style={[
-              styles.logo,
-              {
-                width: isMobile ? 220 : 440,
-                height: isMobile ? 90 : 180,
-              },
-            ]}
+            style={{
+              ...styles.logo,
+              width: isMobile ? 220 : 440,
+              height: isMobile ? 90 : 180,
+            }}
             resizeMode="contain"
+            showLoader={true}
           />
         </View>
       </View>

@@ -426,12 +426,36 @@ class AchievementService {
         throw new Error('UserId no puede estar vacío');
       }
 
+      const docRef = doc(this.userStatsCollection, userId);
+
+      // Asegurarse de que el documento exista. Si no existe, crear uno básico.
+      const existing = await getDoc(docRef);
+      if (!existing.exists()) {
+        console.log('📊 Documento de userStats no existe, creando documento inicial antes de incrementar');
+        const initialStats = {
+          userId,
+          totalReviews: 0,
+          totalMusicTime: 0,
+          totalAppTime: 0,
+          totalMessages: 0,
+          moviesWatched: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalPoints: 0,
+          level: 1,
+          experience: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+        await setDoc(docRef, initialStats);
+      }
+
       const updates: any = {
         [statName]: increment(value),
         updatedAt: serverTimestamp()
       };
 
-      await updateDoc(doc(this.userStatsCollection, userId), updates);
+      await updateDoc(docRef, updates);
 
       // Solo verificar logros si NO es totalPoints (para evitar bucle infinito)
       if (statName !== 'totalPoints') {

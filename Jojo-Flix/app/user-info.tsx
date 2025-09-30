@@ -182,6 +182,34 @@ const UserInfoScreen = () => {
               <Text style={styles.name}>{userData.name}</Text>
               <Text style={styles.email}>{userData.email}</Text>
             </View>
+
+            
+            {/* Sección de Logros */}
+            <View style={styles.achievementsSection}>
+              <TouchableOpacity 
+                style={styles.achievementsButton}
+                onPress={() => router.push('/achievements-main')}
+              >
+                <View style={styles.achievementsButtonContent}>
+                  <View style={styles.achievementsButtonLeft}>
+                    <MaterialIcons name="emoji-events" size={24} color="#FFD700" />
+                    <View style={styles.achievementsInfo}>
+                      <Text style={styles.achievementsTitle}>Mis Logros</Text>
+                      <Text style={styles.achievementsSubtitle}>
+                        Nivel {Math.floor((totalPoints || 0) / 1000) + 1} • {userAchievements?.filter(a => a.isCompleted).length || 0} logros • {totalPoints || 0} puntos
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.achievementsButtonRight}>
+                    <View style={styles.progressCircle}>
+                      <Text style={styles.progressText}>{Math.round(completionPercentage || 0)}%</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={24} color="#666" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+
             {/* Sección Favoritos con Carousel */}
             <FavoritesCarousel 
               favoriteIds={favoritos.map(([favId]) => favId)}
@@ -211,31 +239,7 @@ const UserInfoScreen = () => {
               )}
             </View>
 
-            {/* Sección de Logros */}
-            <View style={styles.achievementsSection}>
-              <TouchableOpacity 
-                style={styles.achievementsButton}
-                onPress={() => router.push('/achievements-main')}
-              >
-                <View style={styles.achievementsButtonContent}>
-                  <View style={styles.achievementsButtonLeft}>
-                    <MaterialIcons name="emoji-events" size={24} color="#FFD700" />
-                    <View style={styles.achievementsInfo}>
-                      <Text style={styles.achievementsTitle}>Mis Logros</Text>
-                      <Text style={styles.achievementsSubtitle}>
-                        Nivel {Math.floor((totalPoints || 0) / 1000) + 1} • {userAchievements?.filter(a => a.isCompleted).length || 0} logros • {totalPoints || 0} puntos
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.achievementsButtonRight}>
-                    <View style={styles.progressCircle}>
-                      <Text style={styles.progressText}>{Math.round(completionPercentage || 0)}%</Text>
-                    </View>
-                    <MaterialIcons name="chevron-right" size={24} color="#666" />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
+            
 
             {/* Botón de cerrar sesión */}
             <View style={styles.logoutSection}>

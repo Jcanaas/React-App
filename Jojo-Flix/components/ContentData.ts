@@ -961,7 +961,50 @@ fuente: [
     nombresEpisodios: ['Película completa'],
     fechaEstreno: '2018',
     puntuacion: 3.5,
-    categoria: ['Película'],
+    categoria: ['Película', 'Terror'],
     verticalbanner: require('../assets/images/28_years_later-958240308-large.jpg')
+  },
+  {
+    id: 'Nosferatu',
+    nombre: 'Nosferatu',
+    descripcion: 'Historia gótica de obsesión entre una joven hechizada y el aterrador vampiro encaprichado de ella, que causa un indescriptible terror a su paso.',
+    fondo: require('../assets/images/wp14949418.webp'),
+    logo: require('../assets/images/nobackground.png'),
+    capitulos: 1,
+    fuente: ['https://mega.nz/embed/gZ1XBI5L#yjyx4Wt-f0WWKKPHMmjls9lgzJqbLycWeS_RLm_UXZs'],
+    nombresEpisodios: ['Película completa'],
+    fechaEstreno: '2024',
+    puntuacion: 7,
+    categoria: ['Película', 'Terror'],
+    verticalbanner: require('../assets/images/3kkr1vc9a2.jpg')
+  },
+  {
+    id: 'Coldwater',
+    nombre: 'Coldwater',
+    descripcion: 'John traslada a su familia a un pueblo rural, se hace amigo de Tommy, que esconde oscuros secretos. La fascinación de John por Tommy crece a medida que su esposa Fiona comienza a sospechar. Se descubren verdades ocultas e ira reprimida.',
+    fondo: require('../assets/images/MV5BM2RmZGU1ZGYtNjU2OC00NTQ0LTg2ZmItZDY2NmRiNDhiOWU5XkEyXkFqcGc@._V1_FMjpg_UX937_.jpg'),
+    logo: require('../assets/images/9420_TT.webp'),
+    capitulos: 6,
+fuente: [
+      "https://mega.nz/embed/8AsBwSKR#5tSB1mdUx1wZrYAAgLOpKO9AJvB6L6wMCH4nKF9sCiA",
+      "https://mega.nz/embed/9R0XkI4S#2qu3LdmddWHHckB04ba1sL61Z1TXHiMV5YO0fdUFECA",
+      "https://mega.nz/embed/EQVHjSBC#IE4beu6qjqHikGNxyMD_yx6Usiccp1_3o1eVEIcB7X4",
+      "https://mega.nz/embed/1EUlkRSR#3cuV9lyv8m5mMa7fvhs3jjGYKtAeJHNhTlcN5clmw6c",
+      "https://mega.nz/embed/gMVR1KBQ#UPG3z3efEmNe0WUTfalesTfA5Aia6i-oHPzXJOPsj1o",
+      "https://mega.nz/embed/ZJsSFCZD#FdBeCSqNJAq3vyvHQx7UDMQbWYFMyWCXh1GxchUOxWQ",
+    ],
+
+    nombresEpisodios: [
+  "Episodio 1",
+  "Episodio 2",
+  "Episodio 3",
+  "Episodio 4",
+  "Episodio 5",
+  "Episodio 6",
+],
+    fechaEstreno: '2006',
+    puntuacion: 7,
+    categoria: ['Serie'],
+    verticalbanner: require('../assets/images/170506955_ycasug.jpg')
   },
 ];

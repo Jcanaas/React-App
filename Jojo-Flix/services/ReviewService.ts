@@ -17,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../components/firebaseConfig';
 import { userProfileService } from './UserProfileService';
-import { achievementService } from './AchievementService';
+import { userProgressService } from './UserProgressService';
 
 export interface UserReview {
   id?: string;
@@ -123,7 +123,7 @@ class ReviewService {
       
       // 🎮 GAMIFICACIÓN: Incrementar contador de reseñas
       try {
-        await achievementService.incrementStat(user.uid, 'totalReviews', 1);
+        await userProgressService.incrementStat(user.uid, 'totalReviews', 1);
         console.log('🏆 Estadísticas de gamificación actualizadas: +1 reseña');
       } catch (gamificationError) {
         console.error('⚠️ Error actualizando gamificación:', gamificationError);

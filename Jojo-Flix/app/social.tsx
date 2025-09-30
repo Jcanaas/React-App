@@ -399,18 +399,6 @@ const SocialScreen = () => {
       
       {renderTabBar()}
       
-      {/* Botón de favoritos de amigos */}
-      {friends.length > 0 && (
-        <TouchableOpacity
-          style={styles.friendsFavoritesButton}
-          onPress={() => router.push('/friends-favorites')}
-        >
-          <MaterialIcons name="favorite" size={20} color="#DF2892" />
-          <Text style={styles.friendsFavoritesText}>Ver favoritos de amigos</Text>
-          <MaterialIcons name="arrow-forward-ios" size={16} color="#DF2892" />
-        </TouchableOpacity>
-      )}
-      
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -608,25 +596,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  friendsFavoritesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#222',
-    marginHorizontal: 16,
-    marginVertical: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  friendsFavoritesText: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 12,
-  },
+
 });
 
 export default SocialScreen;

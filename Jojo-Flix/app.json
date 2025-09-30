@@ -22,10 +22,9 @@
         "ACCESS_NETWORK_STATE"
       ],
       "allowBackup": false,
-      "icon": "./assets/images/icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#00000000"
       },
       "notifications": {
         "icon": "./assets/images/icon.png",
@@ -58,7 +57,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#DF2892",
+          "color": "#FFFFFF00",
           "defaultChannel": "default"
         }
       ]

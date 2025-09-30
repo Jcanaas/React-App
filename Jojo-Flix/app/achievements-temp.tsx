@@ -65,27 +65,14 @@ export default function AchievementsScreen() {
   }, []); // Solo al montar, no dependencies que causen bucles
 
   useEffect(() => {
-    console.log('🏆 [ACHIEVEMENTS SCREEN] Estado completo:', {
+    console.log('🏆 [ACHIEVEMENTS SCREEN] Estado inicial:', {
       isLoading,
       isInitialized,
       userAchievementsCount: userAchievements?.length,
       allAchievementsCount: allAchievements?.length,
       totalPoints,
-      completionPercentage,
-      userProgress,
-      achievementSummary,
-      recentAchievements: recentAchievements?.length,
-      upcomingAchievements: upcomingAchievements?.length,
-      filteredAchievementsCount: filteredAchievements?.length
+      completionPercentage
     });
-    
-    // Log adicional para verificar datos
-    if (allAchievements?.length > 0) {
-      console.log('📋 [ACHIEVEMENTS] Primeros 3 logros:', allAchievements.slice(0, 3));
-    }
-    if (userAchievements?.length > 0) {
-      console.log('👤 [ACHIEVEMENTS] Progreso usuario primeros 3:', userAchievements.slice(0, 3));
-    }
 
     if (!isLoading) {
       Animated.parallel([
@@ -159,23 +146,6 @@ export default function AchievementsScreen() {
       </View>
     );
   }
-  
-  // Fallback si no hay datos pero no está cargando
-  if (!isLoading && (!allAchievements || allAchievements.length === 0)) {
-    return (
-      <View style={styles.container}>
-        <Header />
-        <View style={styles.errorContainer}>
-          <MaterialIcons name="error-outline" size={64} color="#666" />
-          <Text style={styles.errorTitle}>No hay logros disponibles</Text>
-          <Text style={styles.errorText}>Los logros no se han cargado correctamente.</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-            <Text style={styles.retryText}>Reintentar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
 
   const renderListHeader = () => (
     <Animated.View 
@@ -242,166 +212,72 @@ export default function AchievementsScreen() {
           </View>
 
           {/* Filtros */}
-          <View style={{
-            paddingHorizontal: 20,
-            paddingVertical: 16,
-            backgroundColor: '#2a2a2a',
-            marginBottom: 10,
-            marginHorizontal: 16,
-            borderRadius: 12,
-          }}>
+          <View style={styles.filtersContainer}>
             <Text style={styles.filterTitle}>Categorías</Text>
-            <View style={{ paddingVertical: 10, width: '100%' }}>
-              {/* Primera fila: 3 botones */}
-              <View style={{ flexDirection: 'row', marginBottom: 8, justifyContent: 'space-between' }}>
-                {categories.slice(0, 3).map((category) => (
-                  <TouchableOpacity 
-                    key={category.key} 
-                    style={{
-                      backgroundColor: selectedCategory === category.key ? category.color : '#555555',
-                      paddingHorizontal: 8,
-                      paddingVertical: 10,
-                      borderRadius: 12,
-                      minHeight: 44,
-                      borderWidth: 1,
-                      borderColor: selectedCategory === category.key ? category.color : '#666666',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexDirection: 'row',
-                      width: '31%',
-                    }}
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+              contentContainerStyle={styles.filterScrollContent}
+            >
+              {categories.map((category, index) => (
+                <View key={category.key} style={styles.filterButtonWrapper}>
+                  <AnimatedButton
+                    title={category.label}
                     onPress={() => setSelectedCategory(category.key)}
-                  >
-                    <MaterialIcons 
-                      name={category.icon as any} 
-                      size={16} 
-                      color={selectedCategory === category.key ? '#FFF' : '#b3b3b3'} 
-                      style={{ marginRight: 4 }}
-                    />
-                    <Text style={{
-                      color: selectedCategory === category.key ? '#FFF' : '#CCCCCC',
-                      fontSize: 11,
+                    icon={category.icon as any}
+                    iconSize={18}
+                    iconColor={selectedCategory === category.key ? '#FFF' : '#b3b3b3'}
+                    backgroundColor={selectedCategory === category.key ? category.color : '#404040'}
+                    pressedColor={category.color}
+                    animationType="bounce"
+                    style={styles.animatedFilterButton}
+                    textStyle={{
+                      color: selectedCategory === category.key ? '#FFF' : '#b3b3b3',
+                      fontSize: 14,
                       fontWeight: '600',
-                      textAlign: 'center',
-                    }} numberOfLines={1} ellipsizeMode="tail">
-                      {category.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              
-              {/* Segunda fila: 2 botones centrados */}
-              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                {categories.slice(3, 5).map((category, index) => (
-                  <TouchableOpacity 
-                    key={category.key} 
-                    style={{
-                      backgroundColor: selectedCategory === category.key ? category.color : '#555555',
-                      paddingHorizontal: 8,
-                      paddingVertical: 10,
-                      borderRadius: 12,
-                      minHeight: 44,
-                      borderWidth: 1,
-                      borderColor: selectedCategory === category.key ? category.color : '#666666',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexDirection: 'row',
-                      width: '31%',
-                      marginRight: index === 0 ? 8 : 0,
                     }}
-                    onPress={() => setSelectedCategory(category.key)}
-                  >
-                    <MaterialIcons 
-                      name={category.icon as any} 
-                      size={16} 
-                      color={selectedCategory === category.key ? '#FFF' : '#b3b3b3'} 
-                      style={{ marginRight: 4 }}
-                    />
-                    <Text style={{
-                      color: selectedCategory === category.key ? '#FFF' : '#CCCCCC',
-                      fontSize: 11,
-                      fontWeight: '600',
-                      textAlign: 'center',
-                    }} numberOfLines={1} ellipsizeMode="tail">
-                      {category.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            </View>
+                  />
+                </View>
+              ))}
+            </ScrollView>
 
             <Text style={styles.filterTitle}>Rareza</Text>
-            <View style={{ paddingVertical: 10, width: '100%' }}>
-              {/* Primera fila: 3 botones */}
-              <View style={{ flexDirection: 'row', marginBottom: 8, justifyContent: 'space-between' }}>
-                {rarities.slice(0, 3).map((rarity) => (
-                  <TouchableOpacity
-                    key={rarity.key}
-                    style={{
-                      backgroundColor: selectedRarity === rarity.key ? rarity.color : '#555555',
-                      paddingHorizontal: 8,
-                      paddingVertical: 8,
-                      borderRadius: 20,
-                      minHeight: 36,
-                      borderWidth: 1,
-                      borderColor: selectedRarity === rarity.key ? rarity.color : '#666666',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: '31%',
-                    }}
-                    onPress={() => setSelectedRarity(rarity.key)}
-                  >
-                    <Text style={{
-                      color: selectedRarity === rarity.key ? '#FFF' : '#CCCCCC',
-                      fontSize: 12,
-                      fontWeight: '600',
-                      textAlign: 'center',
-                    }} numberOfLines={1}>
-                      {rarity.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              
-              {/* Segunda fila: 2 botones centrados */}
-              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                {rarities.slice(3, 5).map((rarity, index) => (
-                  <TouchableOpacity
-                    key={rarity.key}
-                    style={{
-                      backgroundColor: selectedRarity === rarity.key ? rarity.color : '#555555',
-                      paddingHorizontal: 8,
-                      paddingVertical: 8,
-                      borderRadius: 20,
-                      minHeight: 36,
-                      borderWidth: 1,
-                      borderColor: selectedRarity === rarity.key ? rarity.color : '#666666',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: '31%',
-                      marginRight: index === 0 ? 8 : 0,
-                    }}
-                    onPress={() => setSelectedRarity(rarity.key)}
-                  >
-                    <Text style={{
-                      color: selectedRarity === rarity.key ? '#FFF' : '#CCCCCC',
-                      fontSize: 12,
-                      fontWeight: '600',
-                      textAlign: 'center',
-                    }} numberOfLines={1}>
-                      {rarity.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
+              contentContainerStyle={styles.filterScrollContent}
+            >
+              {rarities.map((rarity) => (
+                <TouchableOpacity
+                  key={rarity.key}
+                  style={[
+                    styles.filterChip,
+                    { 
+                      backgroundColor: selectedRarity === rarity.key 
+                        ? rarity.color 
+                        : '#404040' 
+                    }
+                  ]}
+                  onPress={() => setSelectedRarity(rarity.key)}
+                >
+                  <Text style={[
+                    styles.filterText,
+                    { 
+                      color: selectedRarity === rarity.key ? '#FFF' : '#b3b3b3' 
+                    }
+                  ]}>
+                    {rarity.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        </LinearGradient>
-      </Animated.View>
-    );
-
-
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
 
   return (
     <View style={styles.container}>
@@ -412,33 +288,19 @@ export default function AchievementsScreen() {
       <FlatList
         data={filteredAchievements}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListHeaderComponent={renderListHeader}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 0 }}
-        renderItem={({ item: achievement, index }) => {
+        renderItem={({ item: achievement }) => {
           const userProgress = getAchievementProgress(achievement.id);
           const progress = userProgress 
             ? (userProgress.currentProgress / userProgress.targetProgress) * 100 
             : 0;
           const isCompleted = userProgress?.isCompleted || false;
-          
-
 
           return (
-            <View style={{
-              backgroundColor: '#2d2d2d',
-              borderRadius: 16,
-              padding: 20,
-              marginBottom: 16,
-              marginHorizontal: 16,
-              borderWidth: 1,
-              borderColor: '#404040',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              elevation: 5,
-            }}>
+            <TouchableOpacity style={styles.achievementCard}>
               <View style={styles.achievementHeader}>
                 <View style={styles.achievementInfo}>
                   <View style={styles.achievementTitleRow}>
@@ -499,9 +361,10 @@ export default function AchievementsScreen() {
                   </View>
                 </View>
               )}
-            </View>
+            </TouchableOpacity>
           );
         }}
+        style={styles.achievementsList}
       />
     </View>
   );
@@ -585,7 +448,6 @@ const styles = StyleSheet.create({
   filterScrollContent: {
     paddingRight: 16,
     alignItems: 'center',
-    minHeight: 50,
   },
   filterButtonWrapper: {
     marginRight: 10,
@@ -821,55 +683,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#CCC',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  retryButton: {
-    backgroundColor: '#DF2892',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#CCC',
-    textAlign: 'center',
-    marginBottom: 4,
   },
 });

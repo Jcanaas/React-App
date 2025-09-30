@@ -1,4 +1,4 @@
 // Pantalla de logros usando el sistema robusto
-import RobustAchievementsScreen from './robust-achievements';
+import RobustAchievementsScreen from './achievements';
 
 export default RobustAchievementsScreen;

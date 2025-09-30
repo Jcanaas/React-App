@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { auth } from '../components/firebaseConfig';
 import { userProgressService, UserProgressData } from '../services/UserProgressService';
 import { 
@@ -40,6 +40,11 @@ interface RobustGamificationContextType {
   syncOnAchievementsView: () => Promise<void>;
   getAchievementDefinition: (achievementId: string) => Achievement | undefined;
   
+  // Sistema de auto-guardado
+  scheduleAutoSave: () => void;
+  saveImmediately: () => Promise<void>;
+  pendingSave: boolean;
+  
   // Funciones de diagnóstico
   runDiagnostics: () => Promise<void>;
 }
@@ -73,6 +78,10 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
   const [lastMinutesSyncTime, setLastMinutesSyncTime] = useState<number>(0);
   const [achievementsSyncCount, setAchievementsSyncCount] = useState<number>(0);
   const [lastAchievementsSyncTime, setLastAchievementsSyncTime] = useState<number>(0);
+  
+  // Sistema de auto-guardado con debounce
+  const autoSaveTimerRef = useRef<number | null>(null);
+  const [pendingSave, setPendingSave] = useState<boolean>(false);
 
   // Inicialización completa del sistema
   const initializeSystem = useCallback(async (userId: string, forceReinit: boolean = false) => {
@@ -149,6 +158,96 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
     }
   }, [isInitialized, userProgress, userAchievements, lastLoadedUserId, lastLoadTime]);
 
+  // Sistema de auto-guardado (definido antes del useEffect)
+  const scheduleAutoSave = useCallback(() => {
+    const user = auth.currentUser;
+    if (!user || !user.uid || user.uid.trim() === '') return;
+
+    console.log('⏰ [AUTO-SAVE] Programando auto-guardado en 10 segundos...');
+    setPendingSave(true);
+
+    // Limpiar timer anterior si existe
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Programar nuevo auto-guardado en 10 segundos
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        console.log('💾 [AUTO-SAVE] Ejecutando auto-guardado...');
+        
+        // Guardar progreso actual
+        const currentProgress = await userProgressService.getUserProgressData(user.uid);
+        if (currentProgress) {
+          console.log('📊 [AUTO-SAVE] Progreso guardado:', currentProgress);
+        }
+
+        // Actualizar y guardar logros
+        await robustAchievementService.forceUpdateAllAchievements(user.uid);
+        const achievements = await robustAchievementService.getUserAchievements(user.uid);
+        console.log('🎯 [AUTO-SAVE] Logros actualizados y guardados:', achievements.length);
+
+        // Actualizar resumen
+        await robustAchievementService.updateUserSummary(user.uid);
+        const summary = await robustAchievementService.getUserSummary(user.uid);
+        console.log('📋 [AUTO-SAVE] Resumen actualizado y guardado');
+
+        // Actualizar estados locales
+        setUserProgress(currentProgress);
+        setUserAchievements(achievements);
+        setAchievementSummary(summary);
+
+        setPendingSave(false);
+        console.log('✅ [AUTO-SAVE] Auto-guardado completado exitosamente');
+
+      } catch (error) {
+        console.error('❌ [AUTO-SAVE] Error en auto-guardado:', error);
+        setPendingSave(false);
+      }
+
+      autoSaveTimerRef.current = null;
+    }, 10000); // 10 segundos
+
+  }, []);
+
+  const saveImmediately = useCallback(async () => {
+    const user = auth.currentUser;
+    if (!user || !user.uid || user.uid.trim() === '') return;
+
+    try {
+      console.log('💾 [IMMEDIATE-SAVE] Guardando inmediatamente...');
+
+      // Cancelar auto-guardado pendiente
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+
+      // Guardar progreso actual
+      const currentProgress = await userProgressService.getUserProgressData(user.uid);
+      
+      // Actualizar y guardar logros
+      await robustAchievementService.forceUpdateAllAchievements(user.uid);
+      const achievements = await robustAchievementService.getUserAchievements(user.uid);
+      
+      // Actualizar resumen
+      await robustAchievementService.updateUserSummary(user.uid);
+      const summary = await robustAchievementService.getUserSummary(user.uid);
+
+      // Actualizar estados locales
+      setUserProgress(currentProgress);
+      setUserAchievements(achievements);
+      setAchievementSummary(summary);
+
+      setPendingSave(false);
+      console.log('✅ [IMMEDIATE-SAVE] Guardado inmediato completado');
+
+    } catch (error) {
+      console.error('❌ [IMMEDIATE-SAVE] Error en guardado inmediato:', error);
+      setPendingSave(false);
+    }
+  }, []);
+
   // Configurar suscripciones
   useEffect(() => {
     console.log('🔔 [ROBUST] Configurando suscripciones...');
@@ -159,6 +258,10 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
       setIsLoading(false);
       return;
     }
+
+    // 🚀 GUARDADO INMEDIATO AL ENTRAR EN LA APP
+    console.log('🚀 [AUTO-SAVE] Ejecutando guardado inmediato al iniciar la app...');
+    saveImmediately();
 
     let unsubscribeProgress: (() => void) | undefined;
     let unsubscribeAchievements: (() => void) | undefined;
@@ -212,8 +315,15 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
       console.log('🧹 [ROBUST] Limpiando suscripciones...');
       if (unsubscribeProgress) unsubscribeProgress();
       if (unsubscribeAchievements) unsubscribeAchievements();
+      
+      // Limpiar timer de auto-guardado
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+        console.log('🧹 [AUTO-SAVE] Timer de auto-guardado limpiado');
+      }
     };
-  }, []); // Sin dependencies para evitar bucles
+  }, []); // Sin dependencies para evitar bucles - saveImmediately se llama directamente
 
   // Funciones para incrementar estadísticas
   const incrementReviews = useCallback(async (count: number = 1) => {
@@ -227,10 +337,13 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
       // Actualizar logros después del incremento
       await robustAchievementService.forceUpdateAllAchievements(user.uid);
       
+      // Programar auto-guardado en 10 segundos
+      scheduleAutoSave();
+      
     } catch (error) {
       console.error('❌ [ROBUST] Error incrementando reseñas:', error);
     }
-  }, []);
+  }, [scheduleAutoSave]);
 
   const incrementMusicTime = useCallback(async (minutes: number) => {
     const user = auth.currentUser;
@@ -243,10 +356,13 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
       // Actualizar logros después del incremento
       await robustAchievementService.forceUpdateAllAchievements(user.uid);
       
+      // Programar auto-guardado en 10 segundos
+      scheduleAutoSave();
+      
     } catch (error) {
       console.error('❌ [ROBUST] Error incrementando tiempo de música:', error);
     }
-  }, []);
+  }, [scheduleAutoSave]);
 
   const incrementAppTime = useCallback(async (minutes: number) => {
     const user = auth.currentUser;
@@ -258,21 +374,27 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
     // Solo enviar a Firebase cada 5 minutos
     if (now - lastMinutesSyncTime >= FIVE_MINUTES) {
       try {
-        console.log(`⏱️ [ROBUST] Sincronizando tiempo de app: +${minutes} minutos con Firebase`);
+        console.log(`⏱️ [ROBUST] Sincronizando tiempo de app: +${minutes} minutos con Firebase (lastMinutesSyncTime=${lastMinutesSyncTime})`);
         await userProgressService.incrementStat(user.uid, 'totalAppTime', minutes);
-        
+
         // Actualizar logros después del incremento
         await robustAchievementService.forceUpdateAllAchievements(user.uid);
         setLastMinutesSyncTime(now);
         
+        // Programar auto-guardado en 10 segundos
+        scheduleAutoSave();
+        
+        console.log('✅ [ROBUST] Tiempo de app sincronizado con éxito');
+
       } catch (error) {
         console.error('❌ [ROBUST] Error incrementando tiempo de app:', error);
       }
     } else {
-      const timeUntilNext = Math.ceil((FIVE_MINUTES - (now - lastMinutesSyncTime)) / 1000 / 60);
-      console.log(`⏱️ [LOCAL] Tiempo actualizado localmente (+${minutes} min). Próxima sync en ${timeUntilNext} min`);
+      const msLeft = FIVE_MINUTES - (now - lastMinutesSyncTime);
+      const timeUntilNext = Math.ceil(msLeft / 1000 / 60);
+      console.log(`⏱️ [LOCAL] Tiempo actualizado localmente (+${minutes} min). Próxima sync en ${timeUntilNext} min (msLeft=${msLeft})`);
     }
-  }, [lastMinutesSyncTime]);
+  }, [lastMinutesSyncTime, scheduleAutoSave]);
 
   // Función SIMPLE para leer BD una sola vez al entrar a logros
   const syncOnAchievementsView = useCallback(async () => {
@@ -302,10 +424,13 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
       // Actualizar logros después del incremento
       await robustAchievementService.forceUpdateAllAchievements(user.uid);
       
+      // Programar auto-guardado en 10 segundos
+      scheduleAutoSave();
+      
     } catch (error) {
       console.error('❌ [ROBUST] Error incrementando mensajes:', error);
     }
-  }, []);
+  }, [scheduleAutoSave]);
 
   // Funciones de utilidad
   const refreshAllData = useCallback(async () => {
@@ -458,6 +583,11 @@ export const RobustGamificationProvider: React.FC<RobustGamificationProviderProp
     forceInitialization,
     syncOnAchievementsView,
     getAchievementDefinition,
+    
+    // Sistema de auto-guardado
+    scheduleAutoSave,
+    saveImmediately,
+    pendingSave,
     
     // Funciones de diagnóstico
     runDiagnostics

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, memo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSeasonalNotifications } from '../services/SeasonalNotificationService';
+import OptimizedImage from './OptimizedImage';
 
 interface SeasonalBannerProps {
   onContentPress?: (contentId: string) => void;
@@ -100,10 +101,11 @@ const SeasonalBanner: React.FC<SeasonalBannerProps> = memo(({ onContentPress }) 
                     onPress={() => handleContentPress(item.id)}
                     activeOpacity={0.8}
                   >
-                    <Image 
+                    <OptimizedImage 
                       source={item.verticalbanner || item.fondo} 
                       style={styles.contentImage}
                       resizeMode="cover"
+                      showLoader={true}
                     />
                     <View style={styles.contentOverlay}>
                       <Text style={styles.contentTitle} numberOfLines={2}>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa de Iconos - Jojo-Flix</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b69 50%, #DF2892 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #DF2892, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .icon-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(223, 40, 146, 0.3);
+        }
+        
+        .icon-display {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        
+        .icon-display img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .icon-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #DF2892;
+        }
+        
+        .icon-info p {
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .dimensions {
+            background: rgba(223, 40, 146, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .preview-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .preview-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #DF2892;
+        }
+        
+        .device-preview {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .device {
+            background: #333;
+            border-radius: 25px;
+            padding: 20px;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .device h4 {
+            margin-bottom: 15px;
+            color: #DF2892;
+        }
+        
+        .app-icon-demo {
+            width: 80px;
+            height: 80px;
+            margin: 10px auto;
+            border-radius: 18px;
+            background: url('./assets/images/icon.png') no-repeat center;
+            background-size: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .splash-demo {
+            background: #DF2892;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .splash-demo img {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .status-bar {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .instructions {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .command {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 3px solid #DF2892;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Vista Previa de Iconos</h1>
+            <p>Jojo-Flix - Iconos Optimizados</p>
+        </div>
+        
+        <div class="status-bar">
+            ✅ Todos los iconos están optimizados y listos para usar
+        </div>
+        
+        <div class="preview-section">
+            <h2>📱 Cómo se verá en Android</h2>
+            <div class="device-preview">
+                <div class="device">
+                    <h4>Drawer de Apps</h4>
+                    <div class="app-icon-demo"></div>
+                    <p>Icono principal en el menú de aplicaciones</p>
+                </div>
+                <div class="device">
+                    <h4>Pantalla de Inicio</h4>
+                    <div class="app-icon-demo" style="border-radius: 50%;"></div>
+                    <p>Icono adaptativo circular</p>
+                </div>
+                <div class="device">
+                    <h4>Splash Screen</h4>
+                    <div class="splash-demo">
+                        <img src="./assets/images/splash-icon.png" alt="Splash Icon">
+                    </div>
+                    <p>Pantalla de carga</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="icons-grid">
+            <div class="icon-card">
+                <div class="icon-display">
+                    <img src="./assets/images/icon.png" alt="Icono Principal">
+                </div>
+                <div class="icon-info">
+                    <h3>📱 Icono Principal</h3>
+                    <p>Icono principal de la aplicación</p>
+                    <p>Usado en: Drawer, configuración, notificaciones</p>
+                    <div class="dimensions">1024 × 1024 px</div>
+                </div>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-display">
+                    <img src="./assets/images/adaptive-icon.png" alt="Icono Adaptativo">
+                </div>
+                <div class="icon-info">
+                    <h3>🎨 Icono Adaptativo</h3>
+                    <p>Icono que se adapta al tema del dispositivo</p>
+                    <p>Usado en: Android 8+, diferentes formas</p>
+                    <div class="dimensions">1024 × 1024 px</div>
+                </div>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-display">
+                    <img src="./assets/images/favicon.png" alt="Favicon">
+                </div>
+                <div class="icon-info">
+                    <h3>🌐 Favicon</h3>
+                    <p>Icono para la versión web</p>
+                    <p>Usado en: Pestaña del navegador, favoritos</p>
+                    <div class="dimensions">512 × 512 px</div>
+                </div>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-display">
+                    <img src="./assets/images/splash-icon.png" alt="Splash Icon">
+                </div>
+                <div class="icon-info">
+                    <h3>💫 Splash Icon</h3>
+                    <p>Icono de la pantalla de carga</p>
+                    <p>Usado en: Al abrir la aplicación</p>
+                    <div class="dimensions">400 × 400 px</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🚀 Para aplicar estos cambios en tu app:</h3>
+            <div class="command">npx expo start --clear</div>
+            <div class="command">eas build --platform android --profile preview --clear-cache</div>
+            <p>Después del build, desinstala la versión anterior e instala la nueva para ver los cambios.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar si las imágenes cargan correctamente
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            img.onerror = function() {
+                this.style.display = 'none';
+                this.parentElement.innerHTML += '<p style="color: #ff6b6b;">⚠️ Imagen no encontrada</p>';
+            };
+        });
+        
+        // Mostrar información de carga
+        window.addEventListener('load', () => {
+            console.log('Vista previa de iconos cargada correctamente');
+        });
+    </script>
+</body>
+</html>

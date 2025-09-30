@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { auth } from '../components/firebaseConfig';
-import { achievementService } from '../services/AchievementService';
 import StatsLogger from '../utils/statsLogger';
+import { useRobustGamification } from '../contexts/RobustGamificationContext';
 
 // Componente para trackear tiempo de uso de la app
 export const AppTimeTracker: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { incrementAppTime } = useRobustGamification();
   const appTimeTracker = useRef<{
     startTime: number;
     accumulatedTime: number; // tiempo acumulado en segundos
@@ -59,7 +60,7 @@ export const AppTimeTracker: React.FC<{ children: React.ReactNode }> = ({ childr
         const sessionTime = (now - appTimeTracker.current.startTime) / 1000;
         
         // Si la sesión actual es mayor a 5 minutos, enviar estadísticas parciales
-        if (sessionTime >= 300) { // 5 minutos
+          if (sessionTime >= 300) { // 5 minutos
           appTimeTracker.current.accumulatedTime += sessionTime;
           sendAppTimeStats();
           
@@ -75,13 +76,13 @@ export const AppTimeTracker: React.FC<{ children: React.ReactNode }> = ({ childr
       clearInterval(statsInterval);
       
       // Enviar estadísticas finales si hay tiempo acumulado
-      if (appTimeTracker.current.isActive) {
-        const finalTime = (Date.now() - appTimeTracker.current.startTime) / 1000;
-        if (finalTime >= 5) {
-          appTimeTracker.current.accumulatedTime += finalTime;
-          sendAppTimeStats();
+        if (appTimeTracker.current.isActive) {
+          const finalTime = (Date.now() - appTimeTracker.current.startTime) / 1000;
+          if (finalTime >= 5) {
+            appTimeTracker.current.accumulatedTime += finalTime;
+            sendAppTimeStats();
+          }
         }
-      }
     };
   }, []);
 
@@ -102,8 +103,8 @@ export const AppTimeTracker: React.FC<{ children: React.ReactNode }> = ({ childr
         const minutesToSend = (blocksOf5Minutes - blocksSent) * 5;
         
         // Solo enviar bloques completos de 5 minutos
-        if (minutesToSend >= 5) {
-          await achievementService.incrementStat(auth.currentUser.uid, 'totalAppTime', minutesToSend);
+          if (minutesToSend >= 5) {
+          await incrementAppTime(minutesToSend);
           StatsLogger.logAppTime(minutesToSend, auth.currentUser.uid, blocksOf5Minutes);
           appTimeTracker.current.lastSentTime = blocksOf5Minutes * 5;
           
