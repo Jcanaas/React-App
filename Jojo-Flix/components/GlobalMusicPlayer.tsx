@@ -48,7 +48,13 @@ const GlobalMusicPlayer: React.FC<GlobalMusicPlayerProps> = ({ onClose }) => {
     previousTrack,
     setSliding,
     setPosition,
-    hidePlayer
+    hidePlayer,
+    isAutoPlayEnabled,
+    isShuffleEnabled,
+    repeatMode,
+    toggleAutoPlay,
+    toggleShuffle,
+    toggleRepeat
   } = useAudioPlayer();
 
   if (!currentTrack || !currentContent) {
@@ -179,6 +185,51 @@ const GlobalMusicPlayer: React.FC<GlobalMusicPlayerProps> = ({ onClose }) => {
           <MaterialIcons name="replay" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Secondary Controls - Playback Modes */}
+      <View style={styles.secondaryControls}>
+        <TouchableOpacity
+          style={[styles.modeButton, isAutoPlayEnabled && styles.modeButtonActive]}
+          onPress={toggleAutoPlay}
+        >
+          <MaterialIcons 
+            name="playlist-play" 
+            size={24} 
+            color={isAutoPlayEnabled ? "#DF2892" : "#888"} 
+          />
+          <Text style={[styles.modeText, isAutoPlayEnabled && styles.modeTextActive]}>
+            Auto
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.modeButton, isShuffleEnabled && styles.modeButtonActive]}
+          onPress={toggleShuffle}
+        >
+          <MaterialIcons 
+            name="shuffle" 
+            size={24} 
+            color={isShuffleEnabled ? "#DF2892" : "#888"} 
+          />
+          <Text style={[styles.modeText, isShuffleEnabled && styles.modeTextActive]}>
+            Shuffle
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.modeButton, repeatMode !== 'off' && styles.modeButtonActive]}
+          onPress={toggleRepeat}
+        >
+          <MaterialIcons 
+            name={repeatMode === 'one' ? "repeat-one" : "repeat"} 
+            size={24} 
+            color={repeatMode !== 'off' ? "#DF2892" : "#888"} 
+          />
+          <Text style={[styles.modeText, repeatMode !== 'off' && styles.modeTextActive]}>
+            {repeatMode === 'off' ? 'Repeat' : (repeatMode === 'all' ? 'All' : 'One')}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -281,6 +332,39 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 8,
+  },
+  secondaryControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 25,
+    paddingHorizontal: 40,
+  },
+  modeButton: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    minWidth: 70,
+    minHeight: 65,
+  },
+  modeButtonActive: {
+    backgroundColor: 'rgba(223, 40, 146, 0.2)',
+    borderWidth: 1,
+    borderColor: '#DF2892',
+  },
+  modeText: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 4,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  modeTextActive: {
+    color: '#DF2892',
+    fontWeight: '600',
   },
 });
 

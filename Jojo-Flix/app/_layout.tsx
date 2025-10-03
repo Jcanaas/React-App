@@ -32,9 +32,14 @@ function AppContent() {
         >
           <Stack.Screen name="(tabs)/index" />
           <Stack.Screen name="auth" />
+          <Stack.Screen name="music-player" />
+          <Stack.Screen name="content-detail-screen" />
           <Stack.Screen name="chat" />
           <Stack.Screen name="user-profile" />
           <Stack.Screen name="achievements-main" />
+          <Stack.Screen name="achievements" />
+          <Stack.Screen name="social" />
+          <Stack.Screen name="user-info" />
           <Stack.Screen name="robust-achievements" />
           <Stack.Screen name="+not-found" />
         </Stack>

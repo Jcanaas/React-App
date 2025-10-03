@@ -19,7 +19,12 @@
         "VIBRATE",
         "WAKE_LOCK",
         "INTERNET",
-        "ACCESS_NETWORK_STATE"
+        "ACCESS_NETWORK_STATE",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "POST_NOTIFICATIONS",
+        "USE_FULL_SCREEN_INTENT",
+        "MODIFY_AUDIO_SETTINGS"
       ],
       "allowBackup": false,
       "adaptiveIcon": {
@@ -57,8 +62,10 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#FFFFFF00",
-          "defaultChannel": "default"
+          "color": "#DF2892",
+          "defaultChannel": "default",
+          "sounds": [],
+          "mode": "production"
         }
       ]
     ],

@@ -24,13 +24,29 @@ export const useAuthNavigation = () => {
 
     const inAuthGroup = segments[0] === '(tabs)';
     const inAuthScreen = segments[0] === 'auth';
+    
+    // Rutas que requieren autenticación pero están fuera de (tabs)
+    const authenticatedRoutes = [
+      'music-player',
+      'content-detail-screen',
+      'achievements',
+      'achievements-main',
+      'user-profile',
+      'user-info',
+      'social',
+      'chat'
+    ];
+    
+    const inAuthenticatedRoute = authenticatedRoutes.includes(segments[0]);
 
-    console.log('useAuthNavigation: inAuthGroup:', inAuthGroup, 'inAuthScreen:', inAuthScreen);
+    console.log('useAuthNavigation: inAuthGroup:', inAuthGroup, 'inAuthScreen:', inAuthScreen, 'inAuthenticatedRoute:', inAuthenticatedRoute);
 
     if (!isAuthenticated && !inAuthScreen) {
-      // Usuario no autenticado y no está en la pantalla de auth
-      console.log('useAuthNavigation: Redirigiendo a auth');
-      router.replace('/auth');
+      // Usuario no autenticado - solo permitir pantalla de auth
+      if (inAuthenticatedRoute || inAuthGroup) {
+        console.log('useAuthNavigation: Acceso denegado, redirigiendo a auth');
+        router.replace('/auth');
+      }
     } else if (isAuthenticated && inAuthScreen) {
       // Usuario autenticado pero está en la pantalla de auth
       console.log('useAuthNavigation: Redirigiendo a home');

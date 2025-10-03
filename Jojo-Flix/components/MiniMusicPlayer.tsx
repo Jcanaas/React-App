@@ -10,6 +10,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import * as Notifications from 'expo-notifications';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
 
 const { width } = Dimensions.get('window');
@@ -24,6 +25,25 @@ const MiniMusicPlayer: React.FC = () => {
     nextTrack,
     previousTrack
   } = useAudioPlayer();
+
+  // Función para probar notificaciones manualmente
+  const testNotification = async () => {
+    try {
+      console.log('🧪 Probando notificación...');
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🎵 Test JojoFlix Music',
+          body: 'Esta es una notificación de prueba del reproductor',
+          data: { test: true },
+        },
+        trigger: null,
+        identifier: 'test-notification',
+      });
+      console.log('✅ Notificación de prueba enviada');
+    } catch (error) {
+      console.error('❌ Error en notificación de prueba:', error);
+    }
+  };
 
   const insets = useSafeAreaInsets();
 
@@ -74,6 +94,17 @@ const MiniMusicPlayer: React.FC = () => {
           </View>
           
           <View style={styles.controls}>
+            {/* Botón de prueba de notificaciones (solo para debug) */}
+            <TouchableOpacity 
+              style={styles.testButton} 
+              onPress={(e) => {
+                e.stopPropagation();
+                testNotification();
+              }}
+            >
+              <MaterialIcons name="notifications" size={16} color="#888" />
+            </TouchableOpacity>
+            
             <TouchableOpacity 
               style={styles.playButton} 
               onPress={(e) => {
@@ -154,8 +185,18 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   controls: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+  },
+  testButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   playButton: {
     width: 50,

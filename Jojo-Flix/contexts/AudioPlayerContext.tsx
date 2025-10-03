@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
@@ -7,29 +7,47 @@ import { userProgressService } from '../services/UserProgressService';
 import { auth } from '../components/firebaseConfig';
 import StatsLogger from '../utils/statsLogger';
 
-// Configurar el comportamiento de las notificaciones para media
+// Configurar notificaciones básicas para controles de música
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowAlert: false,
     shouldPlaySound: false,
     shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
+    shouldShowBanner: true,  // Permitir mostrar en banner
+    shouldShowList: true,    // Permitir mostrar en lista de notificaciones
   }),
 });
 
-// Configurar canales de notificación para Android
-if (Platform.OS === 'android') {
-  Notifications.setNotificationChannelAsync('music-channel', {
-    name: 'Reproductor de Música',
-    importance: Notifications.AndroidImportance.HIGH,
-    sound: null,
-    vibrationPattern: [0],
-    lightColor: '#DF2892',
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-    bypassDnd: true,
-  });
-}
+// Solicitar permisos de notificación al inicializar
+const initializeNotifications = async () => {
+  try {
+    console.log('🔔 Solicitando permisos de notificación...');
+    
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    
+    if (finalStatus !== 'granted') {
+      console.warn('⚠️ Permisos de notificación denegados');
+      return false;
+    }
+    
+    console.log('✅ Permisos de notificación concedidos');
+    return true;
+  } catch (error) {
+    console.error('❌ Error solicitando permisos:', error);
+    return false;
+  }
+};
+
+// Inicializar permisos inmediatamente
+initializeNotifications();
+
+console.log('🎵 Sistema de notificaciones musicales configurado');
 
 interface AudioPlayerState {
   // Estado del reproductor
@@ -48,6 +66,12 @@ interface AudioPlayerState {
   
   // Estado de la interfaz
   isPlayerVisible: boolean;
+  
+  // Modos de reproducción
+  isAutoPlayEnabled: boolean;
+  isShuffleEnabled: boolean;
+  isRepeatEnabled: boolean;
+  repeatMode: 'off' | 'all' | 'one';
 }
 
 interface AudioPlayerActions {
@@ -66,6 +90,11 @@ interface AudioPlayerActions {
   setPosition: (position: number) => void;
   showPlayer: () => void;
   hidePlayer: () => void;
+  
+  // Modos de reproducción
+  toggleAutoPlay: () => void;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
   
   // Limpieza
   cleanup: () => Promise<void>;
@@ -104,6 +133,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
   
   // Estado de la interfaz
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  
+  // Modos de reproducción
+  const [isAutoPlayEnabled, setIsAutoPlayEnabled] = useState(true); // Auto-play habilitado por defecto
+  const [isShuffleEnabled, setIsShuffleEnabled] = useState(false);
+  const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
   
   // Referencias
   const statusUpdateInterval = useRef<NodeJS.Timeout | null>(null);
@@ -161,151 +196,170 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     console.log('Audio completamente limpiado');
   };
 
-  // Configurar notificaciones cuando cambie el estado
+  // Configurar controles multimedia cuando cambie el estado
   useEffect(() => {
     if (currentTrack && currentContent) {
-      updateNotification();
+      updateMusicControl();
     } else {
-      clearNotification();
+      clearMusicControl();
     }
   }, [currentTrack, currentContent, isPlaying]);
 
-  // Listener para las acciones de notificación
+  // Configurar listeners para notificaciones musicales
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      const action = response.actionIdentifier;
-      console.log('🎵 Acción de notificación recibida:', action);
-      
-      switch (action) {
-        case 'TOGGLE_PLAYBACK':
-          playPause();
-          break;
-        case 'NEXT_TRACK':
-          nextTrack();
-          break;
-        case 'PREVIOUS_TRACK':
-          previousTrack();
-          break;
-        default:
-          console.log('🎵 Acción no reconocida:', action);
-          break;
-      }
+      console.log('🎵 Notificación tocada:', response.notification.request.content.title);
+      // La notificación abre la app automáticamente
     });
 
     return () => subscription.remove();
   }, []);
 
-  // Configurar categorías de notificación multimedia
-  const setupNotificationCategories = async () => {
+  // Configurar notificaciones musicales básicas
+  const setupMusicControls = async () => {
     try {
-      // Crear categoría con acciones específicas para media
-      await Notifications.setNotificationCategoryAsync('MEDIA_PLAYER', [
-        {
-          identifier: 'PREVIOUS_TRACK',
-          buttonTitle: '⏮️ Anterior',
-          options: {
-            opensAppToForeground: false,
-            isDestructive: false,
-            isAuthenticationRequired: false,
-          },
-        },
-        {
-          identifier: 'TOGGLE_PLAYBACK',
-          buttonTitle: isPlaying ? '⏸️ Pausar' : '▶️ Reproducir',
-          options: {
-            opensAppToForeground: false,
-            isDestructive: false,
-            isAuthenticationRequired: false,
-          },
-        },
-        {
-          identifier: 'NEXT_TRACK',
-          buttonTitle: '⏭️ Siguiente',
-          options: {
-            opensAppToForeground: false,
-            isDestructive: false,
-            isAuthenticationRequired: false,
-          },
-        },
-      ]);
+      // Configurar canal de notificación para Android
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('music-channel', {
+          name: 'JojoFlix Music Player',
+          description: 'Controles del reproductor de música',
+          importance: Notifications.AndroidImportance.LOW,
+          sound: null,
+          vibrationPattern: [0],
+          lightColor: '#DF2892',
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          bypassDnd: false,
+          showBadge: false,
+          enableLights: true,
+          enableVibrate: false,
+        });
+        
+        console.log('🎵 Canal Android configurado: music-channel');
+      }
+
+      return true;
     } catch (error) {
-      console.error('Error configurando categorías de notificación:', error);
+      console.error('❌ Error configurando canal de notificaciones:', error);
+      return false;
     }
   };
 
   // Actualizar notificación
-  const updateNotification = async () => {
-    if (!currentTrack || !currentContent) return;
+  const updateMusicControl = async () => {
+    if (!currentTrack || !currentContent) {
+      console.log('🚫 No hay canción o contenido para mostrar notificación');
+      return;
+    }
 
     try {
-      await setupNotificationCategories();
-      await Notifications.dismissAllNotificationsAsync();
+      console.log('🔔 Actualizando notificación musical...', {
+        track: currentTrack.title,
+        content: currentContent.nombre,
+        isPlaying: isPlaying
+      });
 
-      // Preparar la imagen del álbum
-      let albumArtUrl = null;
+      // Verificar permisos antes de mostrar notificación
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('⚠️ Sin permisos de notificación, solicitando...');
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          console.error('❌ Permisos de notificación denegados');
+          return;
+        }
+      }
+
+      await setupMusicControls();
+
+      // Preparar imagen del álbum
+      let albumArtwork = null;
       if (currentContent.verticalbanner) {
-        albumArtUrl = typeof currentContent.verticalbanner === 'string' 
+        albumArtwork = typeof currentContent.verticalbanner === 'string' 
           ? currentContent.verticalbanner 
           : currentContent.verticalbanner.uri || null;
       }
 
-      console.log('🖼️ Album art URL:', albumArtUrl);
+      // Limpiar notificación anterior
+      await Notifications.dismissNotificationAsync('music-player-notification');
 
-      // Crear notificación multimedia simplificada
+      // Configuración de notificación mejorada
       const notificationContent: any = {
-        title: currentTrack.title,
-        body: currentContent.nombre,
-        subtitle: isPlaying ? '🎵 Reproduciendo' : '⏸️ Pausado',
-        categoryIdentifier: 'MEDIA_PLAYER',
+        title: `🎵 ${currentTrack.title}`,
+        body: `${currentContent.nombre} • ${isPlaying ? 'Reproduciendo' : 'Pausado'}`,
+        subtitle: 'JojoFlix Music Player',
         sound: false,
         sticky: true,
-        priority: 'high' as const,
+        priority: Notifications.AndroidImportance.LOW,
         color: '#DF2892',
-        badge: 0,
         data: {
-          type: 'multimedia',
+          type: 'music_player',
           track: currentTrack.title,
-          artist: currentContent.nombre,
+          content: currentContent.nombre,
           isPlaying: isPlaying,
-          albumArt: albumArtUrl,
+          timestamp: Date.now(),
         },
       };
 
-      // Configuración específica por plataforma
+      // Para Android, configuración específica
       if (Platform.OS === 'android') {
         notificationContent.channelId = 'music-channel';
-      } else if (Platform.OS === 'ios' && albumArtUrl) {
-        // iOS: usar attachments para mostrar imagen
+        notificationContent.categoryIdentifier = 'music';
+        notificationContent.autoDismiss = false;
+      }
+
+      // Para iOS, agregar imagen si está disponible
+      if (Platform.OS === 'ios' && albumArtwork) {
         notificationContent.attachments = [{
-          type: 'UNNotificationAttachmentTypeImage',
-          identifier: 'album-artwork',
-          url: albumArtUrl,
+          identifier: 'album-art',
+          url: albumArtwork,
           typeHint: 'public.jpeg',
         }];
       }
 
-      console.log('📱 Enviando notificación multimedia:', {
-        title: notificationContent.title,
-        hasImage: !!albumArtUrl,
-        platform: Platform.OS,
-      });
-
+      // Mostrar notificación inmediatamente
       await Notifications.scheduleNotificationAsync({
         content: notificationContent,
-        trigger: null,
-        identifier: 'multimedia-notification',
+        trigger: null, // Mostrar inmediatamente
+        identifier: 'music-player-notification',
       });
+
+      console.log('✅ Notificación musical mostrada exitosamente:', {
+        title: currentTrack.title,
+        artist: currentContent.nombre,
+        isPlaying: isPlaying,
+        hasArtwork: !!albumArtwork,
+      });
+
     } catch (error) {
-      console.error('Error mostrando notificación:', error);
+      console.error('❌ Error actualizando notificación musical:', error);
+      console.error('Detalles del error:', error instanceof Error ? error.message : String(error));
+      
+      // Fallback: intentar una notificación más simple
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: '🎵 JojoFlix Music',
+            body: `${currentTrack.title} - ${currentContent.nombre}`,
+            data: { type: 'music_player' },
+          },
+          trigger: null,
+          identifier: 'music-player-simple',
+        });
+        console.log('🔄 Notificación simple mostrada como fallback');
+      } catch (fallbackError) {
+        console.error('❌ Error también en notificación fallback:', fallbackError);
+      }
     }
   };
 
-  // Limpiar notificaciones
-  const clearNotification = async () => {
+  // Limpiar notificaciones musicales
+  const clearMusicControl = async () => {
     try {
+      await Notifications.dismissNotificationAsync('music-player-notification');
       await Notifications.dismissAllNotificationsAsync();
+      console.log('🎵 Notificaciones musicales limpiadas');
     } catch (error) {
-      console.error('Error limpiando notificaciones:', error);
+      console.error('Error limpiando notificaciones musicales:', error);
     }
   };
 
@@ -322,6 +376,110 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     } catch (error) {
       console.error('Error configurando audio:', error);
     }
+  };
+
+  // Manejar cuando una canción termina
+  const handleTrackFinished = async () => {
+    console.log('🎵 Procesando fin de canción...', {
+      repeatMode,
+      isAutoPlayEnabled,
+      isShuffleEnabled,
+      playlistLength: playlist.length,
+      currentIndex
+    });
+
+    // Modo repeat "one" - repetir la misma canción
+    if (repeatMode === 'one') {
+      console.log('🔂 Repitiendo canción actual...');
+      if (sound) {
+        try {
+          await sound.setPositionAsync(0);
+          await sound.playAsync();
+          return;
+        } catch (error) {
+          console.error('Error repitiendo canción:', error);
+        }
+      }
+    }
+
+    // Si auto-play está deshabilitado, solo parar
+    if (!isAutoPlayEnabled) {
+      console.log('⏹️ Auto-play deshabilitado, parando...');
+      await stop();
+      return;
+    }
+
+    // Determinar siguiente canción
+    let nextIndex: number;
+    
+    if (isShuffleEnabled) {
+      // Modo shuffle - canción aleatoria (que no sea la actual)
+      const availableIndices = playlist
+        .map((_, index) => index)
+        .filter(index => index !== currentIndex);
+      
+      if (availableIndices.length === 0) {
+        // Solo hay una canción, repetir si está en modo repeat all
+        nextIndex = repeatMode === 'all' ? currentIndex : -1;
+      } else {
+        const randomIndex = Math.floor(Math.random() * availableIndices.length);
+        nextIndex = availableIndices[randomIndex];
+      }
+      
+      console.log('🔀 Modo shuffle - siguiente canción aleatoria:', nextIndex);
+    } else {
+      // Modo normal - siguiente en orden
+      nextIndex = currentIndex + 1;
+      
+      // Si llegamos al final de la playlist
+      if (nextIndex >= playlist.length) {
+        if (repeatMode === 'all') {
+          nextIndex = 0; // Volver al inicio
+          console.log('🔁 Repeat all - volviendo al inicio');
+        } else {
+          nextIndex = -1; // Terminar playlist
+          console.log('⏹️ Fin de playlist alcanzado');
+        }
+      }
+    }
+
+    // Reproducir siguiente canción o terminar
+    if (nextIndex >= 0 && nextIndex < playlist.length) {
+      const nextTrackItem = playlist[nextIndex];
+      console.log(`⏭️ Reproduciendo siguiente: ${nextTrackItem.title} (${nextIndex + 1}/${playlist.length})`);
+      await playTrack(nextTrackItem, currentContent!, playlist, nextIndex);
+    } else {
+      console.log('🏁 Finalizando reproducción');
+      await stop();
+    }
+  };
+
+  // Funciones de control de modos
+  const toggleAutoPlay = () => {
+    setIsAutoPlayEnabled(!isAutoPlayEnabled);
+    console.log('🎵 Auto-play:', !isAutoPlayEnabled ? 'activado' : 'desactivado');
+  };
+
+  const toggleShuffle = () => {
+    setIsShuffleEnabled(!isShuffleEnabled);
+    console.log('🔀 Shuffle:', !isShuffleEnabled ? 'activado' : 'desactivado');
+  };
+
+  const toggleRepeat = () => {
+    const modes: Array<'off' | 'all' | 'one'> = ['off', 'all', 'one'];
+    const currentModeIndex = modes.indexOf(repeatMode);
+    const nextMode = modes[(currentModeIndex + 1) % modes.length];
+    
+    setRepeatMode(nextMode);
+    setIsRepeatEnabled(nextMode !== 'off');
+    
+    const modeNames = {
+      'off': 'desactivado',
+      'all': 'repetir lista',
+      'one': 'repetir canción'
+    };
+    
+    console.log('🔁 Repeat:', modeNames[nextMode]);
   };
 
   // Callback de estado de reproducción
@@ -387,12 +545,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
         musicTimeTracker.current.lastUpdateTime = 0;
       }
       
-      // Si la canción terminó, pasar a la siguiente automáticamente
+      // Si la canción terminó, manejar según el modo de reproducción
       if (status.didJustFinish && playlist.length > 0) {
-        console.log('Canción terminada, pasando a la siguiente...');
-        // Usar setTimeout para evitar problemas de timing
+        console.log('🎵 Canción terminada, procesando siguiente acción...');
+        
         setTimeout(() => {
-          nextTrack();
+          handleTrackFinished();
         }, 100);
       }
     }
@@ -590,6 +748,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     setDuration(0);
     setIsPlaying(false);
     setIsPlayerVisible(false);
+    
+    // Resetear modos de reproducción a valores por defecto
+    setIsAutoPlayEnabled(true);
+    setIsShuffleEnabled(false);
+    setIsRepeatEnabled(false);
+    setRepeatMode('off');
   };
 
   const contextValue: AudioPlayerContextType = {
@@ -606,6 +770,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     currentIndex,
     isPlayerVisible,
     
+    // Modos de reproducción
+    isAutoPlayEnabled,
+    isShuffleEnabled,
+    isRepeatEnabled,
+    repeatMode,
+    
     // Acciones
     playPause,
     stop,
@@ -617,6 +787,12 @@ export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ childr
     setPosition,
     showPlayer,
     hidePlayer,
+    
+    // Controles de modo
+    toggleAutoPlay,
+    toggleShuffle,
+    toggleRepeat,
+    
     cleanup,
   };
 

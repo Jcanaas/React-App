@@ -15,7 +15,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db, auth } from '../components/firebaseConfig';
-import { reviewService } from './ReviewService';
+// Evitar ciclo de dependencias - importar reviewService solo cuando sea necesario
 
 // Nueva interfaz para el progreso de logros más robusta
 export interface UserProgressData {
@@ -147,6 +147,8 @@ class UserProgressService {
       console.log('🆕 Creando datos de progreso desde cero para:', userId);
       
       // Contar datos reales de Firebase
+      // Calcular progreso de reviews reales (excluyendo auto-generated)
+      const { reviewService } = await import('./ReviewService');
       const realReviews = await reviewService.getUserReviews(userId, 1000);
       const realReviewCount = realReviews.length;
       
@@ -237,6 +239,8 @@ class UserProgressService {
       }
       
       // Verificar reseñas
+      // Obtener reviews actuales para recalcular
+      const { reviewService } = await import('./ReviewService');
       const currentReviews = await reviewService.getUserReviews(userId, 1000);
       const currentReviewCount = currentReviews.length;
       
