@@ -88,7 +88,8 @@ export const ContentData: ContentItem[] = [
     puntuacion: 8.9,
     categoria: ['Anime', 'Serie'],
     verticalbanner: require('../assets/images/beckverticalbanner.png'),
-    soundtracks: [
+    // Temporalmente comentado - archivos de música removidos
+    /* soundtracks: [
       { title: "Brainstorm", file: require('../assets/Music/Beck/Brainstorm.mp3'), duration: "4:12" },
       { title: "By Her", file: require('../assets/Music/Beck/By Her.mp3'), duration: "3:47" },
       { title: "Face (Acoustic)", file: require('../assets/Music/Beck/Face [Acoustic].mp3'), duration: "2:58" },
@@ -112,7 +113,7 @@ export const ContentData: ContentItem[] = [
       { title: "Sly", file: require('../assets/Music/Beck/Sly.mp3'), duration: "3:31" },
       { title: "Spice of Life", file: require('../assets/Music/Beck/Spice of Life.mp3'), duration: "4:05" },
       { title: "Takano's Demo", file: require('../assets/Music/Beck/Takano\'s Demo.mp3'), duration: "2:43" }
-    ],
+    ], */
   },
   {
     id: 'The Last of Us',
@@ -616,13 +617,14 @@ export const ContentData: ContentItem[] = [
     puntuacion: 8.8,
     categoria: ['Serie', 'Anime'],
     verticalbanner: require('../assets/images/bocchi_the_rock_re-639827727-large.jpg'),
-    soundtracks: [
+    // Temporalmente comentado - archivos de música removidos
+    /* soundtracks: [
       { title: "Seisyun Complex", file: require('../assets/Music/Bocchi the rock/01. seisyun complex.mp3'), duration: "3:24" },
       { title: "Distortion!!", file: require('../assets/Music/Bocchi the rock/03. Distortion!!.mp3'), duration: "3:12" },
       { title: "Guitar, Loneliness and Blue Planet", file: require('../assets/Music/Bocchi the rock/05. Guitar, Loneliness and Blue Planet.mp3'), duration: "4:15" },
       { title: "That Band", file: require('../assets/Music/Bocchi the rock/07. That band.mp3'), duration: "3:48" },
       { title: "Never Forget", file: require('../assets/Music/Bocchi the rock/11. Never forget.mp3'), duration: "4:02" }
-    ]
+    ] */
   },
   {
     id: 'Aqui no hay quien viva',
@@ -785,12 +787,13 @@ export const ContentData: ContentItem[] = [
     puntuacion: 9,
     categoria: ['Película'],
     verticalbanner: require('../assets/images/La_ciudad_de_las_estrellas_La_La_Land-262021831-large.jpg'),
-    soundtracks: [
+    // Temporalmente comentado - archivos de música removidos
+    /* soundtracks: [
       { title: "Another Day Of Sun", file: require("../assets/Music/La La Land/Another Day Of Sun [WxCz0UNUNeQ].mp3"), duration: "3:47" },
       { title: "Someone In The Crowd", file: require("../assets/Music/La La Land/Someone In The Crowd [-62YbRZqxjs].mp3"), duration: "4:18" },
       { title: "A Lovely Night", file: require("../assets/Music/La La Land/A Lovely Night [trrH4sVZ0dQ].mp3"), duration: "3:56" },
       { title: "Mia & Sebastian's Theme", file: require("../assets/Music/La La Land/Mia and Sebastian Theme.mp3"), duration: "1:37" }
-    ],
+    ], */
   },
   {
     id: 'Jojos Bizarre Adventure',

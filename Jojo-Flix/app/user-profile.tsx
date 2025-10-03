@@ -278,8 +278,8 @@ const UserProfileScreen = () => {
     '28 Años Después': require('../assets/images/28semanasdespuesbanner.webp'),
     'Aquí no hay quien viva': require('../assets/images/aqui_no_hay_quien_viva-150319925-mmed.jpg'),
     
-    // Games (si tienes reseñas de juegos)
-    'Red Dead Redemption 2': require('../assets/images/rdr2.webp'),
+    // Games/Movies (películas y series también)
+    // 'Red Dead Redemption 2': require('../assets/images/rdr2.webp'), // Solo juego - comentado
     'Metal Gear Solid': require('../assets/images/Metal Gear Solid poster.webp'),
     'Devil May Cry 5': require('../assets/images/devil_may_cry_v.webp'),
   };
